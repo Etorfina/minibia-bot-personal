@@ -244,8 +244,18 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const route = bot.cave?.getRoute?.() || [];
     const status = bot.cave?.status?.();
 
+    const routeList = document.getElementById("minibia-bot-cave-route");
+    if (routeList) {
+      routeList.textContent = route.map((point, index) =>
+        `${status?.running && index === status.currentIndex ? "▶ " : ""}${index + 1}. ${point.type.toUpperCase()} ${point.x},${point.y},${point.z}${point.label ? " — " + point.label : ""}${point.action ? " — " + point.action : ""}`
+      ).join("\n");
+    }
+    const routeMode = document.getElementById("minibia-bot-cave-mode");
+    if (routeMode && document.activeElement !== routeMode) routeMode.value = status?.config?.routeMode || "pingpong";
     if (statusLabel) {
-      if (!route.length) {
+      if (status?.lastError) {
+        statusLabel.textContent = status.lastError;
+      } else if (!route.length) {
         statusLabel.textContent = "Status: no waypoints";
       } else if (status?.running && status?.pausedForCombat) {
         statusLabel.textContent = "Status: fighting nearby enemies (route paused)";
@@ -255,7 +265,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
           Number.isFinite(status?.distanceToWaypoint) && status.distanceToWaypoint >= 0
             ? `, dist ${status.distanceToWaypoint}`
             : "";
-        statusLabel.textContent = `Status: running (${waypointNumber}/${route.length}${distanceLabel})`;
+        statusLabel.textContent = `Status: ${status.waitingUntil ? "waiting" : "running"} (${waypointNumber}/${route.length}${distanceLabel})`;
       } else {
         statusLabel.textContent = `Status: idle (${route.length} waypoint${route.length === 1 ? "" : "s"})`;
       }
@@ -1217,15 +1227,29 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-new">New</button>
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-delete">Delete</button>
               </div>
+              <label class="mb-field">Tipo de punto
+                <select id="minibia-bot-cave-type">
+                  <option value="node">Node — flexible</option>
+                  <option value="stand">Stand — exacto</option>
+                  <option value="walk">Walk — flexible</option>
+                  <option value="label">Label — nombre</option>
+                  <option value="action">Action — acción</option>
+                </select>
+              </label>
+              <label class="mb-field">Recorrido
+                <select id="minibia-bot-cave-mode"><option value="pingpong">Ida y vuelta</option><option value="loop">Loop — circuito</option></select>
+              </label>
+              <div class="mb-small-note">Action: wait:2000, skip:1 o goto:SALIDA. Stand llega al SQM exacto.</div>
+              <pre id="minibia-bot-cave-route" style="max-height:160px;overflow:auto;white-space:pre-wrap;font-size:11px"></pre>
               <div class="mb-actions mb-actions-inline-two">
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-record">Record Spot</button>
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-record">Añadir punto</button>
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-remove-last">Remove Last</button>
               </div>
               <div class="mb-small-note" id="minibia-bot-cave-closest">Closest start: no waypoints</div>
               <div class="mb-small-note" id="minibia-bot-cave-transition-status">Transitions learned: none</div>
               <div class="mb-actions mb-actions-inline-two">
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-start">Start</button>
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-stop">Stop</button>
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-stop" style="background:#b91c1c;color:white;border-color:#ef4444">Stop</button>
               </div>
               <div class="mb-small-note" id="minibia-bot-cave-status">Status: no waypoints</div>
             </div>
@@ -1588,9 +1612,20 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       });
     }
 
+    panel.querySelector("#minibia-bot-cave-mode")?.addEventListener("change", event => {
+      bot.cave.updateConfig({ routeMode: event.target.value });
+    });
     if (caveRecordButton) {
       caveRecordButton.addEventListener("click", () => {
-        bot.cave.addWaypointCurrentSpot();
+        const type = panel.querySelector("#minibia-bot-cave-type")?.value || "node";
+        const options = { type };
+        if (type === "label" || type === "action") {
+          const value = window.prompt(type === "label" ? "Nombre del punto (ej. SALIDA):" : "Acción: wait:2000, skip:1 o goto:SALIDA");
+          if (!value?.trim()) return;
+          options[type === "label" ? "label" : "action"] = value.trim();
+        }
+        if (!bot.cave.addWaypointCurrentSpot(options)) window.alert("Punto inválido. Usa wait:milisegundos, skip:entero o goto:NOMBRE.");
+        refreshCaveStatus();
         refreshCavePresetControls();
         refreshCaveClosestStatus();
         refreshCaveTransitionStatus();
