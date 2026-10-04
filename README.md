@@ -19,11 +19,12 @@ En la consola del navegador, con el juego abierto:
 ```js
 (async () => {
   const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/1f196d9f0223dc0c10f27c2828d34c27c2aab8c5/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/307dd3af9f59c2c4821f52d3ba05b1eb8613e8d9/minibia-bot.js.gz.b64";
   const requiredControls = [
     'data-tab="healing"',
-    'id="minibia-bot-auto-heal-hp-mode"',
-    'id="minibia-bot-auto-heal-mana-mode"',
+    'id="minibia-bot-heal-spells"',
+    'id="minibia-bot-heal-items"',
+    'id="minibia-bot-heal-status"',
     'id="minibia-bot-attack-target-list"',
     'id="minibia-bot-attack-stance"',
     'id="minibia-bot-attack-range"'
@@ -40,14 +41,14 @@ En la consola del navegador, con el juego abierto:
     code = await decode(verifiedUrl);
   }
   if (!hasTargetingControls(code)) {
-    throw new Error("La versión descargada no incluye Curación independiente y umbrales por porcentaje.");
+    throw new Error("La versión descargada no incluye las reglas de curación y controles esperados.");
   }
   window.minibiaBotSourceUrl = mainUrl;
   (0, eval)(code);
-  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-auto-heal-hp-mode") || !document.getElementById("minibia-bot-auto-heal-mana-mode") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) {
+  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-heal-spells") || !document.getElementById("minibia-bot-heal-items") || !document.getElementById("minibia-bot-heal-status") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) {
     throw new Error("La versión nueva se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
   }
-  console.info("[minibia-bot] Curación y Attack Target actualizados cargados");
+  console.info("[minibia-bot] HealBot y Attack Target actualizados cargados");
 })().catch(error => { console.error(error); alert(error.message); });
 ```
 
@@ -68,7 +69,11 @@ Editar `src/` y ejecutar `bash build.sh`: el script regenera `pz-bot.js` y `mini
 
 ## Curación
 
-La pestaña **Curación** configura umbrales separados para vida y maná, medidos en puntos o porcentaje. Asigna el hechizo, la runa o la poción a una casilla de la barra del juego y selecciona esa casilla aquí. Si se alcanzan ambos umbrales, primero se intenta la acción de vida.
+La pestaña **Curación** organiza las reglas en **Hechizos** y **Runas y pociones**, con ajustes generales en **Condiciones**. Añade una regla por cada acción (por ejemplo, `exura`, `UH`, poción de vida o de maná), asígnale la casilla donde ya colocaste esa acción en Minibia y elige qué vigilar: vida o maná. Cada regla puede activarse por debajo o por encima de un umbral, medido en puntos o porcentaje, con un costo mínimo de maná y un enfriamiento propio.
+
+Las reglas se intentan de arriba abajo. Los controles ↑ y ↓ cambian la prioridad, incluso entre las dos listas. **Wait** es la frecuencia con que se revisan las condiciones; **Delay** es la pausa general después de activar una casilla. El mínimo global de maná evita gastar acciones por debajo de la reserva que indiques. La interfaz muestra la última acción detectada y permite pausar todas las reglas con **Activo**.
+
+La detección de curación confirma un cambio de vida o maná tras activar la casilla. La curación de otros jugadores no está disponible: el cliente actual no ofrece al bot una función fiable para seleccionar y curar a un objetivo ajeno.
 
 ## Documentación original
 
