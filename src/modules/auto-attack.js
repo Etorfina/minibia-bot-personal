@@ -30,6 +30,7 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
       runeCooldownMs: 1200,
       maxTargetDistance: 8,
       meleeMode: true,
+      rangedDistance: 3,
       targetPriority: [],
       targetSelectionMode: "proximity",
       onlyPriorityTargets: false,
@@ -40,23 +41,39 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
   if (config.targetHotbarSlot == null && storedConfig.hotbarSlot != null) {
     config.targetHotbarSlot = storedConfig.hotbarSlot;
   }
+  config.rangedDistance = normalizeRangedDistance(config.rangedDistance);
   config.targetPriority = normalizeTargetPriority(config.targetPriority);
   config.targetSelectionMode = config.targetSelectionMode === "list" ? "list" : "proximity";
   config.onlyPriorityTargets = !!config.onlyPriorityTargets;
 
   function normalizeTargetPriority(value) {
     if (!Array.isArray(value)) return [];
-    const names = [];
+    const targets = [];
     const seen = new Set();
     for (const item of value) {
       const name = String(item?.name ?? item ?? "").trim().slice(0, 48);
       const key = name.toLocaleLowerCase();
       if (!name || seen.has(key)) continue;
       seen.add(key);
-      names.push(name);
-      if (names.length >= 50) break;
+      const stance = ["melee", "ranged"].includes(item?.stance) ? item.stance : "default";
+      targets.push({ name, stance });
+      if (targets.length >= 50) break;
     }
-    return names;
+    return targets;
+  }
+
+  function normalizeRangedDistance(value) {
+    const distance = Math.trunc(Number(value));
+    return Number.isFinite(distance) ? Math.min(8, Math.max(2, distance)) : 3;
+  }
+
+  function getTargetBehavior(target) {
+    const targetName = String(target?.name || "").toLocaleLowerCase();
+    const setting = config.targetPriority.find((entry) => entry.name.toLocaleLowerCase() === targetName);
+    const stance = setting?.stance === "melee" || setting?.stance === "ranged"
+      ? setting.stance
+      : config.meleeMode === false ? "ranged" : "melee";
+    return { stance, distance: normalizeRangedDistance(config.rangedDistance) };
   }
 
   function persistConfig() {
@@ -340,7 +357,7 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
 
     const playerPosition = normalizePosition(bot.getPlayerPosition());
     const priority = normalizeTargetPriority(config.targetPriority);
-    const priorityOrder = new Map(priority.map((name, index) => [name.toLocaleLowerCase(), index]));
+    const priorityOrder = new Map(priority.map((target, index) => [target.name.toLocaleLowerCase(), index]));
     return getNearbyMonsters()
       .filter((monster) => !isTargetSkipped(monster, now))
       .filter((monster) => !config.onlyPriorityTargets || priorityOrder.has(String(monster?.name || "").toLocaleLowerCase()))
@@ -481,11 +498,13 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
     const startTile = getTileFromPosition(playerPosition);
     if (!pathfinder || !startTile || typeof pathfinder.search !== "function") return null;
 
+    const maxDistance = normalizeRangedDistance(config.rangedDistance);
+    const minDistance = Math.max(1, maxDistance - 1);
     const candidates = [];
-    for (let dx = -3; dx <= 3; dx += 1) {
-      for (let dy = -3; dy <= 3; dy += 1) {
+    for (let dx = -maxDistance; dx <= maxDistance; dx += 1) {
+      for (let dy = -maxDistance; dy <= maxDistance; dy += 1) {
         const range = Math.max(Math.abs(dx), Math.abs(dy));
-        if (range < 2 || range > 3) continue;
+        if (range < minDistance || range > maxDistance) continue;
         const position = { x: targetPosition.x + dx, y: targetPosition.y + dy, z: targetPosition.z };
         const tile = getTileFromPosition(position);
         if (!tile?.isWalkable?.()) continue;
@@ -510,14 +529,16 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
   }
 
   function syncRangedDistance(now = Date.now()) {
-    if (config.meleeMode) return false;
     const target = getEngagedTarget();
+    if (!target || getTargetBehavior(target).stance !== "ranged") return false;
     const me = normalizePosition(bot.getPlayerPosition());
     const them = normalizePosition(target?.getPosition?.() || target?.__position);
     if (!target || !me || !them || me.z !== them.z) return false;
 
     const range = getTileDistance(me, them);
-    if (range >= 2 && range <= 3) {
+    const maxDistance = normalizeRangedDistance(config.rangedDistance);
+    const minDistance = Math.max(1, maxDistance - 1);
+    if (range >= minDistance && range <= maxDistance) {
       clearCurrentFollowTarget();
       state.lastRangedProgressAt = 0;
       state.lastRangedPositionKey = null;
@@ -555,15 +576,12 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
   }
 
   function syncMeleeChase(now = Date.now()) {
-    if (!config.meleeMode) {
-      return false;
-    }
-
     const target = getEngagedTarget();
     if (!target) {
       clearEngagedTarget();
       return false;
     }
+    if (getTargetBehavior(target).stance !== "melee") return false;
 
     const playerPosition = normalizePosition(bot.getPlayerPosition());
     const targetPosition = normalizePosition(target.getPosition?.() || target.__position);
@@ -638,7 +656,9 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
       return false;
     }
 
-    if (config.meleeMode) {
+    const engaged = getEngagedTarget();
+    const candidate = engaged || getMonsterCandidates(now)[0] || null;
+    if (candidate && getTargetBehavior(candidate).stance === "melee") {
       return getMonsterCandidates(now).length > 0 && !getCurrentTarget();
     }
 
@@ -665,7 +685,8 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
       return true;
     }
 
-    if (config.meleeMode) {
+    const currentOrNextTarget = getEngagedTarget() || getMonsterCandidates(now)[0] || null;
+    if (currentOrNextTarget && getTargetBehavior(currentOrNextTarget).stance === "melee") {
       return false;
     }
 
@@ -732,7 +753,11 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
 
     syncCombatState(now);
 
-    if (config.meleeMode) {
+    const target = getEngagedTarget();
+    const nextTarget = target || getMonsterCandidates(now)[0] || null;
+    const targetIsMelee = nextTarget && getTargetBehavior(nextTarget).stance === "melee";
+
+    if (targetIsMelee) {
       const chased = syncMeleeChase(now);
       if (getCurrentTarget()) {
         return false;
@@ -854,6 +879,10 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
       nextConfig.maxTargetDistance = Math.max(1, Math.trunc(Number(nextConfig.maxTargetDistance) || config.maxTargetDistance || 8));
     }
 
+    if (Object.prototype.hasOwnProperty.call(nextConfig, "rangedDistance")) {
+      nextConfig.rangedDistance = normalizeRangedDistance(nextConfig.rangedDistance);
+    }
+
     if (Object.prototype.hasOwnProperty.call(nextConfig, "targetPriority")) {
       nextConfig.targetPriority = normalizeTargetPriority(nextConfig.targetPriority);
     }
@@ -892,6 +921,7 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
     triggerRune,
     getNearbyMonsters,
     getMonsterCandidates,
+    getTargetBehavior,
     getCurrentTarget,
     getCurrentFollowTarget,
     isCombatActive,
