@@ -30,12 +30,33 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
       runeCooldownMs: 1200,
       maxTargetDistance: 8,
       meleeMode: true,
+      targetPriority: [],
+      targetSelectionMode: "proximity",
+      onlyPriorityTargets: false,
       enabled: false,
     },
     storedConfig
   );
   if (config.targetHotbarSlot == null && storedConfig.hotbarSlot != null) {
     config.targetHotbarSlot = storedConfig.hotbarSlot;
+  }
+  config.targetPriority = normalizeTargetPriority(config.targetPriority);
+  config.targetSelectionMode = config.targetSelectionMode === "list" ? "list" : "proximity";
+  config.onlyPriorityTargets = !!config.onlyPriorityTargets;
+
+  function normalizeTargetPriority(value) {
+    if (!Array.isArray(value)) return [];
+    const names = [];
+    const seen = new Set();
+    for (const item of value) {
+      const name = String(item?.name ?? item ?? "").trim().slice(0, 48);
+      const key = name.toLocaleLowerCase();
+      if (!name || seen.has(key)) continue;
+      seen.add(key);
+      names.push(name);
+      if (names.length >= 50) break;
+    }
+    return names;
   }
 
   function persistConfig() {
@@ -318,9 +339,17 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
     pruneSkippedTargets(now);
 
     const playerPosition = normalizePosition(bot.getPlayerPosition());
+    const priority = normalizeTargetPriority(config.targetPriority);
+    const priorityOrder = new Map(priority.map((name, index) => [name.toLocaleLowerCase(), index]));
     return getNearbyMonsters()
       .filter((monster) => !isTargetSkipped(monster, now))
+      .filter((monster) => !config.onlyPriorityTargets || priorityOrder.has(String(monster?.name || "").toLocaleLowerCase()))
       .sort((left, right) => {
+        if (config.targetSelectionMode === "list") {
+          const leftOrder = priorityOrder.get(String(left?.name || "").toLocaleLowerCase()) ?? Number.MAX_SAFE_INTEGER;
+          const rightOrder = priorityOrder.get(String(right?.name || "").toLocaleLowerCase()) ?? Number.MAX_SAFE_INTEGER;
+          if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+        }
         const leftDistance = getTileDistance(playerPosition, normalizePosition(left?.getPosition?.() || left?.__position));
         const rightDistance = getTileDistance(playerPosition, normalizePosition(right?.getPosition?.() || right?.__position));
         return leftDistance - rightDistance || Number(left?.id || 0) - Number(right?.id || 0);
@@ -821,6 +850,18 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
       nextConfig.maxTargetDistance = Math.max(1, Math.trunc(Number(nextConfig.maxTargetDistance) || config.maxTargetDistance || 8));
     }
 
+    if (Object.prototype.hasOwnProperty.call(nextConfig, "targetPriority")) {
+      nextConfig.targetPriority = normalizeTargetPriority(nextConfig.targetPriority);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(nextConfig, "targetSelectionMode")) {
+      nextConfig.targetSelectionMode = nextConfig.targetSelectionMode === "list" ? "list" : "proximity";
+    }
+
+    if (Object.prototype.hasOwnProperty.call(nextConfig, "onlyPriorityTargets")) {
+      nextConfig.onlyPriorityTargets = !!nextConfig.onlyPriorityTargets;
+    }
+
     Object.assign(config, nextConfig);
     persistConfig();
     bot.log("auto attack config updated", { ...config });
@@ -846,6 +887,7 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
     canUseRune,
     triggerRune,
     getNearbyMonsters,
+    getMonsterCandidates,
     getCurrentTarget,
     getCurrentFollowTarget,
     isCombatActive,
