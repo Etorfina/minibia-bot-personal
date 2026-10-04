@@ -741,7 +741,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       ["#minibia-bot-rune-enabled", "more"],
       [".mb-main-column .mb-note", "more"],
       ["#minibia-bot-xray-overlay-toggle", "more"],
-      ["#minibia-bot-auto-heal-enabled", "combat"],
+      ["#minibia-bot-auto-heal-enabled", "healing"],
       ["#minibia-bot-talk-enabled", "more"],
       ["#minibia-bot-cave-preset-select", "cave"],
       ["#minibia-bot-auto-attack-enabled", "combat"],
@@ -750,7 +750,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       panel.querySelector(selector)?.closest(".mb-column-section")?.setAttribute("data-mobile-tab", tab);
     });
 
-    const tabs = ["status", "cave", "combat", "safety", "more"];
+    const tabs = ["status", "cave", "combat", "healing", "safety", "more"];
     const nav = panel.querySelector(".mb-mobile-tabs");
     const body = panel.querySelector(".mb-body");
     const saved = bot.storage.get(mobileTabKey, "status");
@@ -900,10 +900,12 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
       #minibia-bot-panel .mb-side-column,
       #minibia-bot-panel .mb-main-column,
-      #minibia-bot-panel .mb-cave-column {
+      #minibia-bot-panel .mb-cave-column,
+      #minibia-bot-panel .mb-healing-column {
         display: grid;
         gap: 10px;
       }
+      #minibia-bot-panel .mb-healing-column { grid-column: 1 / -1; }
 
       #minibia-bot-panel .mb-section {
         padding: 12px;
@@ -1210,11 +1212,13 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       }
       #minibia-bot-panel.mb-mobile .mb-main-column,
       #minibia-bot-panel.mb-mobile .mb-side-column,
-      #minibia-bot-panel.mb-mobile .mb-cave-column { display: contents; }
+      #minibia-bot-panel.mb-mobile .mb-cave-column,
+      #minibia-bot-panel.mb-mobile .mb-healing-column { display: contents; }
       #minibia-bot-panel.mb-mobile .mb-column-section { display: none; }
       #minibia-bot-panel.mb-mobile[data-mobile-tab="status"] [data-mobile-tab="status"],
       #minibia-bot-panel.mb-mobile[data-mobile-tab="cave"] [data-mobile-tab="cave"],
       #minibia-bot-panel.mb-mobile[data-mobile-tab="combat"] [data-mobile-tab="combat"],
+      #minibia-bot-panel.mb-mobile[data-mobile-tab="healing"] [data-mobile-tab="healing"],
       #minibia-bot-panel.mb-mobile[data-mobile-tab="safety"] [data-mobile-tab="safety"],
       #minibia-bot-panel.mb-mobile[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
       #minibia-bot-panel.mb-mobile .mb-field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1308,6 +1312,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         <button type="button" role="tab" data-tab="status">Inicio</button>
         <button type="button" role="tab" data-tab="cave">Cueva</button>
         <button type="button" role="tab" data-tab="combat">Combate</button>
+        <button type="button" role="tab" data-tab="healing">Curación</button>
         <button type="button" role="tab" data-tab="safety">Seguridad</button>
         <button type="button" role="tab" data-tab="more">Más</button>
       </div>
@@ -1411,34 +1416,6 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
               </select>
             </label>
             <div class="mb-list" id="minibia-bot-visible-creatures-list"></div>
-          </div>
-          <div class="mb-section mb-column-section">
-            <div class="mb-label">Curación automática</div>
-            <div class="mb-stack">
-              <label class="mb-toggle">
-                <input type="checkbox" id="minibia-bot-auto-heal-enabled" />
-                <span>Activar curación automática</span>
-              </label>
-              <div class="mb-field-grid">
-                <label class="mb-field" for="minibia-bot-auto-heal-min-hp">
-                  <span class="mb-field-label">Vida mínima</span>
-                  <input type="number" id="minibia-bot-auto-heal-min-hp" min="0" placeholder="250" />
-                </label>
-                <label class="mb-field" for="minibia-bot-auto-heal-hp-hotkey">
-                  <span class="mb-field-label">Tecla de vida (1-12)</span>
-                  <input type="number" id="minibia-bot-auto-heal-hp-hotkey" min="1" max="12" placeholder="1" />
-                </label>
-                <label class="mb-field" for="minibia-bot-auto-heal-min-mana">
-                  <span class="mb-field-label">Mana mínima</span>
-                  <input type="number" id="minibia-bot-auto-heal-min-mana" min="0" placeholder="150" />
-                </label>
-                <label class="mb-field" for="minibia-bot-auto-heal-mana-hotkey">
-                  <span class="mb-field-label">Tecla de mana (1-12)</span>
-                  <input type="number" id="minibia-bot-auto-heal-mana-hotkey" min="1" max="12" placeholder="2" />
-                </label>
-              </div>
-              <div class="mb-small-note">Revisa la vida y el mana continuamente. Usa primero la tecla de vida.</div>
-            </div>
           </div>
           <div class="mb-section mb-column-section">
             <div class="mb-label">Respuestas automáticas</div>
@@ -1607,6 +1584,51 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
             </div>
           </section>
         </div>
+        <div class="mb-healing-column">
+          <section class="mb-section mb-column-section" aria-labelledby="minibia-bot-heal-title">
+            <div class="mb-label" id="minibia-bot-heal-title">Curación automática</div>
+            <div class="mb-small-note">Configura qué casillas de la barra usar y cuándo activarlas. Puedes colocar un hechizo, una runa o una poción en cada casilla.</div>
+            <div class="mb-stack">
+              <label class="mb-toggle">
+                <input type="checkbox" id="minibia-bot-auto-heal-enabled" />
+                <span>Activar curación automática</span>
+              </label>
+              <div class="mb-field-grid">
+                <label class="mb-field" for="minibia-bot-auto-heal-hp-mode">
+                  <span class="mb-field-label">Medir vida en</span>
+                  <select id="minibia-bot-auto-heal-hp-mode">
+                    <option value="absolute">Puntos de vida</option>
+                    <option value="percentage">Porcentaje</option>
+                  </select>
+                </label>
+                <label class="mb-field" for="minibia-bot-auto-heal-min-hp">
+                  <span class="mb-field-label">Curar cuando la vida llegue a</span>
+                  <input type="number" id="minibia-bot-auto-heal-min-hp" min="0" placeholder="250" />
+                </label>
+                <label class="mb-field" for="minibia-bot-auto-heal-hp-hotkey">
+                  <span class="mb-field-label">Casilla de vida (1–12)</span>
+                  <input type="number" id="minibia-bot-auto-heal-hp-hotkey" min="1" max="12" placeholder="1" />
+                </label>
+                <label class="mb-field" for="minibia-bot-auto-heal-mana-mode">
+                  <span class="mb-field-label">Medir maná en</span>
+                  <select id="minibia-bot-auto-heal-mana-mode">
+                    <option value="absolute">Puntos de maná</option>
+                    <option value="percentage">Porcentaje</option>
+                  </select>
+                </label>
+                <label class="mb-field" for="minibia-bot-auto-heal-min-mana">
+                  <span class="mb-field-label">Recuperar maná cuando llegue a</span>
+                  <input type="number" id="minibia-bot-auto-heal-min-mana" min="0" placeholder="150" />
+                </label>
+                <label class="mb-field" for="minibia-bot-auto-heal-mana-hotkey">
+                  <span class="mb-field-label">Casilla de maná (1–12)</span>
+                  <input type="number" id="minibia-bot-auto-heal-mana-hotkey" min="1" max="12" placeholder="2" />
+                </label>
+              </div>
+              <div class="mb-small-note">Cuando elijas porcentaje, el umbral se calcula respecto a tu vida o maná máximos. Si ambas condiciones se activan a la vez, primero intenta curar la vida.</div>
+            </div>
+          </section>
+        </div>
       </div>
     `;
     document.body.appendChild(panel);
@@ -1658,8 +1680,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const equipRingEnabledInput = panel.querySelector("#minibia-bot-equip-ring-enabled");
     const autoHealEnabledInput = panel.querySelector("#minibia-bot-auto-heal-enabled");
     const autoHealMinHpInput = panel.querySelector("#minibia-bot-auto-heal-min-hp");
+    const autoHealHpModeInput = panel.querySelector("#minibia-bot-auto-heal-hp-mode");
     const autoHealHpHotkeyInput = panel.querySelector("#minibia-bot-auto-heal-hp-hotkey");
     const autoHealMinManaInput = panel.querySelector("#minibia-bot-auto-heal-min-mana");
+    const autoHealManaModeInput = panel.querySelector("#minibia-bot-auto-heal-mana-mode");
     const autoHealManaHotkeyInput = panel.querySelector("#minibia-bot-auto-heal-mana-hotkey");
     const autoAttackEnabledInput = panel.querySelector("#minibia-bot-auto-attack-enabled");
     const autoAttackStanceInput = panel.querySelector("#minibia-bot-attack-stance");
@@ -2110,11 +2134,28 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     }
 
     if (autoHealMinHpInput) {
+      autoHealHpModeInput.value = bot.heal?.config?.hpThresholdMode ?? "absolute";
+      autoHealMinHpInput.max = autoHealHpModeInput.value === "percentage" ? "100" : "";
       autoHealMinHpInput.value = String(bot.heal?.config?.minHp ?? 0);
       autoHealMinHpInput.addEventListener("change", () => {
-        const minHp = Math.max(0, Number(autoHealMinHpInput.value) || 0);
+        const max = autoHealHpModeInput?.value === "percentage" ? 100 : Number.MAX_SAFE_INTEGER;
+        const minHp = Math.min(max, Math.max(0, Number(autoHealMinHpInput.value) || 0));
         autoHealMinHpInput.value = String(minHp);
         bot.heal.updateConfig({ minHp });
+      });
+    }
+
+    if (autoHealHpModeInput) {
+      autoHealHpModeInput.value = bot.heal?.config?.hpThresholdMode ?? "absolute";
+      autoHealHpModeInput.addEventListener("change", () => {
+        const hpThresholdMode = autoHealHpModeInput.value === "percentage" ? "percentage" : "absolute";
+        autoHealHpModeInput.value = hpThresholdMode;
+        autoHealMinHpInput.max = hpThresholdMode === "percentage" ? "100" : "";
+        if (hpThresholdMode === "percentage") {
+          const current = Number(autoHealMinHpInput.value) || 0;
+          autoHealMinHpInput.value = String(current > 100 ? 50 : current);
+        }
+        bot.heal.updateConfig({ hpThresholdMode, minHp: Number(autoHealMinHpInput.value) || 0 });
       });
     }
 
@@ -2128,11 +2169,28 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     }
 
     if (autoHealMinManaInput) {
+      autoHealManaModeInput.value = bot.heal?.config?.manaThresholdMode ?? "absolute";
+      autoHealMinManaInput.max = autoHealManaModeInput.value === "percentage" ? "100" : "";
       autoHealMinManaInput.value = String(bot.heal?.config?.minMana ?? 0);
       autoHealMinManaInput.addEventListener("change", () => {
-        const minMana = Math.max(0, Number(autoHealMinManaInput.value) || 0);
+        const max = autoHealManaModeInput?.value === "percentage" ? 100 : Number.MAX_SAFE_INTEGER;
+        const minMana = Math.min(max, Math.max(0, Number(autoHealMinManaInput.value) || 0));
         autoHealMinManaInput.value = String(minMana);
         bot.heal.updateConfig({ minMana });
+      });
+    }
+
+    if (autoHealManaModeInput) {
+      autoHealManaModeInput.value = bot.heal?.config?.manaThresholdMode ?? "absolute";
+      autoHealManaModeInput.addEventListener("change", () => {
+        const manaThresholdMode = autoHealManaModeInput.value === "percentage" ? "percentage" : "absolute";
+        autoHealManaModeInput.value = manaThresholdMode;
+        autoHealMinManaInput.max = manaThresholdMode === "percentage" ? "100" : "";
+        if (manaThresholdMode === "percentage") {
+          const current = Number(autoHealMinManaInput.value) || 0;
+          autoHealMinManaInput.value = String(current > 100 ? 50 : current);
+        }
+        bot.heal.updateConfig({ manaThresholdMode, minMana: Number(autoHealMinManaInput.value) || 0 });
       });
     }
 
@@ -2149,18 +2207,20 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       autoHealEnabledInput.checked = !!bot.heal?.status?.().running;
       autoHealEnabledInput.addEventListener("change", () => {
         const minHp = Math.max(0, Number(autoHealMinHpInput?.value) || bot.heal.config.minHp || 0);
+        const hpThresholdMode = autoHealHpModeInput?.value === "percentage" ? "percentage" : "absolute";
         const hpHotbarSlot = Math.min(
           12,
           Math.max(1, Number(autoHealHpHotkeyInput?.value) || bot.heal.config.hpHotbarSlot || 1)
         );
         const minMana = Math.max(0, Number(autoHealMinManaInput?.value) || bot.heal.config.minMana || 0);
+        const manaThresholdMode = autoHealManaModeInput?.value === "percentage" ? "percentage" : "absolute";
         const manaHotbarSlot = Math.min(
           12,
           Math.max(1, Number(autoHealManaHotkeyInput?.value) || bot.heal.config.manaHotbarSlot || 1)
         );
 
         if (autoHealEnabledInput.checked) {
-          bot.heal.start({ minHp, hpHotbarSlot, minMana, manaHotbarSlot });
+          bot.heal.start({ minHp, hpThresholdMode, hpHotbarSlot, minMana, manaThresholdMode, manaHotbarSlot });
         } else {
           bot.heal.stop();
         }
