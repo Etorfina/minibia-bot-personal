@@ -19,7 +19,7 @@ En la consola del navegador, con el juego abierto:
 ```js
 (async () => {
   const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/e3e3641cd380b0369eb9249ae676779515948e7f/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/9b39bc484239ebacb7a6d54361099ec456b86130/minibia-bot.js.gz.b64";
   const decode = async (url) => {
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error(`No pude descargar el bot: HTTP ${response.status}`);
@@ -27,15 +27,15 @@ En la consola del navegador, con el juego abierto:
     return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
   };
   let code = await decode(`${mainUrl}?v=${Date.now()}`);
-  if (!code.includes('id="minibia-bot-auto-attack-status"')) {
+  if (!code.includes('id="minibia-bot-attack-target-list"')) {
     code = await decode(verifiedUrl);
   }
-  if (!code.includes('id="minibia-bot-auto-attack-status"')) {
-    throw new Error("Llegó una versión vieja: falta la interfaz actualizada de Attack Target.");
+  if (!code.includes('id="minibia-bot-attack-target-list"')) {
+    throw new Error("Llegó una versión vieja: falta la lista de prioridades de Attack Target.");
   }
   window.minibiaBotSourceUrl = mainUrl;
   (0, eval)(code);
-  if (!document.getElementById("minibia-bot-auto-attack-status")) {
+  if (!document.getElementById("minibia-bot-attack-target-list")) {
     throw new Error("La versión nueva se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
   }
   console.info("[minibia-bot] Interfaz actualizada cargada");
@@ -82,4 +82,4 @@ Si ves **Record Spot** en vez de los botones **Node / Stand / Walk**, tu página
 
 ## Attack Target
 
-El módulo busca criaturas visibles del mismo piso y puede funcionar junto con Cavebot. En modo cuerpo a cuerpo persigue al objetivo; a distancia mantiene 2–3 casillas. Configura las casillas que tienen la acción de objetivo y, si la usarás, la runa. El selector elige objetivos cercanos automáticamente; la lista de prioridades por criatura de ElfBot todavía no forma parte de este módulo.
+El módulo busca criaturas visibles del mismo piso y puede funcionar junto con Cavebot. Añade nombres para darles prioridad, reordénalos y, si activas **Atacar solo los de esta lista**, los demás se ignoran. La selección puede seguir el orden de la lista o elegir el más cercano. En modo cuerpo a cuerpo persigue al objetivo; a distancia mantiene 2–3 casillas. Asigna las casillas de objetivo y, si la usarás, de la runa.
