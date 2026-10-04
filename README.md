@@ -45,3 +45,18 @@ Editar `src/` y ejecutar `bash build.sh`: el script regenera `pz-bot.js` y `mini
 ## Documentación original
 
 El README original se conserva en el respaldo local `minibia-bot-base-y-trabajo.zip`.
+
+## Cavebot V1
+
+En **Cueva**, selecciona el tipo y pulsa **Añadir punto** en el lugar correspondiente:
+
+- **Node / Walk:** puntos flexibles. La tolerancia por defecto es 1; una configuración anterior con tolerancia 0 conserva su precisión.
+- **Stand:** debe llegar exactamente al SQM.
+- **Label:** llega al punto y lo identifica con un nombre, por ejemplo `SALIDA`.
+- **Action:** llega exactamente al punto y ejecuta `wait:2000` (espera 2 segundos), `skip:1` (omite el siguiente punto) o `goto:SALIDA` (salta al Label). No ejecuta JavaScript arbitrario.
+
+**Ida y vuelta** recorre los puntos en ambas direcciones, incluidas las acciones. **Loop** vuelve del último al primero; graba también el tramo de regreso. Cada preset guarda su modo de recorrido. START comienza por el punto de movimiento más cercano.
+
+El combate tiene prioridad sobre la ruta. Tras 8 segundos sin acercarse al punto, el antiatasco puede omitir un Node/Walk solamente si el siguiente punto también es flexible, está en el mismo piso y el pathfinder confirma una ruta. En los demás casos detiene Cavebot y muestra el punto que requiere revisión. No omite acciones, Stand ni cambios de piso. Las transiciones aprendidas y Auto Loot del juego siguen funcionando como antes.
+
+Pruebas de comportamiento: `node --test tests/cave.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
