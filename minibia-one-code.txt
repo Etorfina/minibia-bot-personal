@@ -1,10 +1,11 @@
 (async () => {
   const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/1f196d9f0223dc0c10f27c2828d34c27c2aab8c5/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/307dd3af9f59c2c4821f52d3ba05b1eb8613e8d9/minibia-bot.js.gz.b64";
   const requiredControls = [
     'data-tab="healing"',
-    'id="minibia-bot-auto-heal-hp-mode"',
-    'id="minibia-bot-auto-heal-mana-mode"',
+    'id="minibia-bot-heal-spells"',
+    'id="minibia-bot-heal-items"',
+    'id="minibia-bot-heal-status"',
     'id="minibia-bot-attack-target-list"',
     'id="minibia-bot-attack-stance"',
     'id="minibia-bot-attack-range"'
@@ -21,12 +22,12 @@
     code = await decode(verifiedUrl);
   }
   if (!hasTargetingControls(code)) {
-    throw new Error("La versión descargada no incluye Curación independiente y umbrales por porcentaje.");
+    throw new Error("La versión descargada no incluye las reglas de curación y controles esperados.");
   }
   window.minibiaBotSourceUrl = mainUrl;
   (0, eval)(code);
-  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-auto-heal-hp-mode") || !document.getElementById("minibia-bot-auto-heal-mana-mode") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) {
+  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-heal-spells") || !document.getElementById("minibia-bot-heal-items") || !document.getElementById("minibia-bot-heal-status") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) {
     throw new Error("La versión nueva se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
   }
-  console.info("[minibia-bot] Curación y Attack Target actualizados cargados");
+  console.info("[minibia-bot] HealBot y Attack Target actualizados cargados");
 })().catch(error => { console.error(error); alert(error.message); });
