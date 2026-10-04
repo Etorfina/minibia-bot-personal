@@ -907,6 +907,74 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       }
       #minibia-bot-panel .mb-healing-column { grid-column: 1 / -1; }
 
+      #minibia-bot-panel .mb-heal-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(190px, .72fr);
+        gap: 10px;
+        align-items: start;
+      }
+      #minibia-bot-panel .mb-heal-group,
+      #minibia-bot-panel .mb-heal-conditions {
+        min-width: 0;
+        padding: 10px;
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 10px;
+        background: #17191b;
+      }
+      #minibia-bot-panel .mb-heal-group-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #e7d2ac;
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: .035em;
+        text-transform: uppercase;
+      }
+      #minibia-bot-panel .mb-heal-rule-list { display: grid; gap: 8px; }
+      #minibia-bot-panel .mb-heal-rule {
+        padding: 9px;
+        border: 1px solid rgba(255,255,255,.09);
+        border-radius: 9px;
+        background: #202225;
+      }
+      #minibia-bot-panel .mb-heal-rule-head {
+        display: grid;
+        grid-template-columns: auto minmax(0,1fr) auto auto auto;
+        gap: 5px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      #minibia-bot-panel .mb-heal-rule-head input[type="checkbox"] { width: auto; margin: 0; }
+      #minibia-bot-panel .mb-heal-rule-head input[type="text"] { min-width: 0; padding: 6px 8px; }
+      #minibia-bot-panel .mb-heal-rule-head button { min-height: 32px; width: auto; padding: 5px 8px; }
+      #minibia-bot-panel .mb-heal-priority {
+        grid-column: 1 / -1;
+        color: #c8b997;
+        font-size: 10px;
+        line-height: 1.3;
+      }
+      #minibia-bot-panel .mb-heal-rule-grid {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 7px;
+      }
+      #minibia-bot-panel .mb-heal-rule-grid .mb-field-label { font-size: 10px; }
+      #minibia-bot-panel .mb-heal-rule-grid input,
+      #minibia-bot-panel .mb-heal-rule-grid select { min-height: 34px; padding: 6px 8px; }
+      #minibia-bot-panel .mb-heal-add { min-height: 34px; width: auto; padding: 6px 9px; font-size: 11px; }
+      #minibia-bot-panel .mb-heal-live {
+        padding: 8px;
+        border: 1px solid rgba(116,164,132,.24);
+        border-radius: 8px;
+        background: rgba(44,81,63,.28);
+        color: #dbe9dd;
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
       #minibia-bot-panel .mb-section {
         padding: 12px;
         border: 1px solid rgba(255,255,255,.08);
@@ -1222,6 +1290,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-mobile[data-mobile-tab="safety"] [data-mobile-tab="safety"],
       #minibia-bot-panel.mb-mobile[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
       #minibia-bot-panel.mb-mobile .mb-field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #minibia-bot-panel.mb-mobile .mb-heal-layout { grid-template-columns: minmax(0,1fr); }
+      #minibia-bot-panel.mb-mobile .mb-heal-rule-head { grid-template-columns: auto minmax(0,1fr) auto auto auto; }
+      #minibia-bot-panel.mb-mobile .mb-heal-rule-head button { min-height: 38px; padding: 5px 7px; }
+      #minibia-bot-panel.mb-mobile .mb-heal-rule-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
       #minibia-bot-panel.mb-mobile button,
       #minibia-bot-panel.mb-mobile select { min-height: 44px; }
       #minibia-bot-panel.mb-mobile input,
@@ -1586,46 +1658,49 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         </div>
         <div class="mb-healing-column">
           <section class="mb-section mb-column-section" aria-labelledby="minibia-bot-heal-title">
-            <div class="mb-label" id="minibia-bot-heal-title">Curación automática</div>
-            <div class="mb-small-note">Configura qué casillas de la barra usar y cuándo activarlas. Puedes colocar un hechizo, una runa o una poción en cada casilla.</div>
-            <div class="mb-stack">
-              <label class="mb-toggle">
-                <input type="checkbox" id="minibia-bot-auto-heal-enabled" />
-                <span>Activar curación automática</span>
-              </label>
-              <div class="mb-field-grid">
-                <label class="mb-field" for="minibia-bot-auto-heal-hp-mode">
-                  <span class="mb-field-label">Medir vida en</span>
-                  <select id="minibia-bot-auto-heal-hp-mode">
-                    <option value="absolute">Puntos de vida</option>
-                    <option value="percentage">Porcentaje</option>
-                  </select>
-                </label>
-                <label class="mb-field" for="minibia-bot-auto-heal-min-hp">
-                  <span class="mb-field-label">Curar cuando la vida llegue a</span>
-                  <input type="number" id="minibia-bot-auto-heal-min-hp" min="0" placeholder="250" />
-                </label>
-                <label class="mb-field" for="minibia-bot-auto-heal-hp-hotkey">
-                  <span class="mb-field-label">Casilla de vida (1–12)</span>
-                  <input type="number" id="minibia-bot-auto-heal-hp-hotkey" min="1" max="12" placeholder="1" />
-                </label>
-                <label class="mb-field" for="minibia-bot-auto-heal-mana-mode">
-                  <span class="mb-field-label">Medir maná en</span>
-                  <select id="minibia-bot-auto-heal-mana-mode">
-                    <option value="absolute">Puntos de maná</option>
-                    <option value="percentage">Porcentaje</option>
-                  </select>
-                </label>
-                <label class="mb-field" for="minibia-bot-auto-heal-min-mana">
-                  <span class="mb-field-label">Recuperar maná cuando llegue a</span>
-                  <input type="number" id="minibia-bot-auto-heal-min-mana" min="0" placeholder="150" />
-                </label>
-                <label class="mb-field" for="minibia-bot-auto-heal-mana-hotkey">
-                  <span class="mb-field-label">Casilla de maná (1–12)</span>
-                  <input type="number" id="minibia-bot-auto-heal-mana-hotkey" min="1" max="12" placeholder="2" />
-                </label>
+            <div class="mb-row" style="grid-template-columns:minmax(0,1fr) auto;align-items:start">
+              <div>
+                <div class="mb-label" id="minibia-bot-heal-title">HealBot</div>
+                <div class="mb-small-note">Crea reglas para hechizos, runas y pociones. El bot activa la casilla indicada cuando se cumple la condición.</div>
               </div>
-              <div class="mb-small-note">Cuando elijas porcentaje, el umbral se calcula respecto a tu vida o maná máximos. Si ambas condiciones se activan a la vez, primero intenta curar la vida.</div>
+              <label class="mb-toggle" style="white-space:nowrap">
+                <input type="checkbox" id="minibia-bot-auto-heal-enabled" />
+                <span>Activo</span>
+              </label>
+            </div>
+            <div class="mb-heal-layout" style="margin-top:10px">
+              <div class="mb-heal-group">
+                <div class="mb-heal-group-title"><span>Hechizos</span><button type="button" class="mb-heal-add" data-heal-add="spell">＋ Añadir</button></div>
+                <div class="mb-heal-rule-list" id="minibia-bot-heal-spells"></div>
+              </div>
+              <div class="mb-heal-group">
+                <div class="mb-heal-group-title"><span>Runas y pociones</span><span></span></div>
+                <div class="mb-row" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:8px">
+                  <button type="button" class="mb-heal-add" data-heal-add="rune">＋ Runa</button>
+                  <button type="button" class="mb-heal-add" data-heal-add="potion">＋ Poción</button>
+                </div>
+                <div class="mb-heal-rule-list" id="minibia-bot-heal-items"></div>
+              </div>
+              <aside class="mb-heal-conditions">
+                <div class="mb-heal-group-title">Condiciones</div>
+                <div class="mb-stack">
+                  <label class="mb-field" for="minibia-bot-heal-min-mana">
+                    <span class="mb-field-label">Maná mínimo disponible</span>
+                    <input type="number" id="minibia-bot-heal-min-mana" min="0" inputmode="numeric" />
+                  </label>
+                  <label class="mb-field" for="minibia-bot-heal-wait">
+                    <span class="mb-field-label">Wait · revisión (ms)</span>
+                    <input type="number" id="minibia-bot-heal-wait" min="50" max="5000" step="50" inputmode="numeric" />
+                  </label>
+                  <label class="mb-field" for="minibia-bot-heal-delay">
+                    <span class="mb-field-label">Delay · pausa tras acción (ms)</span>
+                    <input type="number" id="minibia-bot-heal-delay" min="0" max="60000" step="50" inputmode="numeric" />
+                  </label>
+                  <div class="mb-heal-live" id="minibia-bot-heal-status" aria-live="polite">Añade y configura una acción para empezar.</div>
+                  <div class="mb-small-note">Las reglas se revisan en orden. Asigna el hechizo, la runa o la poción en Minibia; aquí solo se configura el disparador y su casilla.</div>
+                  <div class="mb-small-note">Curar a otro jugador requiere una función de objetivo del cliente que Minibia no expone al bot; no se simula con una tecla.</div>
+                </div>
+              </aside>
             </div>
           </section>
         </div>
@@ -1679,12 +1754,12 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const autoMagicShieldEnabledInput = panel.querySelector("#minibia-bot-auto-magic-shield-enabled");
     const equipRingEnabledInput = panel.querySelector("#minibia-bot-equip-ring-enabled");
     const autoHealEnabledInput = panel.querySelector("#minibia-bot-auto-heal-enabled");
-    const autoHealMinHpInput = panel.querySelector("#minibia-bot-auto-heal-min-hp");
-    const autoHealHpModeInput = panel.querySelector("#minibia-bot-auto-heal-hp-mode");
-    const autoHealHpHotkeyInput = panel.querySelector("#minibia-bot-auto-heal-hp-hotkey");
-    const autoHealMinManaInput = panel.querySelector("#minibia-bot-auto-heal-min-mana");
-    const autoHealManaModeInput = panel.querySelector("#minibia-bot-auto-heal-mana-mode");
-    const autoHealManaHotkeyInput = panel.querySelector("#minibia-bot-auto-heal-mana-hotkey");
+    const autoHealSpellList = panel.querySelector("#minibia-bot-heal-spells");
+    const autoHealItemList = panel.querySelector("#minibia-bot-heal-items");
+    const autoHealWaitInput = panel.querySelector("#minibia-bot-heal-wait");
+    const autoHealDelayInput = panel.querySelector("#minibia-bot-heal-delay");
+    const autoHealMinManaInput = panel.querySelector("#minibia-bot-heal-min-mana");
+    const autoHealStatus = panel.querySelector("#minibia-bot-heal-status");
     const autoAttackEnabledInput = panel.querySelector("#minibia-bot-auto-attack-enabled");
     const autoAttackStanceInput = panel.querySelector("#minibia-bot-attack-stance");
     const autoAttackRangeInput = panel.querySelector("#minibia-bot-attack-range");
@@ -2133,101 +2208,134 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       });
     }
 
-    if (autoHealMinHpInput) {
-      autoHealHpModeInput.value = bot.heal?.config?.hpThresholdMode ?? "absolute";
-      autoHealMinHpInput.max = autoHealHpModeInput.value === "percentage" ? "100" : "";
-      autoHealMinHpInput.value = String(bot.heal?.config?.minHp ?? 0);
-      autoHealMinHpInput.addEventListener("change", () => {
-        const max = autoHealHpModeInput?.value === "percentage" ? 100 : Number.MAX_SAFE_INTEGER;
-        const minHp = Math.min(max, Math.max(0, Number(autoHealMinHpInput.value) || 0));
-        autoHealMinHpInput.value = String(minHp);
-        bot.heal.updateConfig({ minHp });
-      });
-    }
+    const escapeHealText = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[char]);
+    const refreshHealStatus = () => {
+      if (!autoHealStatus) return;
+      const status = bot.heal?.status?.();
+      const rules = status?.config?.rules || [];
+      if (!status?.running) {
+        autoHealStatus.textContent = `${rules.length} reglas guardadas · Pausado`;
+        return;
+      }
+      const ready = rules.filter((rule) => rule.enabled && rule.slot).length;
+      const action = status.pending?.ruleName ? ` · Usando: ${status.pending.ruleName}` : status.lastAction ? ` · Última: ${status.lastAction}` : "";
+      autoHealStatus.textContent = `ACTIVO · ${ready} reglas listas${action}`;
+    };
+    const renderHealRules = () => {
+      const rules = Array.isArray(bot.heal?.config?.rules) ? bot.heal.config.rules : [];
+      const option = (value, selected, label) => `<option value="${value}" ${selected === value ? "selected" : ""}>${label}</option>`;
+      const renderRule = (rule, index, group) => `
+        <article class="mb-heal-rule" data-rule-id="${escapeHealText(rule.id)}">
+          <div class="mb-heal-priority">Prioridad ${index + 1} · Se intenta antes que las reglas siguientes</div>
+          <div class="mb-heal-rule-head">
+            <input type="checkbox" aria-label="Activar ${escapeHealText(rule.name)}" data-heal-prop="enabled" ${rule.enabled ? "checked" : ""} />
+            <input type="text" aria-label="Nombre de la acción" maxlength="48" value="${escapeHealText(rule.name)}" data-heal-prop="name" />
+            <button type="button" data-heal-move="up" aria-label="Subir prioridad" title="Subir prioridad">↑</button>
+            <button type="button" data-heal-move="down" aria-label="Bajar prioridad" title="Bajar prioridad">↓</button>
+            <button type="button" data-heal-remove aria-label="Eliminar acción" title="Eliminar">×</button>
+          </div>
+          <div class="mb-heal-rule-grid">
+            <label class="mb-field"><span class="mb-field-label">Casilla (1–12)</span><input type="number" min="1" max="12" inputmode="numeric" placeholder="Sin asignar" value="${rule.slot ?? ""}" data-heal-prop="slot" /></label>
+            <label class="mb-field"><span class="mb-field-label">Vigilar</span><select data-heal-prop="stat">${option("hp", rule.stat, "Vida · HP")}${option("mana", rule.stat, "Maná · MP")}</select></label>
+            <label class="mb-field"><span class="mb-field-label">Condición</span><select data-heal-prop="operator">${option("below", rule.operator, "Por debajo de")}${option("above", rule.operator, "Por encima de")}</select></label>
+            <label class="mb-field"><span class="mb-field-label">Umbral</span><input type="number" min="0" step="1" inputmode="numeric" value="${rule.value}" data-heal-prop="value" /></label>
+            <label class="mb-field"><span class="mb-field-label">Unidad</span><select data-heal-prop="unit">${option("points", rule.unit, "Puntos")}${option("percent", rule.unit, "Porcentaje")}</select></label>
+            <label class="mb-field"><span class="mb-field-label">Maná requerido</span><input type="number" min="0" step="1" inputmode="numeric" value="${rule.manaCost}" data-heal-prop="manaCost" /></label>
+            <label class="mb-field"><span class="mb-field-label">Delay / CD (ms)</span><input type="number" min="0" max="60000" step="50" inputmode="numeric" value="${rule.cooldownMs}" data-heal-prop="cooldownMs" /></label>
+          </div>
+        </article>`;
+      if (autoHealSpellList) autoHealSpellList.innerHTML = rules.map((rule, index) => rule.kind === "spell" ? renderRule(rule, index, "spell") : "").join("") || '<div class="mb-small-note">Sin hechizos configurados. Añade aquí tus hechizos de vida o maná.</div>';
+      if (autoHealItemList) autoHealItemList.innerHTML = rules.map((rule, index) => rule.kind !== "spell" ? renderRule(rule, index, "item") : "").join("") || '<div class="mb-small-note">Añade runas o pociones para vida o maná.</div>';
+      refreshHealStatus();
+    };
 
-    if (autoHealHpModeInput) {
-      autoHealHpModeInput.value = bot.heal?.config?.hpThresholdMode ?? "absolute";
-      autoHealHpModeInput.addEventListener("change", () => {
-        const hpThresholdMode = autoHealHpModeInput.value === "percentage" ? "percentage" : "absolute";
-        autoHealHpModeInput.value = hpThresholdMode;
-        autoHealMinHpInput.max = hpThresholdMode === "percentage" ? "100" : "";
-        if (hpThresholdMode === "percentage") {
-          const current = Number(autoHealMinHpInput.value) || 0;
-          autoHealMinHpInput.value = String(current > 100 ? 50 : current);
-        }
-        bot.heal.updateConfig({ hpThresholdMode, minHp: Number(autoHealMinHpInput.value) || 0 });
-      });
-    }
+    const saveHealRules = (rules) => {
+      bot.heal.updateConfig({ rules });
+      renderHealRules();
+    };
+    const healRuleDefault = (kind, index) => ({
+      id: `heal-${kind}-${Date.now()}-${index}`,
+      kind,
+      name: kind === "spell" ? (index ? "Spell Lo" : "Spell Hi") : kind === "rune" ? "UH Rune" : "Poción",
+      slot: null,
+      stat: "hp",
+      operator: "below",
+      value: 0,
+      unit: "percent",
+      manaCost: 0,
+      cooldownMs: 1200,
+      enabled: false,
+    });
 
-    if (autoHealHpHotkeyInput) {
-      autoHealHpHotkeyInput.value = String(bot.heal?.config?.hpHotbarSlot ?? 1);
-      autoHealHpHotkeyInput.addEventListener("change", () => {
-        const hpHotbarSlot = Math.min(12, Math.max(1, Number(autoHealHpHotkeyInput.value) || 1));
-        autoHealHpHotkeyInput.value = String(hpHotbarSlot);
-        bot.heal.updateConfig({ hpHotbarSlot });
-      });
-    }
+    panel.addEventListener("click", (event) => {
+      const add = event.target.closest("[data-heal-add]");
+      if (add) {
+        const rules = [...bot.heal.config.rules];
+        if (rules.length >= 24) return;
+        const kind = add.dataset.healAdd;
+        rules.push(healRuleDefault(kind, rules.filter((rule) => rule.kind === kind).length));
+        saveHealRules(rules);
+        return;
+      }
+      const card = event.target.closest(".mb-heal-rule");
+      if (!card) return;
+      const rules = [...bot.heal.config.rules];
+      const index = rules.findIndex((rule) => rule.id === card.dataset.ruleId);
+      if (index < 0) return;
+      if (event.target.closest("[data-heal-remove]")) {
+        rules.splice(index, 1);
+        saveHealRules(rules);
+        return;
+      }
+      const move = event.target.closest("[data-heal-move]")?.dataset.healMove;
+      if (move) {
+        const destination = move === "up" ? index - 1 : index + 1;
+        if (destination < 0 || destination >= rules.length) return;
+        [rules[index], rules[destination]] = [rules[destination], rules[index]];
+        saveHealRules(rules);
+      }
+    });
 
+    panel.addEventListener("change", (event) => {
+      const input = event.target.closest("[data-heal-prop]");
+      const card = input?.closest(".mb-heal-rule");
+      if (!input || !card) return;
+      const rules = [...bot.heal.config.rules];
+      const rule = rules.find((entry) => entry.id === card.dataset.ruleId);
+      if (!rule) return;
+      const prop = input.dataset.healProp;
+      if (prop === "enabled") rule.enabled = input.checked;
+      else if (prop === "name") rule.name = input.value.trim().slice(0, 48) || "Acción de curación";
+      else if (prop === "slot") rule.slot = input.value === "" ? null : Math.min(12, Math.max(1, Number(input.value) || 1));
+      else if (prop === "value") rule.value = Math.max(0, Number(input.value) || 0);
+      else if (prop === "manaCost" || prop === "cooldownMs") rule[prop] = Math.max(0, Number(input.value) || 0);
+      else rule[prop] = input.value;
+      saveHealRules(rules);
+    });
+
+    if (autoHealWaitInput) {
+      autoHealWaitInput.value = String(bot.heal.config.tickMs ?? 100);
+      autoHealWaitInput.addEventListener("change", () => bot.heal.updateConfig({ tickMs: Math.min(5000, Math.max(50, Number(autoHealWaitInput.value) || 100)) }));
+    }
+    if (autoHealDelayInput) {
+      autoHealDelayInput.value = String(bot.heal.config.delayMs ?? 0);
+      autoHealDelayInput.addEventListener("change", () => bot.heal.updateConfig({ delayMs: Math.min(60000, Math.max(0, Number(autoHealDelayInput.value) || 0)) }));
+    }
     if (autoHealMinManaInput) {
-      autoHealManaModeInput.value = bot.heal?.config?.manaThresholdMode ?? "absolute";
-      autoHealMinManaInput.max = autoHealManaModeInput.value === "percentage" ? "100" : "";
-      autoHealMinManaInput.value = String(bot.heal?.config?.minMana ?? 0);
-      autoHealMinManaInput.addEventListener("change", () => {
-        const max = autoHealManaModeInput?.value === "percentage" ? 100 : Number.MAX_SAFE_INTEGER;
-        const minMana = Math.min(max, Math.max(0, Number(autoHealMinManaInput.value) || 0));
-        autoHealMinManaInput.value = String(minMana);
-        bot.heal.updateConfig({ minMana });
-      });
+      autoHealMinManaInput.value = String(bot.heal.config.minimumMana ?? 0);
+      autoHealMinManaInput.addEventListener("change", () => bot.heal.updateConfig({ minimumMana: Math.max(0, Number(autoHealMinManaInput.value) || 0) }));
     }
-
-    if (autoHealManaModeInput) {
-      autoHealManaModeInput.value = bot.heal?.config?.manaThresholdMode ?? "absolute";
-      autoHealManaModeInput.addEventListener("change", () => {
-        const manaThresholdMode = autoHealManaModeInput.value === "percentage" ? "percentage" : "absolute";
-        autoHealManaModeInput.value = manaThresholdMode;
-        autoHealMinManaInput.max = manaThresholdMode === "percentage" ? "100" : "";
-        if (manaThresholdMode === "percentage") {
-          const current = Number(autoHealMinManaInput.value) || 0;
-          autoHealMinManaInput.value = String(current > 100 ? 50 : current);
-        }
-        bot.heal.updateConfig({ manaThresholdMode, minMana: Number(autoHealMinManaInput.value) || 0 });
-      });
-    }
-
-    if (autoHealManaHotkeyInput) {
-      autoHealManaHotkeyInput.value = String(bot.heal?.config?.manaHotbarSlot ?? 1);
-      autoHealManaHotkeyInput.addEventListener("change", () => {
-        const manaHotbarSlot = Math.min(12, Math.max(1, Number(autoHealManaHotkeyInput.value) || 1));
-        autoHealManaHotkeyInput.value = String(manaHotbarSlot);
-        bot.heal.updateConfig({ manaHotbarSlot });
-      });
-    }
-
     if (autoHealEnabledInput) {
-      autoHealEnabledInput.checked = !!bot.heal?.status?.().running;
+      autoHealEnabledInput.checked = !!bot.heal.status().running;
       autoHealEnabledInput.addEventListener("change", () => {
-        const minHp = Math.max(0, Number(autoHealMinHpInput?.value) || bot.heal.config.minHp || 0);
-        const hpThresholdMode = autoHealHpModeInput?.value === "percentage" ? "percentage" : "absolute";
-        const hpHotbarSlot = Math.min(
-          12,
-          Math.max(1, Number(autoHealHpHotkeyInput?.value) || bot.heal.config.hpHotbarSlot || 1)
-        );
-        const minMana = Math.max(0, Number(autoHealMinManaInput?.value) || bot.heal.config.minMana || 0);
-        const manaThresholdMode = autoHealManaModeInput?.value === "percentage" ? "percentage" : "absolute";
-        const manaHotbarSlot = Math.min(
-          12,
-          Math.max(1, Number(autoHealManaHotkeyInput?.value) || bot.heal.config.manaHotbarSlot || 1)
-        );
-
-        if (autoHealEnabledInput.checked) {
-          bot.heal.start({ minHp, hpThresholdMode, hpHotbarSlot, minMana, manaThresholdMode, manaHotbarSlot });
-        } else {
-          bot.heal.stop();
-        }
-
-        refreshAutoHealStatus();
+        if (autoHealEnabledInput.checked) bot.heal.start();
+        else bot.heal.stop();
+        renderHealRules();
       });
     }
+    renderHealRules();
+    const healStatusTimerId = window.setInterval(refreshHealStatus, 500);
+    bot.addCleanup(() => window.clearInterval(healStatusTimerId));
 
     const addAttackPriorityName = (suggestedName = null) => {
       const name = String(suggestedName ?? autoAttackTargetNameInput?.value ?? "").trim();
