@@ -19,7 +19,16 @@ En la consola del navegador, con el juego abierto:
 ```js
 (async () => {
   const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/9b39bc484239ebacb7a6d54361099ec456b86130/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/1f196d9f0223dc0c10f27c2828d34c27c2aab8c5/minibia-bot.js.gz.b64";
+  const requiredControls = [
+    'data-tab="healing"',
+    'id="minibia-bot-auto-heal-hp-mode"',
+    'id="minibia-bot-auto-heal-mana-mode"',
+    'id="minibia-bot-attack-target-list"',
+    'id="minibia-bot-attack-stance"',
+    'id="minibia-bot-attack-range"'
+  ];
+  const hasTargetingControls = (source) => requiredControls.every((control) => source.includes(control));
   const decode = async (url) => {
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error(`No pude descargar el bot: HTTP ${response.status}`);
@@ -27,18 +36,18 @@ En la consola del navegador, con el juego abierto:
     return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
   };
   let code = await decode(`${mainUrl}?v=${Date.now()}`);
-  if (!code.includes('id="minibia-bot-attack-target-list"')) {
+  if (!hasTargetingControls(code)) {
     code = await decode(verifiedUrl);
   }
-  if (!code.includes('id="minibia-bot-attack-target-list"')) {
-    throw new Error("Llegó una versión vieja: falta la lista de prioridades de Attack Target.");
+  if (!hasTargetingControls(code)) {
+    throw new Error("La versión descargada no incluye Curación independiente y umbrales por porcentaje.");
   }
   window.minibiaBotSourceUrl = mainUrl;
   (0, eval)(code);
-  if (!document.getElementById("minibia-bot-attack-target-list")) {
+  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-auto-heal-hp-mode") || !document.getElementById("minibia-bot-auto-heal-mana-mode") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) {
     throw new Error("La versión nueva se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
   }
-  console.info("[minibia-bot] Interfaz actualizada cargada");
+  console.info("[minibia-bot] Curación y Attack Target actualizados cargados");
 })().catch(error => { console.error(error); alert(error.message); });
 ```
 
@@ -55,7 +64,11 @@ La barra aparece compacta en el centro de la pantalla:
 
 ## Desarrollo
 
-Editar `src/` y ejecutar `bash build.sh`: el script regenera `pz-bot.js` y `minibia-bot.js.gz.b64`. La carpeta `base/` queda como referencia. Las comprobaciones verifican sintaxis e integridad; el comportamiento dentro del juego requiere una prueba en una sesión real.
+Editar `src/` y ejecutar `bash build.sh`: el script regenera `pz-bot.js` y `minibia-bot.js.gz.b64`. Ejecutar `node --test tests/*.test.cjs` para validar curación, combate y Cavebot. La carpeta `base/` queda como referencia. El comportamiento dentro del juego requiere una prueba en una sesión real.
+
+## Curación
+
+La pestaña **Curación** configura umbrales separados para vida y maná, medidos en puntos o porcentaje. Asigna el hechizo, la runa o la poción a una casilla de la barra del juego y selecciona esa casilla aquí. Si se alcanzan ambos umbrales, primero se intenta la acción de vida.
 
 ## Documentación original
 
@@ -76,10 +89,12 @@ Para compartir un preset, selecciónalo y pulsa **Exportar** debajo de **Nuevo /
 
 El combate tiene prioridad sobre la ruta. Tras 8 segundos sin acercarse al punto, el antiatasco puede omitir un Node/Walk solamente si el siguiente punto también es flexible, está en el mismo piso y el pathfinder confirma una ruta. En los demás casos detiene Cavebot y muestra el punto que requiere revisión. No omite acciones, Stand ni cambios de piso. Las transiciones aprendidas y Auto Loot del juego siguen funcionando como antes.
 
-Pruebas de comportamiento: `node --test tests/cave.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
+Pruebas de comportamiento: `node --test tests/auto-attack.test.cjs tests/cave.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
 
 Si ves **Record Spot** en vez de los botones **Node / Stand / Walk**, tu página aún usa un bundle anterior. Ejecuta el cargador de arriba y recarga Minibia para aplicar la interfaz nueva.
 
 ## Attack Target
 
-El módulo busca criaturas visibles del mismo piso y puede funcionar junto con Cavebot. Añade nombres para darles prioridad, reordénalos y, si activas **Atacar solo los de esta lista**, los demás se ignoran. La selección puede seguir el orden de la lista o elegir el más cercano. En modo cuerpo a cuerpo persigue al objetivo; a distancia mantiene 2–3 casillas. Asigna las casillas de objetivo y, si la usarás, de la runa.
+El módulo busca criaturas visibles del mismo piso y puede funcionar junto con Cavebot. Añade nombres para darles prioridad, reordénalos y, si activas **Atacar solo los de esta lista**, los demás se ignoran. La selección puede seguir el orden de la lista o elegir el más cercano.
+
+El **modo general** ofrece combate cercano, que persigue hasta quedar junto al objetivo, y combate lejano, que conserva una separación ajustable. Por defecto mantiene entre 2 y 3 SQM; cambia el límite máximo de 2 a 8 SQM para mover ese anillo. En cada criatura de la lista, el selector **General / Cerca / Lejos** permite heredar el modo global o definir su propio estilo, como el ajuste de distancia deseada de ElfBot. Asigna la casilla de objetivo y, si la usarás, la de la runa.
