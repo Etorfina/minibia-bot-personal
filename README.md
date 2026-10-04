@@ -19,7 +19,7 @@ En la consola del navegador, con el juego abierto:
 ```js
 (async () => {
   const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/307dd3af9f59c2c4821f52d3ba05b1eb8613e8d9/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/ea2ec7c13a387b956d7495423f675a0a7e7b5dee/minibia-bot.js.gz.b64";
   const requiredControls = [
     'data-tab="healing"',
     'id="minibia-bot-heal-spells"',
@@ -71,7 +71,7 @@ Editar `src/` y ejecutar `bash build.sh`: el script regenera `pz-bot.js` y `mini
 
 La pestaña **Curación** organiza las reglas en **Hechizos** y **Runas y pociones**, con ajustes generales en **Condiciones**. Añade una regla por cada acción (por ejemplo, `exura`, `UH`, poción de vida o de maná), asígnale la casilla donde ya colocaste esa acción en Minibia y elige qué vigilar: vida o maná. Cada regla puede activarse por debajo o por encima de un umbral, medido en puntos o porcentaje, con un costo mínimo de maná y un enfriamiento propio.
 
-Las reglas se intentan de arriba abajo. Los controles ↑ y ↓ cambian la prioridad, incluso entre las dos listas. **Wait** es la frecuencia con que se revisan las condiciones; **Delay** es la pausa general después de activar una casilla. El mínimo global de maná evita gastar acciones por debajo de la reserva que indiques. La interfaz muestra la última acción detectada y permite pausar todas las reglas con **Activo**.
+Las reglas se muestran en filas compactas; toca una para abrir o cerrar sus ajustes. Al añadir una, el editor se abre para configurarla. Las reglas se intentan de arriba abajo. Los controles ↑ y ↓ cambian la prioridad, incluso entre las dos listas. **Wait** es la frecuencia con que se revisan las condiciones; **Delay** es la pausa general después de activar una casilla. El mínimo global de maná evita gastar acciones por debajo de la reserva que indiques. La interfaz muestra la última acción detectada y permite pausar todas las reglas con **Activo**.
 
 La detección de curación confirma un cambio de vida o maná tras activar la casilla. La curación de otros jugadores no está disponible: el cliente actual no ofrece al bot una función fiable para seleccionar y curar a un objetivo ajeno.
 
