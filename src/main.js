@@ -44,6 +44,7 @@
     ["eat", "minibiaBot.eat.config"],
     ["talk", "minibiaBot.talk.config"],
   ];
+  const masterResumeKey = "minibiaBot.master.resume";
 
   function getPersistedEnabledSnapshot(bot) {
     const snapshot = {};
@@ -103,12 +104,64 @@
     currentBundle.installEquipRingModule(bot);
     currentBundle.installAutoEatModule(bot);
     currentBundle.installTalkModule(bot);
+
+    const moduleNames = persistedEnabledModules.map(([name]) => name);
+    bot.master = {
+      isPaused: () => !!bot.storage.get(masterResumeKey, null),
+      noteModule(name, enabled) {
+        const saved = bot.storage.get(masterResumeKey, null);
+        if (!saved || !moduleNames.includes(name)) return;
+        saved.modules[name] = !!enabled;
+        bot.storage.set(masterResumeKey, saved);
+      },
+      stop() {
+        let saved = bot.storage.get(masterResumeKey, null);
+        if (!saved) {
+          saved = {
+            modules: Object.fromEntries(moduleNames.map((name) => [
+              name, !!bot[name]?.status?.().config?.enabled,
+            ])),
+            panic: bot.panic?.status?.().config || {},
+            overlayEnabled: !!bot.xray?.status?.().config?.overlayEnabled,
+          };
+          bot.storage.set(masterResumeKey, saved);
+        }
+
+        moduleNames.forEach((name) => bot[name]?.stop?.());
+        bot.panic?.updateConfig?.({
+          unknownPlayerEnabled: false,
+          healthLossEnabled: false,
+          returnToOriginEnabled: false,
+          gameMasterNames: [],
+        });
+        bot.panic?.stop?.();
+        bot.xray?.setOverlayEnabled?.(false);
+        bot.setReconnectWatcherEnabled?.(false);
+        return true;
+      },
+      start() {
+        const saved = bot.storage.get(masterResumeKey, null);
+        bot.storage.remove(masterResumeKey);
+        bot.setReconnectWatcherEnabled?.(true);
+
+        if (saved) {
+          bot.panic?.updateConfig?.(saved.panic || {});
+          bot.xray?.setOverlayEnabled?.(!!saved.overlayEnabled);
+        }
+        moduleNames.forEach((name) => {
+          if (saved ? saved.modules?.[name] : bot[name]?.status?.().config?.enabled) {
+            bot[name]?.start?.();
+          }
+        });
+        return true;
+      },
+    };
     currentBundle.installPanel(bot);
 
     bot.ui.inject();
 
-    bot.start = (...args) => bot.rune.start(...args);
-    bot.stop = (...args) => bot.rune.stop(...args);
+    bot.start = () => bot.master.start();
+    bot.stop = () => bot.master.stop();
     bot.reload = () => window.minibiaBotReload?.();
     bot.status = () => ({
       version: bot.version,

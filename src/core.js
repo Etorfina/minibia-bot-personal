@@ -263,11 +263,17 @@ window.__minibiaBotBundle.createBot = function createBot() {
     }
   }
 
-  startReconnectWatcher();
+  if (!window.localStorage.getItem("minibiaBot.master.resume")) {
+    startReconnectWatcher();
+  }
 
   return {
     version: "0.3.0",
     addCleanup,
+    setReconnectWatcherEnabled(enabled) {
+      if (enabled) startReconnectWatcher();
+      else stopReconnectWatcher();
+    },
     destroy() {
       if (this.panic?.stop) {
         this.panic.stop();
@@ -283,6 +289,10 @@ window.__minibiaBotBundle.createBot = function createBot() {
 
       if (this.invisible?.stop) {
         this.invisible.stop({ persistEnabled: false });
+      }
+
+      if (this.magicShield?.stop) {
+        this.magicShield.stop({ persistEnabled: false });
       }
 
       if (this.attack?.stop) {
