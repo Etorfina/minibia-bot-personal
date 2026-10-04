@@ -382,6 +382,55 @@ window.__minibiaBotBundle.installCaveModule = function installCaveModule(bot) {
     };
   }
 
+  // Shared routes contain movement data only. Never import bot settings or executable code.
+  function exportPreset(name = getActivePresetName()) {
+    const preset = getPresetByName(name);
+    if (!preset) throw new Error("Recorrido no encontrado.");
+    if (!preset.route.length) throw new Error("Añade al menos un punto antes de exportar.");
+    return JSON.stringify({
+      format: "minibia-cave-route",
+      version: 1,
+      name: preset.name,
+      routeMode: preset.routeMode,
+      route: preset.route,
+      transitions: preset.transitions,
+    });
+  }
+
+  function importPreset(text) {
+    if (typeof text !== "string" || text.length > 500000) {
+      throw new Error("El recorrido es demasiado grande o no es texto.");
+    }
+    let data;
+    try { data = JSON.parse(text.trim()); }
+    catch { throw new Error("El texto no es un recorrido JSON válido."); }
+    if (!data || data.format !== "minibia-cave-route" || data.version !== 1 ||
+        !Array.isArray(data.route) || !data.route.length || data.route.length > 3000 ||
+        !Array.isArray(data.transitions) || data.transitions.length > 1000 ||
+        !["loop", "pingpong"].includes(data.routeMode)) {
+      throw new Error("Formato de recorrido no compatible.");
+    }
+    const importedRoute = normalizeRoute(data.route);
+    const importedTransitions = normalizeTransitions(data.transitions);
+    if (importedRoute.length !== data.route.length ||
+        importedTransitions.length !== data.transitions.length) {
+      throw new Error("El recorrido tiene puntos o transiciones inválidos.");
+    }
+    const base = normalizePresetName(data.name)?.slice(0, 60);
+    if (!base) throw new Error("El recorrido necesita un nombre.");
+    let name = base;
+    for (let number = 2; getPresetByName(name); number += 1) {
+      name = `${base.slice(0, 48)} (${number})`;
+    }
+    if (state.running) stop();
+    const preset = upsertPreset(name, importedRoute, importedTransitions);
+    preset.routeMode = data.routeMode;
+    persistPresets();
+    loadPresetState(name);
+    bot.log("cave preset imported", { name, waypoints: importedRoute.length });
+    return { name, waypoints: importedRoute.length };
+  }
+
   function deletePreset(name) {
     const preset = getPresetByName(name);
     if (!preset) {
@@ -1753,6 +1802,8 @@ window.__minibiaBotBundle.installCaveModule = function installCaveModule(bot) {
     createPreset,
     savePreset,
     loadPreset,
+    exportPreset,
+    importPreset,
     deletePreset,
     addWaypoint,
     addWaypointCurrentSpot,
