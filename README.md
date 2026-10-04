@@ -19,7 +19,7 @@ En la consola del navegador, con el juego abierto:
 ```js
 (async () => {
   const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/d40ae708c57a5bf20b2f71cce7cbb871166e8ff7/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/e3e3641cd380b0369eb9249ae676779515948e7f/minibia-bot.js.gz.b64";
   const decode = async (url) => {
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error(`No pude descargar el bot: HTTP ${response.status}`);
@@ -27,18 +27,18 @@ En la consola del navegador, con el juego abierto:
     return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
   };
   let code = await decode(`${mainUrl}?v=${Date.now()}`);
-  if (!code.includes('id="minibia-bot-cave-type"')) {
+  if (!code.includes('id="minibia-bot-auto-attack-status"')) {
     code = await decode(verifiedUrl);
   }
-  if (!code.includes('id="minibia-bot-cave-type"')) {
-    throw new Error("Llegó una versión vieja: Cavebot V1 no está en el archivo descargado.");
+  if (!code.includes('id="minibia-bot-auto-attack-status"')) {
+    throw new Error("Llegó una versión vieja: falta la interfaz actualizada de Attack Target.");
   }
   window.minibiaBotSourceUrl = mainUrl;
   (0, eval)(code);
-  if (!document.getElementById("minibia-bot-cave-type")) {
-    throw new Error("Cavebot V1 se descargó, pero no apareció su panel. Recarga el juego y vuelve a ejecutar este código.");
+  if (!document.getElementById("minibia-bot-auto-attack-status")) {
+    throw new Error("La versión nueva se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
   }
-  console.info("[minibia-bot] Cavebot V1 cargado");
+  console.info("[minibia-bot] Interfaz actualizada cargada");
 })().catch(error => { console.error(error); alert(error.message); });
 ```
 
@@ -79,3 +79,7 @@ El combate tiene prioridad sobre la ruta. Tras 8 segundos sin acercarse al punto
 Pruebas de comportamiento: `node --test tests/cave.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
 
 Si ves **Record Spot** en vez de los botones **Node / Stand / Walk**, tu página aún usa un bundle anterior. Ejecuta el cargador de arriba y recarga Minibia para aplicar la interfaz nueva.
+
+## Attack Target
+
+El módulo busca criaturas visibles del mismo piso y puede funcionar junto con Cavebot. En modo cuerpo a cuerpo persigue al objetivo; a distancia mantiene 2–3 casillas. Configura las casillas que tienen la acción de objetivo y, si la usarás, la runa. El selector elige objetivos cercanos automáticamente; la lista de prioridades por criatura de ElfBot todavía no forma parte de este módulo.
