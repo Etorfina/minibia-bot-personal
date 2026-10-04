@@ -263,7 +263,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     if (selection) selection.value = bot.attack?.config?.targetSelectionMode === "list" ? "list" : "proximity";
 
     list.replaceChildren();
-    if (!names.length) {
+    if (!targets.length) {
       const empty = document.createElement("div");
       empty.className = "mb-attack-empty";
       empty.textContent = "Sin prioridades; por defecto elige el objetivo más cercano.";
@@ -309,7 +309,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         button.textContent = glyph;
         button.setAttribute("aria-label", `${verb} ${name}`);
         button.title = `${verb} ${name}`;
-        button.disabled = (action === "up" && index === 0) || (action === "down" && index === names.length - 1);
+        button.disabled = (action === "up" && index === 0) || (action === "down" && index === targets.length - 1);
         controls.appendChild(button);
       });
       row.append(stance, controls);
