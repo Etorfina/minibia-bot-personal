@@ -1,6 +1,15 @@
 (async () => {
   const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/9b39bc484239ebacb7a6d54361099ec456b86130/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/1f196d9f0223dc0c10f27c2828d34c27c2aab8c5/minibia-bot.js.gz.b64";
+  const requiredControls = [
+    'data-tab="healing"',
+    'id="minibia-bot-auto-heal-hp-mode"',
+    'id="minibia-bot-auto-heal-mana-mode"',
+    'id="minibia-bot-attack-target-list"',
+    'id="minibia-bot-attack-stance"',
+    'id="minibia-bot-attack-range"'
+  ];
+  const hasTargetingControls = (source) => requiredControls.every((control) => source.includes(control));
   const decode = async (url) => {
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) throw new Error(`No pude descargar el bot: HTTP ${response.status}`);
@@ -8,16 +17,16 @@
     return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
   };
   let code = await decode(`${mainUrl}?v=${Date.now()}`);
-  if (!code.includes('id="minibia-bot-attack-target-list"')) {
+  if (!hasTargetingControls(code)) {
     code = await decode(verifiedUrl);
   }
-  if (!code.includes('id="minibia-bot-attack-target-list"')) {
-    throw new Error("Llegó una versión vieja: falta la lista de prioridades de Attack Target.");
+  if (!hasTargetingControls(code)) {
+    throw new Error("La versión descargada no incluye Curación independiente y umbrales por porcentaje.");
   }
   window.minibiaBotSourceUrl = mainUrl;
   (0, eval)(code);
-  if (!document.getElementById("minibia-bot-attack-target-list")) {
+  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-auto-heal-hp-mode") || !document.getElementById("minibia-bot-auto-heal-mana-mode") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) {
     throw new Error("La versión nueva se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
   }
-  console.info("[minibia-bot] Interfaz actualizada cargada");
+  console.info("[minibia-bot] Curación y Attack Target actualizados cargados");
 })().catch(error => { console.error(error); alert(error.message); });
