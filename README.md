@@ -18,13 +18,28 @@ En la consola del navegador, con el juego abierto:
 
 ```js
 (async () => {
-  window.minibiaBotSourceUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const response = await fetch(window.minibiaBotSourceUrl, { cache: "no-store" });
-  if (!response.ok) throw new Error(`No pude descargar el bot: HTTP ${response.status}`);
-  const bytes = Uint8Array.from(atob((await response.text()).trim()), c => c.charCodeAt(0));
-  const code = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/d40ae708c57a5bf20b2f71cce7cbb871166e8ff7/minibia-bot.js.gz.b64";
+  const decode = async (url) => {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`No pude descargar el bot: HTTP ${response.status}`);
+    const bytes = Uint8Array.from(atob((await response.text()).trim()), c => c.charCodeAt(0));
+    return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  };
+  let code = await decode(`${mainUrl}?v=${Date.now()}`);
+  if (!code.includes('id="minibia-bot-cave-type"')) {
+    code = await decode(verifiedUrl);
+  }
+  if (!code.includes('id="minibia-bot-cave-type"')) {
+    throw new Error("Llegó una versión vieja: Cavebot V1 no está en el archivo descargado.");
+  }
+  window.minibiaBotSourceUrl = mainUrl;
   (0, eval)(code);
-})().catch(console.error);
+  if (!document.getElementById("minibia-bot-cave-type")) {
+    throw new Error("Cavebot V1 se descargó, pero no apareció su panel. Recarga el juego y vuelve a ejecutar este código.");
+  }
+  console.info("[minibia-bot] Cavebot V1 cargado");
+})().catch(error => { console.error(error); alert(error.message); });
 ```
 
 El botón **Copiar código con mis ajustes** exporta las rutas y opciones del navegador actual. El repositorio conserva el código; los ajustes personales no se sincronizan automáticamente. La clave API y la configuración de Auto Reply se excluyen de la exportación.
@@ -60,3 +75,5 @@ En **Cueva**, selecciona el tipo y pulsa **Añadir punto** en el lugar correspon
 El combate tiene prioridad sobre la ruta. Tras 8 segundos sin acercarse al punto, el antiatasco puede omitir un Node/Walk solamente si el siguiente punto también es flexible, está en el mismo piso y el pathfinder confirma una ruta. En los demás casos detiene Cavebot y muestra el punto que requiere revisión. No omite acciones, Stand ni cambios de piso. Las transiciones aprendidas y Auto Loot del juego siguen funcionando como antes.
 
 Pruebas de comportamiento: `node --test tests/cave.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
+
+Si ves **Record Spot** en vez de **Añadir punto**, tu página aún usa un bundle anterior. Ejecuta el cargador de arriba: comprueba el selector de Cavebot V1 y usa una revisión verificada si la ruta `main` entrega una copia en caché. El botón Reload Bot por sí solo reinicia el código que ya estaba en memoria.
