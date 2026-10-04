@@ -7576,26 +7576,28 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       }
       #minibia-bot-panel .mb-heal-rule-list { display: grid; gap: 8px; }
       #minibia-bot-panel .mb-heal-rule {
-        padding: 9px;
+        padding: 7px 9px;
         border: 1px solid rgba(255,255,255,.09);
         border-radius: 9px;
         background: #202225;
       }
       #minibia-bot-panel .mb-heal-rule-head {
         display: grid;
-        grid-template-columns: auto minmax(0,1fr) auto auto auto;
-        gap: 5px;
+        grid-template-columns: auto minmax(0,1fr) auto auto auto auto;
+        gap: 6px;
         align-items: center;
-        margin-bottom: 8px;
       }
       #minibia-bot-panel .mb-heal-rule-head input[type="checkbox"] { width: auto; margin: 0; }
-      #minibia-bot-panel .mb-heal-rule-head input[type="text"] { min-width: 0; padding: 6px 8px; }
       #minibia-bot-panel .mb-heal-rule-head button { min-height: 32px; width: auto; padding: 5px 8px; }
+      #minibia-bot-panel .mb-heal-rule-toggle { min-width: 0; border: 0; background: transparent; text-align: left; padding: 4px; }
+      #minibia-bot-panel .mb-heal-rule-toggle strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+      #minibia-bot-panel .mb-heal-rule-summary { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #aaa394; font-size: 10px; margin-top: 2px; }
+      #minibia-bot-panel .mb-heal-rule[data-expanded="true"] { border-color: rgba(190,151,83,.45); }
+      #minibia-bot-panel .mb-heal-rule-details { margin-top: 8px; }
       #minibia-bot-panel .mb-heal-priority {
-        grid-column: 1 / -1;
         color: #c8b997;
         font-size: 10px;
-        line-height: 1.3;
+        white-space: nowrap;
       }
       #minibia-bot-panel .mb-heal-rule-grid {
         display: grid;
@@ -7932,9 +7934,12 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-mobile[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
       #minibia-bot-panel.mb-mobile .mb-field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       #minibia-bot-panel.mb-mobile .mb-heal-layout { grid-template-columns: minmax(0,1fr); }
-      #minibia-bot-panel.mb-mobile .mb-heal-rule-head { grid-template-columns: auto minmax(0,1fr) auto auto auto; }
-      #minibia-bot-panel.mb-mobile .mb-heal-rule-head button { min-height: 38px; padding: 5px 7px; }
-      #minibia-bot-panel.mb-mobile .mb-heal-rule-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      #minibia-bot-panel.mb-mobile .mb-heal-rule { padding: 6px 7px; }
+      #minibia-bot-panel.mb-mobile .mb-heal-rule-head { grid-template-columns: auto minmax(0,1fr) auto auto auto auto; gap: 4px; }
+      #minibia-bot-panel.mb-mobile .mb-heal-rule-head button { min-height: 34px; padding: 4px 7px; }
+      #minibia-bot-panel.mb-mobile .mb-heal-rule-toggle { min-height: 38px; }
+      #minibia-bot-panel.mb-mobile .mb-heal-priority { font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-heal-rule-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
       #minibia-bot-panel.mb-mobile button,
       #minibia-bot-panel.mb-mobile select { min-height: 44px; }
       #minibia-bot-panel.mb-mobile input,
@@ -8862,19 +8867,25 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       const action = status.pending?.ruleName ? ` · Usando: ${status.pending.ruleName}` : status.lastAction ? ` · Última: ${status.lastAction}` : "";
       autoHealStatus.textContent = `ACTIVO · ${ready} reglas listas${action}`;
     };
+    let expandedHealRuleId = null;
     const renderHealRules = () => {
       const rules = Array.isArray(bot.heal?.config?.rules) ? bot.heal.config.rules : [];
       const option = (value, selected, label) => `<option value="${value}" ${selected === value ? "selected" : ""}>${label}</option>`;
       const renderRule = (rule, index, group) => `
-        <article class="mb-heal-rule" data-rule-id="${escapeHealText(rule.id)}">
-          <div class="mb-heal-priority">Prioridad ${index + 1} · Se intenta antes que las reglas siguientes</div>
+        <article class="mb-heal-rule" data-rule-id="${escapeHealText(rule.id)}" data-expanded="${expandedHealRuleId === rule.id}">
           <div class="mb-heal-rule-head">
             <input type="checkbox" aria-label="Activar ${escapeHealText(rule.name)}" data-heal-prop="enabled" ${rule.enabled ? "checked" : ""} />
-            <input type="text" aria-label="Nombre de la acción" maxlength="48" value="${escapeHealText(rule.name)}" data-heal-prop="name" />
+            <button type="button" class="mb-heal-rule-toggle" data-heal-toggle aria-expanded="${expandedHealRuleId === rule.id}">
+              <strong>${escapeHealText(rule.name || "Acción de curación")}</strong>
+              <span class="mb-heal-rule-summary">${rule.stat === "mana" ? "MP" : "HP"} ${rule.operator === "above" ? ">" : "<"} ${escapeHealText(rule.value)}${rule.unit === "percent" ? "%" : " pts"} · Casilla ${rule.slot || "—"}</span>
+            </button>
+            <span class="mb-heal-priority">#${index + 1}</span>
             <button type="button" data-heal-move="up" aria-label="Subir prioridad" title="Subir prioridad">↑</button>
             <button type="button" data-heal-move="down" aria-label="Bajar prioridad" title="Bajar prioridad">↓</button>
             <button type="button" data-heal-remove aria-label="Eliminar acción" title="Eliminar">×</button>
           </div>
+          ${expandedHealRuleId === rule.id ? `<div class="mb-heal-rule-details">
+          <label class="mb-field" style="margin-bottom:7px"><span class="mb-field-label">Nombre de la acción</span><input type="text" aria-label="Nombre de la acción" maxlength="48" value="${escapeHealText(rule.name)}" data-heal-prop="name" /></label>
           <div class="mb-heal-rule-grid">
             <label class="mb-field"><span class="mb-field-label">Casilla (1–12)</span><input type="number" min="1" max="12" inputmode="numeric" placeholder="Sin asignar" value="${rule.slot ?? ""}" data-heal-prop="slot" /></label>
             <label class="mb-field"><span class="mb-field-label">Vigilar</span><select data-heal-prop="stat">${option("hp", rule.stat, "Vida · HP")}${option("mana", rule.stat, "Maná · MP")}</select></label>
@@ -8884,6 +8895,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
             <label class="mb-field"><span class="mb-field-label">Maná requerido</span><input type="number" min="0" step="1" inputmode="numeric" value="${rule.manaCost}" data-heal-prop="manaCost" /></label>
             <label class="mb-field"><span class="mb-field-label">Delay / CD (ms)</span><input type="number" min="0" max="60000" step="50" inputmode="numeric" value="${rule.cooldownMs}" data-heal-prop="cooldownMs" /></label>
           </div>
+          </div>` : ""}
         </article>`;
       if (autoHealSpellList) autoHealSpellList.innerHTML = rules.map((rule, index) => rule.kind === "spell" ? renderRule(rule, index, "spell") : "").join("") || '<div class="mb-small-note">Sin hechizos configurados. Añade aquí tus hechizos de vida o maná.</div>';
       if (autoHealItemList) autoHealItemList.innerHTML = rules.map((rule, index) => rule.kind !== "spell" ? renderRule(rule, index, "item") : "").join("") || '<div class="mb-small-note">Añade runas o pociones para vida o maná.</div>';
@@ -8914,17 +8926,25 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         const rules = [...bot.heal.config.rules];
         if (rules.length >= 24) return;
         const kind = add.dataset.healAdd;
-        rules.push(healRuleDefault(kind, rules.filter((rule) => rule.kind === kind).length));
+        const nextRule = healRuleDefault(kind, rules.filter((rule) => rule.kind === kind).length);
+        rules.push(nextRule);
+        expandedHealRuleId = nextRule.id;
         saveHealRules(rules);
         return;
       }
       const card = event.target.closest(".mb-heal-rule");
       if (!card) return;
+      if (event.target.closest("[data-heal-toggle]")) {
+        expandedHealRuleId = expandedHealRuleId === card.dataset.ruleId ? null : card.dataset.ruleId;
+        renderHealRules();
+        return;
+      }
       const rules = [...bot.heal.config.rules];
       const index = rules.findIndex((rule) => rule.id === card.dataset.ruleId);
       if (index < 0) return;
       if (event.target.closest("[data-heal-remove]")) {
         rules.splice(index, 1);
+        if (expandedHealRuleId === card.dataset.ruleId) expandedHealRuleId = null;
         saveHealRules(rules);
         return;
       }
