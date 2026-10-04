@@ -6969,7 +6969,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     }
 
     if (toggle) {
-      toggle.textContent = nextCollapsed ? "+" : "−";
+      toggle.textContent = nextCollapsed ? "☰" : "×";
       toggle.setAttribute("aria-label", nextCollapsed ? "Abrir menú" : "Cerrar menú");
       toggle.setAttribute("title", nextCollapsed ? "Abrir menú" : "Cerrar menú");
     }
@@ -7509,7 +7509,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       <div class="mb-titlebar" role="toolbar" aria-label="Controles del bot">
         <button type="button" id="minibia-bot-start-all">START</button>
         <button type="button" id="minibia-bot-stop-all">STOP</button>
-        <button type="button" class="mb-icon-button" id="minibia-bot-collapse" aria-label="Abrir menú" title="Abrir menú">+</button>
+        <button type="button" class="mb-icon-button" id="minibia-bot-collapse" aria-label="Abrir menú" title="Abrir menú">☰</button>
         <button type="button" class="mb-icon-button mb-drag-handle" aria-label="Arrastrar barra" title="Mantén presionado para mover">✥</button>
       </div>
       <div class="mb-safety-status" aria-live="off">🛡️ Protección lista · Sin regreso pendiente</div>

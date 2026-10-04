@@ -35,7 +35,7 @@ La barra aparece compacta en el centro de la pantalla:
 
 - **START** reanuda los módulos que estaban configurados y habilitados antes de pulsar STOP.
 - **STOP** detiene todos los módulos y la reconexión automática. La selección anterior queda guardada para START, incluso después de recargar la página.
-- **+** despliega el menú; al cerrarlo, la barra vuelve al centro.
+- **☰** despliega el menú; **×** lo cierra y devuelve la barra al centro.
 - Mantén presionado **✥** y arrástralo para mover la barra.
 
 ## Desarrollo
