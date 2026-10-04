@@ -10,7 +10,7 @@ Versión personalizada recuperada del paquete `minibia-bot-mobile-1.0.zip`.
 - `minibia-bot.js.gz.b64`: el mismo bundle comprimido para el cargador y la exportación de ajustes.
 - `portable-installer.js` y los parches `*-live.js`: herramientas anteriores conservadas; el instalador portátil todavía descarga una revisión del autor original. Para usar nuestra versión, utiliza el cargador de abajo.
 
-Se verificó que el código fuente reconstruye exactamente el bundle. SHA-256 inicial de `pz-bot.js`: `1a41a059a7209f7824068b0468d1bca6ebe836383821fb75ca0607794d794454`.
+Se verificó que el código fuente inicial reconstruía exactamente el bundle de referencia. SHA-256 de esa versión inicial de `pz-bot.js`: `1a41a059a7209f7824068b0468d1bca6ebe836383821fb75ca0607794d794454`.
 
 ## Cargar nuestra versión
 
@@ -29,9 +29,18 @@ En la consola del navegador, con el juego abierto:
 
 El botón **Copiar código con mis ajustes** exporta las rutas y opciones del navegador actual. El repositorio conserva el código; los ajustes personales no se sincronizan automáticamente. La clave API y la configuración de Auto Reply se excluyen de la exportación.
 
+## Barra de inicio
+
+La barra aparece compacta en el centro de la pantalla:
+
+- **START** reanuda los módulos que estaban configurados y habilitados antes de pulsar STOP.
+- **STOP** detiene todos los módulos y la reconexión automática. La selección anterior queda guardada para START, incluso después de recargar la página.
+- **+** despliega el menú; al cerrarlo, la barra vuelve al centro.
+- Mantén presionado **✥** y arrástralo para mover la barra.
+
 ## Desarrollo
 
-Editar `src/`, ejecutar `bash build.sh` y regenerar el comprimido de la raíz cuando cambie el bundle. La carpeta `base/` queda como referencia. Las comprobaciones iniciales verifican sintaxis e integridad; el comportamiento dentro del juego requiere una prueba en una sesión real.
+Editar `src/` y ejecutar `bash build.sh`: el script regenera `pz-bot.js` y `minibia-bot.js.gz.b64`. La carpeta `base/` queda como referencia. Las comprobaciones verifican sintaxis e integridad; el comportamiento dentro del juego requiere una prueba en una sesión real.
 
 ## Documentación original
 

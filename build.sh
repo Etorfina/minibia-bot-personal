@@ -18,3 +18,6 @@ cat \
   src/ui/panel.js \
   src/main.js \
   > pz-bot.js
+
+gzip -n -c pz-bot.js | base64 | tr -d '\n' > minibia-bot.js.gz.b64
+printf '\n' >> minibia-bot.js.gz.b64

@@ -263,11 +263,17 @@ window.__minibiaBotBundle.createBot = function createBot() {
     }
   }
 
-  startReconnectWatcher();
+  if (!window.localStorage.getItem("minibiaBot.master.resume")) {
+    startReconnectWatcher();
+  }
 
   return {
     version: "0.3.0",
     addCleanup,
+    setReconnectWatcherEnabled(enabled) {
+      if (enabled) startReconnectWatcher();
+      else stopReconnectWatcher();
+    },
     destroy() {
       if (this.panic?.stop) {
         this.panic.stop();
@@ -283,6 +289,10 @@ window.__minibiaBotBundle.createBot = function createBot() {
 
       if (this.invisible?.stop) {
         this.invisible.stop({ persistEnabled: false });
+      }
+
+      if (this.magicShield?.stop) {
+        this.magicShield.stop({ persistEnabled: false });
       }
 
       if (this.attack?.stop) {
@@ -6483,7 +6493,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
   }
 
   function getSavedPanelCollapsed() {
-    return !!bot.storage.get(panelCollapsedKey, false);
+    return !!bot.storage.get(panelCollapsedKey, true);
   }
 
   function refreshHomeLabel() {
@@ -6960,11 +6970,31 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     if (toggle) {
       toggle.textContent = nextCollapsed ? "+" : "−";
-      toggle.setAttribute("aria-label", nextCollapsed ? "Maximize panel" : "Minimize panel");
-      toggle.setAttribute("title", nextCollapsed ? "Maximize" : "Minimize");
+      toggle.setAttribute("aria-label", nextCollapsed ? "Abrir menú" : "Cerrar menú");
+      toggle.setAttribute("title", nextCollapsed ? "Abrir menú" : "Cerrar menú");
     }
 
     savePanelCollapsed(nextCollapsed);
+    if (nextCollapsed) {
+      centerToolbar(panel);
+    } else {
+      const rect = panel.getBoundingClientRect();
+      const next = clampPanelPosition(panel, rect.left, rect.top);
+      panel.style.left = `${next.left}px`;
+      panel.style.top = `${next.top}px`;
+    }
+  }
+
+  function centerToolbar(panel) {
+    const next = clampPanelPosition(
+      panel,
+      (window.innerWidth - panel.offsetWidth) / 2,
+      (window.innerHeight - panel.offsetHeight) / 2
+    );
+    panel.style.left = `${next.left}px`;
+    panel.style.top = `${next.top}px`;
+    panel.style.right = "auto";
+    savePanelPosition(next);
   }
 
   function applySavedPanelPosition(panel, key = panelPositionKey) {
@@ -6997,7 +7027,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
   }
 
   function enableDrag(panel, key = panelPositionKey) {
-    const handle = panel.querySelector(".mb-title");
+    const handle = panel.querySelector(".mb-drag-handle");
     if (!handle) return;
 
     let dragState = null;
@@ -7115,24 +7145,34 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       }
 
       #minibia-bot-panel[data-collapsed="true"] {
-        width: 220px;
+        width: max-content;
       }
 
-      #minibia-bot-panel .mb-title {
-        margin: 0;
+      #minibia-bot-panel .mb-drag-handle {
         font-weight: 700;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        cursor: move;
+        cursor: grab;
         touch-action: none;
       }
 
       #minibia-bot-panel .mb-titlebar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-start;
         gap: 8px;
         margin: 0 0 8px;
+      }
+
+      #minibia-bot-panel .mb-titlebar button {
+        width: auto;
+        flex: none;
+        min-width: 42px;
+        min-height: 36px;
+        white-space: nowrap;
+      }
+
+      #minibia-bot-panel .mb-titlebar [data-active="true"] {
+        background: #557848;
+        color: #fff;
       }
 
       #minibia-bot-panel .mb-safety-status {
@@ -7157,6 +7197,9 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
       #minibia-bot-panel[data-collapsed="true"] .mb-titlebar {
         margin-bottom: 0;
+      }
+      #minibia-bot-panel[data-collapsed="true"] .mb-safety-status {
+        display: none;
       }
 
       #minibia-bot-panel .mb-body {
@@ -7399,7 +7442,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         padding: 10px;
         font-size: 14px;
       }
-      #minibia-bot-panel.mb-mobile[data-collapsed="true"] { width: 190px; }
+      #minibia-bot-panel.mb-mobile[data-collapsed="true"] {
+        width: max-content;
+        max-width: calc(100vw - 16px);
+      }
       #minibia-bot-panel.mb-mobile .mb-mobile-tabs {
         display: flex;
         gap: 4px;
@@ -7460,9 +7506,11 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const panel = document.createElement("div");
     panel.id = "minibia-bot-panel";
     panel.innerHTML = `
-        <div class="mb-titlebar">
-        <div class="mb-title">Minibia Bot</div>
-        <button type="button" class="mb-icon-button" id="minibia-bot-collapse" aria-label="Minimize panel" title="Minimize">−</button>
+      <div class="mb-titlebar" role="toolbar" aria-label="Controles del bot">
+        <button type="button" id="minibia-bot-start-all">START</button>
+        <button type="button" id="minibia-bot-stop-all">STOP</button>
+        <button type="button" class="mb-icon-button" id="minibia-bot-collapse" aria-label="Abrir menú" title="Abrir menú">+</button>
+        <button type="button" class="mb-icon-button mb-drag-handle" aria-label="Arrastrar barra" title="Mantén presionado para mover">✥</button>
       </div>
       <div class="mb-safety-status" aria-live="off">🛡️ Protección lista · Sin regreso pendiente</div>
       <div class="mb-mobile-tabs" role="tablist" aria-label="Bot sections">
@@ -7703,7 +7751,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     applySavedPanelPosition(panel);
     updateMobile();
     enableDrag(panel);
-    setPanelCollapsed(panel, getSavedPanelCollapsed());
+    setPanelCollapsed(panel, true);
 
     const spellInput = panel.querySelector("#minibia-bot-rune-spell");
     const manaInput = panel.querySelector("#minibia-bot-rune-mana");
@@ -7735,6 +7783,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const xrayOverlayButton = panel.querySelector("#minibia-bot-xray-overlay-toggle");
     const xrayFloorSelect = panel.querySelector("#minibia-bot-xray-floor-select");
     const collapseButton = panel.querySelector("#minibia-bot-collapse");
+    const startAllButton = panel.querySelector("#minibia-bot-start-all");
+    const stopAllButton = panel.querySelector("#minibia-bot-stop-all");
     const reloadButton = panel.querySelector("#minibia-bot-reload");
     const copySetupButton = panel.querySelector("#minibia-bot-copy-setup");
     const caveRecordButton = panel.querySelector("#minibia-bot-cave-record");
@@ -7744,6 +7794,56 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const cavePresetSelect = panel.querySelector("#minibia-bot-cave-preset-select");
     const cavePresetNewButton = panel.querySelector("#minibia-bot-cave-preset-new");
     const cavePresetDeleteButton = panel.querySelector("#minibia-bot-cave-preset-delete");
+
+    const refreshMasterControls = () => {
+      const paused = bot.master?.isPaused?.();
+      startAllButton.dataset.active = paused ? "false" : "true";
+      stopAllButton.dataset.active = paused ? "true" : "false";
+      startAllButton.setAttribute("aria-pressed", String(!paused));
+      stopAllButton.setAttribute("aria-pressed", String(!!paused));
+    };
+    const refreshModuleControls = () => {
+      refreshRuneStatus();
+      refreshAutoHealStatus();
+      refreshAutoInvisibleStatus();
+      refreshAutoMagicShieldStatus();
+      refreshAutoAttackStatus();
+      refreshAutoEatStatus();
+      refreshCaveStatus();
+      refreshEquipRingStatus();
+      refreshTalkStatus();
+      refreshPanicStatus();
+      refreshXrayStatus();
+      refreshMasterControls();
+    };
+    startAllButton.addEventListener("click", () => {
+      bot.master.start();
+      refreshModuleControls();
+    });
+    stopAllButton.addEventListener("click", () => {
+      bot.master.stop();
+      refreshModuleControls();
+    });
+    refreshMasterControls();
+
+    const moduleCheckboxes = {
+      "minibia-bot-rune-enabled": "rune",
+      "minibia-bot-auto-heal-enabled": "heal",
+      "minibia-bot-auto-invisible-enabled": "invisible",
+      "minibia-bot-auto-magic-shield-enabled": "magicShield",
+      "minibia-bot-auto-attack-enabled": "attack",
+      "minibia-bot-equip-ring-enabled": "equipRing",
+      "minibia-bot-auto-eat-enabled": "eat",
+      "minibia-bot-talk-enabled": "talk",
+    };
+    panel.addEventListener("change", (event) => {
+      const name = moduleCheckboxes[event.target?.id];
+      if (name) bot.master.noteModule(name, event.target.checked);
+    });
+    panel.addEventListener("click", (event) => {
+      if (event.target?.id === "minibia-bot-cave-start") bot.master.noteModule("cave", true);
+      if (event.target?.id === "minibia-bot-cave-stop") bot.master.noteModule("cave", false);
+    });
 
     if (collapseButton) {
       collapseButton.addEventListener("click", () => {
@@ -8387,6 +8487,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     ["eat", "minibiaBot.eat.config"],
     ["talk", "minibiaBot.talk.config"],
   ];
+  const masterResumeKey = "minibiaBot.master.resume";
 
   function getPersistedEnabledSnapshot(bot) {
     const snapshot = {};
@@ -8446,12 +8547,64 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     currentBundle.installEquipRingModule(bot);
     currentBundle.installAutoEatModule(bot);
     currentBundle.installTalkModule(bot);
+
+    const moduleNames = persistedEnabledModules.map(([name]) => name);
+    bot.master = {
+      isPaused: () => !!bot.storage.get(masterResumeKey, null),
+      noteModule(name, enabled) {
+        const saved = bot.storage.get(masterResumeKey, null);
+        if (!saved || !moduleNames.includes(name)) return;
+        saved.modules[name] = !!enabled;
+        bot.storage.set(masterResumeKey, saved);
+      },
+      stop() {
+        let saved = bot.storage.get(masterResumeKey, null);
+        if (!saved) {
+          saved = {
+            modules: Object.fromEntries(moduleNames.map((name) => [
+              name, !!bot[name]?.status?.().config?.enabled,
+            ])),
+            panic: bot.panic?.status?.().config || {},
+            overlayEnabled: !!bot.xray?.status?.().config?.overlayEnabled,
+          };
+          bot.storage.set(masterResumeKey, saved);
+        }
+
+        moduleNames.forEach((name) => bot[name]?.stop?.());
+        bot.panic?.updateConfig?.({
+          unknownPlayerEnabled: false,
+          healthLossEnabled: false,
+          returnToOriginEnabled: false,
+          gameMasterNames: [],
+        });
+        bot.panic?.stop?.();
+        bot.xray?.setOverlayEnabled?.(false);
+        bot.setReconnectWatcherEnabled?.(false);
+        return true;
+      },
+      start() {
+        const saved = bot.storage.get(masterResumeKey, null);
+        bot.storage.remove(masterResumeKey);
+        bot.setReconnectWatcherEnabled?.(true);
+
+        if (saved) {
+          bot.panic?.updateConfig?.(saved.panic || {});
+          bot.xray?.setOverlayEnabled?.(!!saved.overlayEnabled);
+        }
+        moduleNames.forEach((name) => {
+          if (saved ? saved.modules?.[name] : bot[name]?.status?.().config?.enabled) {
+            bot[name]?.start?.();
+          }
+        });
+        return true;
+      },
+    };
     currentBundle.installPanel(bot);
 
     bot.ui.inject();
 
-    bot.start = (...args) => bot.rune.start(...args);
-    bot.stop = (...args) => bot.rune.stop(...args);
+    bot.start = () => bot.master.start();
+    bot.stop = () => bot.master.stop();
     bot.reload = () => window.minibiaBotReload?.();
     bot.status = () => ({
       version: bot.version,
