@@ -6663,8 +6663,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     const home = bot.pz?.getHomePz?.();
     homeLabel.textContent = home
-      ? `Panic Runner Home: ${home.x}, ${home.y}, ${home.z}`
-      : "Panic Runner Home: not set";
+      ? `Punto de regreso: ${home.x}, ${home.y}, piso ${home.z}`
+      : "Punto de regreso: sin configurar";
   }
 
   function refreshPanicStatus() {
@@ -6702,14 +6702,14 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     };
 
     if (overlayButton) {
-      overlayButton.textContent = status?.config?.overlayEnabled ? "Disable Overlay" : "Enable Overlay";
+      overlayButton.textContent = status?.config?.overlayEnabled ? "Ocultar radar" : "Mostrar radar";
     }
 
     if (overlayLabel) {
       const floorLabel = status?.config?.selectedFloor == null
-        ? "all floors"
+        ? "todos los pisos"
         : `${formatFloorOffset(status.config.selectedFloor) ?? "?"}`;
-      overlayLabel.textContent = `${status?.config?.overlayEnabled ? "Overlay: on" : "Overlay: off"} • ${floorLabel}`;
+      overlayLabel.textContent = `${status?.config?.overlayEnabled ? "Radar activo" : "Radar oculto"} · ${floorLabel}`;
     }
 
     if (floorSelect) {
@@ -6731,7 +6731,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
       const allOption = document.createElement("option");
       allOption.value = "all";
-      allOption.textContent = "All floors";
+      allOption.textContent = "Todos los pisos";
       floorSelect.appendChild(allOption);
 
       floors.forEach((floor) => {
@@ -6758,7 +6758,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     if (!trustedNames.length) {
       const empty = document.createElement("div");
       empty.className = "mb-small-note";
-      empty.textContent = "No trusted names saved.";
+      empty.textContent = "Aún no hay jugadores de confianza.";
       list.appendChild(empty);
       return;
     }
@@ -6773,7 +6773,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       const removeButton = document.createElement("button");
       removeButton.type = "button";
       removeButton.className = "mb-small-button";
-      removeButton.textContent = "Remove";
+      removeButton.textContent = "Quitar";
       removeButton.addEventListener("click", () => {
         const nextNames = trustedNames.filter((_, currentIndex) => currentIndex !== index);
         bot.panic.updateConfig({ trustedNames: nextNames });
@@ -6796,7 +6796,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     if (!gameMasterNames.length) {
       const empty = document.createElement("div");
       empty.className = "mb-small-note";
-      empty.textContent = "No game master names saved.";
+      empty.textContent = "Aún no hay nombres guardados.";
       list.appendChild(empty);
       return;
     }
@@ -6811,7 +6811,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       const removeButton = document.createElement("button");
       removeButton.type = "button";
       removeButton.className = "mb-small-button";
-      removeButton.textContent = "Remove";
+      removeButton.textContent = "Quitar";
       removeButton.addEventListener("click", () => {
         const nextNames = gameMasterNames.filter((_, currentIndex) => currentIndex !== index);
         bot.panic.updateConfig({ gameMasterNames: nextNames });
@@ -6877,10 +6877,11 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     const routeList = document.getElementById("minibia-bot-cave-route");
     const routeSummary = document.getElementById("minibia-bot-cave-route-summary");
-    if (routeSummary) routeSummary.textContent = `Puntos del recorrido (${route.length}) ▾`;
+    if (routeSummary) routeSummary.textContent = `Ver puntos guardados · ${route.length}`;
     if (routeList) {
+      const typeLabels = { node: "PUNTO", stand: "EXACTO", walk: "CAMINO", label: "MARCA", action: "ACCIÓN" };
       routeList.textContent = route.map((point, index) =>
-        `${status?.running && index === status.currentIndex ? "▶ " : ""}${index + 1}. ${point.type.toUpperCase()} ${point.x},${point.y},${point.z}${point.label ? " — " + point.label : ""}${point.action ? " — " + point.action : ""}`
+        `${status?.running && index === status.currentIndex ? "▶ " : ""}${index + 1}. ${typeLabels[point.type] || "PUNTO"} · ${point.x}, ${point.y}, piso ${point.z}${point.label ? " · " + point.label : ""}${point.action ? " · " + point.action : ""}`
       ).join("\n");
     }
     const routeMode = document.getElementById("minibia-bot-cave-mode");
@@ -6893,18 +6894,18 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       if (status?.lastError) {
         statusLabel.textContent = status.lastError;
       } else if (!route.length) {
-        statusLabel.textContent = "Status: no waypoints";
+        statusLabel.textContent = "Sin puntos todavía · toca un tipo para grabar el primero.";
       } else if (status?.running && status?.pausedForCombat) {
-        statusLabel.textContent = "Status: fighting nearby enemies (route paused)";
+        statusLabel.textContent = "En pausa · hay enemigos cerca.";
       } else if (status?.running) {
         const waypointNumber = (status.currentIndex ?? 0) + 1;
         const distanceLabel =
           Number.isFinite(status?.distanceToWaypoint) && status.distanceToWaypoint >= 0
-            ? `, dist ${status.distanceToWaypoint}`
+            ? ` · a ${status.distanceToWaypoint} SQM`
             : "";
-        statusLabel.textContent = `Status: ${status.waitingUntil ? "waiting" : "running"} (${waypointNumber}/${route.length}${distanceLabel})`;
+        statusLabel.textContent = `${status.waitingUntil ? "Esperando" : "Ruta en marcha"} · punto ${waypointNumber} de ${route.length}${distanceLabel}`;
       } else {
-        statusLabel.textContent = `Status: idle (${route.length} waypoint${route.length === 1 ? "" : "s"})`;
+        statusLabel.textContent = `Lista para iniciar · ${route.length} ${route.length === 1 ? "punto" : "puntos"}.`;
       }
     }
 
@@ -6932,7 +6933,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       if (!presetNames.length) {
         const option = document.createElement("option");
         option.value = "";
-        option.textContent = "No saved presets";
+        option.textContent = "No hay rutas guardadas";
         select.appendChild(option);
         select.disabled = true;
       } else {
@@ -6952,8 +6953,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     if (label) {
       label.textContent = presetNames.length
-        ? `Preset: ${activePresetName} (${presetNames.length} saved)`
-        : `Preset: ${activePresetName}`;
+        ? `Ruta activa: ${activePresetName} · ${presetNames.length} guardadas`
+        : `Ruta activa: ${activePresetName}`;
     }
 
     if (deleteButton) {
@@ -6969,12 +6970,12 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const route = bot.cave?.getRoute?.() || [];
 
     if (!position) {
-      label.textContent = "Closest start: current position unavailable";
+      label.textContent = "Inicio recomendado: posición actual no disponible";
       return;
     }
 
     if (!route.length) {
-      label.textContent = "Closest start: no waypoints";
+      label.textContent = "Inicio recomendado: agrega puntos a la ruta";
       return;
     }
 
@@ -6982,11 +6983,11 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const waypoint = route[closestIndex];
 
     if (!waypoint) {
-      label.textContent = "Closest start: unavailable";
+      label.textContent = "Inicio recomendado: no disponible";
       return;
     }
 
-    label.textContent = `Closest start: ${closestIndex + 1}. ${waypoint.x}, ${waypoint.y}, ${waypoint.z}`;
+    label.textContent = `Mejor punto para empezar: ${closestIndex + 1} · ${waypoint.x}, ${waypoint.y}, piso ${waypoint.z}`;
   }
 
   function refreshCaveTransitionStatus() {
@@ -6995,7 +6996,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     const transitions = bot.cave?.getTransitions?.() || [];
     if (!transitions.length) {
-      label.textContent = "Transitions learned: none";
+      label.textContent = "Cambios de piso: todavía no aprendidos";
       return;
     }
 
@@ -7004,14 +7005,13 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       .sort((a, b) => Number(b?.lastSeenAt || 0) - Number(a?.lastSeenAt || 0))[0];
 
     if (!latest?.from || !latest?.to) {
-      label.textContent = `Transitions learned: ${transitions.length}`;
+      label.textContent = `Cambios de piso aprendidos: ${transitions.length}`;
       return;
     }
 
-    const extra = transitions.length > 1 ? ` (+${transitions.length - 1} more)` : "";
     label.textContent =
-      `Transitions learned: ${latest.from.x}, ${latest.from.y}, ${latest.from.z} -> ` +
-      `${latest.to.x}, ${latest.to.y}, ${latest.to.z}${extra}`;
+      `Último cambio de piso: ${latest.from.x}, ${latest.from.y}, ${latest.from.z} → ` +
+      `${latest.to.x}, ${latest.to.y}, ${latest.to.z}${transitions.length > 1 ? ` · y ${transitions.length - 1} más` : ""}`;
   }
 
   function refreshEquipRingStatus() {
@@ -7032,13 +7032,13 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     if (statusLabel) {
       if (!status?.config?.apiKey) {
-        statusLabel.textContent = "Status: API key missing";
+        statusLabel.textContent = "Falta la clave API";
       } else if (status?.pending) {
-        statusLabel.textContent = "Status: generating";
+        statusLabel.textContent = "Preparando respuesta…";
       } else if (status?.running) {
-        statusLabel.textContent = "Status: listening to Default";
+        statusLabel.textContent = "Escuchando el chat Default";
       } else {
-        statusLabel.textContent = "Status: idle";
+        statusLabel.textContent = "Inactivo";
       }
     }
   }
@@ -7056,7 +7056,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     if (!me) {
       const empty = document.createElement("div");
       empty.className = "mb-small-note";
-      empty.textContent = "Current position unavailable.";
+      empty.textContent = "Posición actual no disponible.";
       list.appendChild(empty);
       return;
     }
@@ -7093,8 +7093,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       const empty = document.createElement("div");
       empty.className = "mb-small-note";
       empty.textContent = selectedFloor == null
-        ? "No off-floor creatures."
-        : `No creatures on floor ${selectedFloor}.`;
+        ? "No hay criaturas visibles en otros pisos."
+        : `No hay criaturas visibles en el piso ${selectedFloor}.`;
       list.appendChild(empty);
       return;
     }
@@ -7120,11 +7120,11 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
       const name = document.createElement("div");
       name.className = "mb-creature-name";
-      name.textContent = creature.name || (creature.type === 0 ? "Player" : "Mob");
+      name.textContent = creature.name || (creature.type === 0 ? "Jugador" : "Criatura");
 
       const meta = document.createElement("div");
       meta.className = "mb-small-note";
-      meta.textContent = `${creature.type === 0 ? "Player" : "Mob"} at ${creature.position.x}, ${creature.position.y}, ${creature.position.z}`;
+      meta.textContent = `${creature.type === 0 ? "Jugador" : "Criatura"} · ${creature.position.x}, ${creature.position.y}, piso ${creature.position.z}`;
 
       row.appendChild(name);
       row.appendChild(meta);
@@ -7306,12 +7306,14 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         z-index: 999999;
         max-width: calc(100vw - 32px);
         padding: 12px;
-        border: 1px solid rgba(224, 200, 148, 0.45);
-        border-radius: 10px;
-        background: linear-gradient(180deg, rgba(30, 23, 15, 0.95), rgba(15, 11, 8, 0.97));
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-        color: #f1e2b8;
-        font: 12px/1.35 Verdana, sans-serif;
+        border: 1px solid rgba(205, 171, 111, 0.38);
+        border-radius: 14px;
+        background: rgba(20, 21, 22, 0.985);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.48);
+        color: #f2efe8;
+        font: 13px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         user-select: none;
       }
 
@@ -7339,6 +7341,29 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         margin: 0 0 8px;
       }
 
+      #minibia-bot-panel .mb-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: auto;
+        color: #f4ead5;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        white-space: nowrap;
+      }
+      #minibia-bot-panel .mb-brand-mark {
+        display: grid;
+        width: 24px;
+        height: 24px;
+        place-items: center;
+        border-radius: 7px;
+        background: #9b773f;
+        color: #fff;
+        font-size: 10px;
+        letter-spacing: 0;
+      }
+
       #minibia-bot-panel .mb-titlebar button {
         width: auto;
         flex: none;
@@ -7354,13 +7379,14 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
       #minibia-bot-panel .mb-safety-status {
         white-space: pre-line;
-        padding: 8px 10px;
-        margin-bottom: 8px;
-        font-size: 14px;
+        padding: 7px 10px;
+        margin-bottom: 9px;
+        font-size: 12px;
         line-height: 1.4;
         color: #fff;
-        background: #34443b;
-        border-radius: 6px;
+        background: #21352d;
+        border: 1px solid rgba(122, 181, 143, .2);
+        border-radius: 8px;
       }
 
       #minibia-bot-panel .mb-icon-button {
@@ -7384,6 +7410,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         grid-template-columns: minmax(0, 1fr) 280px 240px;
         gap: 12px;
         align-items: start;
+        max-height: calc(100dvh - 112px);
+        overflow: auto;
       }
 
       #minibia-bot-panel .mb-body[hidden] {
@@ -7401,18 +7429,24 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       }
 
       #minibia-bot-panel .mb-section {
-        padding-top: 10px;
-        border-top: 1px solid rgba(224, 200, 148, 0.16);
+        padding: 12px;
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 12px;
+        background: #1b1d1f;
+        box-shadow: 0 4px 14px rgba(0,0,0,.16);
       }
 
       #minibia-bot-panel .mb-column-section:first-child {
-        padding-top: 0;
-        border-top: 0;
+        padding-top: 12px;
       }
 
       #minibia-bot-panel .mb-label {
         margin: 0 0 8px;
-        color: #d3c49d;
+        color: #e7d2ac;
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: .045em;
+        text-transform: uppercase;
         word-break: break-word;
       }
 
@@ -7431,17 +7465,38 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
       #minibia-bot-panel button {
         width: 100%;
+        min-height: 38px;
         padding: 8px 10px;
-        border: 1px solid rgba(224, 200, 148, 0.35);
+        border: 1px solid rgba(222, 195, 151, 0.24);
         border-radius: 8px;
-        background: linear-gradient(180deg, #635133, #3f321f);
-        color: #f7eccf;
+        background: #302c26;
+        color: #f0ece4;
         font: inherit;
         cursor: pointer;
+        transition: background .15s ease, border-color .15s ease, transform .15s ease;
       }
 
       #minibia-bot-panel button:hover {
-        background: linear-gradient(180deg, #755f3d, #4f4028);
+        background: #40382d;
+        border-color: rgba(222,195,151,.48);
+      }
+
+      #minibia-bot-panel button:disabled { opacity: .46; cursor: not-allowed; }
+      #minibia-bot-panel button:focus-visible,
+      #minibia-bot-panel select:focus-visible,
+      #minibia-bot-panel input:focus-visible,
+      #minibia-bot-panel textarea:focus-visible { outline: 2px solid #cba86a; outline-offset: 2px; }
+
+      #minibia-bot-panel select {
+        width: 100%;
+        min-height: 38px;
+        box-sizing: border-box;
+        padding: 7px 10px;
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 8px;
+        background: #111315;
+        color: #f2efe8;
+        font: inherit;
       }
 
       #minibia-bot-panel #minibia-bot-stop-all {
@@ -7460,10 +7515,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         width: 100%;
         box-sizing: border-box;
         padding: 8px 10px;
-        border: 1px solid rgba(224, 200, 148, 0.35);
+        border: 1px solid rgba(255,255,255,.14);
         border-radius: 8px;
-        background: rgba(16, 12, 8, 0.88);
-        color: #f7eccf;
+        background: #111315;
+        color: #f2efe8;
         font: inherit;
       }
 
@@ -7476,7 +7531,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #d3c49d;
+        color: #dedbd4;
       }
 
       #minibia-bot-panel .mb-toggle input[type="checkbox"] {
@@ -7613,7 +7668,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       }
 
       #minibia-bot-panel .mb-small-note {
-        color: #b7a67d;
+        color: #b3b0aa;
         font-size: 11px;
       }
 
@@ -7645,18 +7700,24 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-mobile .mb-mobile-tabs button {
         width: auto;
         min-width: max-content;
-        min-height: 44px;
-        padding: 8px 12px;
+        min-height: 36px;
+        padding: 6px 11px;
+        border-radius: 8px;
+        background: #25282a;
+        border-color: rgba(255,255,255,.09);
+        color: #cbc8c1;
+        font-size: 11px;
       }
       #minibia-bot-panel.mb-mobile .mb-mobile-tabs button[aria-selected="true"] {
-        background: #a17a39;
+        background: #8e6c38;
+        border-color: #bd985a;
         color: #fff;
       }
       #minibia-bot-panel.mb-mobile[data-collapsed="true"] .mb-mobile-tabs { display: none; }
       #minibia-bot-panel.mb-mobile .mb-body {
         display: block;
         box-sizing: border-box;
-        max-height: min(70dvh, 620px);
+        max-height: min(66dvh, 620px);
         overflow-y: auto;
         overflow-x: hidden;
         overscroll-behavior: contain;
@@ -7690,7 +7751,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-mobile .mb-small-note { font-size: 12px; }
       #minibia-bot-panel.mb-mobile .mb-titlebar button { min-height: 38px; padding: 5px 8px; }
       #minibia-bot-panel.mb-mobile .mb-mobile-tabs button { min-height: 38px; padding: 6px 9px; }
-      #minibia-bot-panel.mb-mobile .mb-cave-column .mb-section { padding-top: 4px; }
+      #minibia-bot-panel.mb-mobile .mb-cave-column .mb-section { padding: 11px; }
       #minibia-bot-panel.mb-mobile .mb-cave-column .mb-stack { gap: 6px; }
       #minibia-bot-panel.mb-mobile .mb-cave-column button,
       #minibia-bot-panel.mb-mobile .mb-cave-column select { min-height: 38px; padding: 6px 8px; }
@@ -7708,6 +7769,14 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel .mb-cave-choice-group button:focus-visible { outline: 2px solid #f4d48c; outline-offset: 2px; }
       #minibia-bot-panel .mb-cave-preset-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
       #minibia-bot-panel .mb-cave-preset-actions button { min-height: 36px; padding: 4px 3px; font-size: 11px; }
+      #minibia-bot-panel .mb-cave-card { display: grid; gap: 9px; padding: 11px; border: 1px solid rgba(255,255,255,.075); border-radius: 10px; background: #202224; }
+      #minibia-bot-panel .mb-cave-card-title { color: #f0d4a0; font-size: 12px; font-weight: 750; }
+      #minibia-bot-panel .mb-cave-intro { margin: -3px 0 2px; }
+      #minibia-bot-panel .mb-cave-diagnostics { padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; color: #c2beb6; font-size: 11px; }
+      #minibia-bot-panel .mb-cave-diagnostics summary { cursor: pointer; color: #cfc7b8; }
+      #minibia-bot-panel .mb-cave-diagnostics[open] { display: grid; gap: 6px; }
+      #minibia-bot-panel .mb-primary-button { background: #456b4d; border-color: #719b79; color: #fff; font-weight: 650; }
+      #minibia-bot-panel .mb-primary-button:hover { background: #527b5a; }
       #minibia-bot-panel .mb-cave-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; padding: 7px 8px; border: 1px solid rgba(224,200,148,.18); border-radius: 7px; background: rgba(12,9,6,.25); color: #c7b990; font-size: 10px; line-height: 1.3; }
       #minibia-bot-panel .mb-cave-legend b { color: #f0d69a; font-weight: 600; }
     `;
@@ -7717,13 +7786,14 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     panel.id = "minibia-bot-panel";
     panel.innerHTML = `
       <div class="mb-titlebar" role="toolbar" aria-label="Controles del bot">
-        <button type="button" id="minibia-bot-start-all">START</button>
-        <button type="button" id="minibia-bot-stop-all">STOP</button>
+        <span class="mb-brand"><span class="mb-brand-mark">MB</span><span>MINIBIA BOT</span></span>
+        <button type="button" id="minibia-bot-start-all" aria-label="Iniciar todos los módulos">START</button>
+        <button type="button" id="minibia-bot-stop-all" aria-label="Pausar todos los módulos">STOP</button>
         <button type="button" class="mb-icon-button" id="minibia-bot-collapse" aria-label="Abrir menú" title="Abrir menú">☰</button>
         <button type="button" class="mb-icon-button mb-drag-handle" aria-label="Arrastrar barra" title="Mantén presionado para mover">✥</button>
       </div>
       <div class="mb-safety-status" aria-live="off">🛡️ Protección lista · Sin regreso pendiente</div>
-      <div class="mb-mobile-tabs" role="tablist" aria-label="Bot sections">
+      <div class="mb-mobile-tabs" role="tablist" aria-label="Secciones del bot">
         <button type="button" role="tab" data-tab="status">Inicio</button>
         <button type="button" role="tab" data-tab="cave">Cueva</button>
         <button type="button" role="tab" data-tab="combat">Combate</button>
@@ -7732,40 +7802,41 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       </div>
       <div class="mb-body">
         <div class="mb-main-column">
-          <div class="mb-actions mb-column-section">
+          <div class="mb-actions mb-section mb-column-section">
             <div class="mb-mobile-summary" aria-live="off">Cargando estado…</div>
-            <button type="button" id="minibia-bot-reload">Reload Bot</button>
-            <button type="button" id="minibia-bot-copy-setup">Copiar código con mis ajustes</button>
+            <button type="button" id="minibia-bot-reload">Reiniciar bot</button>
+            <button type="button" id="minibia-bot-copy-setup">Exportar mi configuración</button>
           </div>
           <div class="mb-section mb-column-section">
-            <div class="mb-label" id="minibia-bot-home">Panic Runner Home: not set</div>
+            <div class="mb-label">Regreso seguro</div>
+            <div class="mb-small-note" id="minibia-bot-home">Punto de regreso: sin configurar</div>
             <div class="mb-stack">
-              <button type="button" id="minibia-bot-set-home">Set Home</button>
+              <button type="button" id="minibia-bot-set-home">Guardar punto de regreso aquí</button>
               <label class="mb-toggle">
                 <input type="checkbox" id="minibia-bot-panic-unknown" />
-                <span>Unknown Player</span>
+                <span>Entrar en protección si aparece otro jugador</span>
               </label>
               <label class="mb-toggle">
                 <input type="checkbox" id="minibia-bot-panic-health" />
-                <span>Lose Health</span>
+                <span>Entrar en protección si baja la vida</span>
               </label>
               <label class="mb-toggle">
                 <input type="checkbox" id="minibia-bot-panic-return" />
-                <span>Auto Return</span>
+                <span>Regresar automáticamente al origen</span>
               </label>
               <div class="mb-inline">
-                <input type="text" id="minibia-bot-panic-trusted-input" placeholder="Trusted name" />
-                <button type="button" class="mb-small-button" id="minibia-bot-panic-trusted-add">Add</button>
+                <input type="text" id="minibia-bot-panic-trusted-input" placeholder="Nombre de jugador de confianza" />
+                <button type="button" class="mb-small-button" id="minibia-bot-panic-trusted-add">Agregar</button>
               </div>
               <div class="mb-list" id="minibia-bot-panic-trusted-list"></div>
             </div>
           </div>
           <div class="mb-section mb-column-section">
-            <div class="mb-label">GM Kill Switch</div>
+            <div class="mb-label">Protección ante Game Masters</div>
             <div class="mb-stack">
               <div class="mb-inline">
-                <input type="text" id="minibia-bot-panic-gm-input" placeholder="Game master name" />
-                <button type="button" class="mb-small-button" id="minibia-bot-panic-gm-add">Add</button>
+                <input type="text" id="minibia-bot-panic-gm-input" placeholder="Nombre del Game Master" />
+                <button type="button" class="mb-small-button" id="minibia-bot-panic-gm-add">Agregar</button>
               </div>
               <div class="mb-list" id="minibia-bot-panic-gm-list"></div>
             </div>
@@ -7775,113 +7846,114 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
               <div class="mb-row-three">
                 <label class="mb-toggle">
                   <input type="checkbox" id="minibia-bot-rune-enabled" />
-                  <span>Magic Level Trainer</span>
+                  <span>Entrenar nivel mágico</span>
                 </label>
-                <input type="text" id="minibia-bot-rune-spell" placeholder="Spell words" />
-                <input type="number" id="minibia-bot-rune-mana" min="0" placeholder="Mana" />
+                <input type="text" id="minibia-bot-rune-spell" placeholder="Palabras del hechizo" />
+                <input type="number" id="minibia-bot-rune-mana" min="0" placeholder="Mana mínima" />
               </div>
               <div class="mb-row mb-row-compact">
                 <label class="mb-toggle">
                   <input type="checkbox" id="minibia-bot-auto-eat-enabled" />
-                  <span>Auto Eat</span>
+                  <span>Comer automáticamente</span>
                 </label>
                 <label class="mb-field mb-field-compact" for="minibia-bot-auto-eat-hotkey">
-                  <span class="mb-field-label">Eat Hotkey (1-12)</span>
+                  <span class="mb-field-label">Tecla para comer (1-12)</span>
                   <input type="number" id="minibia-bot-auto-eat-hotkey" min="1" max="12" placeholder="10" />
                 </label>
               </div>
               <div class="mb-row">
                 <label class="mb-toggle">
                   <input type="checkbox" id="minibia-bot-auto-invisible-enabled" />
-                  <span>Auto Invisible</span>
+                  <span>Invisibilidad automática</span>
                 </label>
-                <div class="mb-small-note">Casts utana vid whenever invisibility is not active.</div>
+                <div class="mb-small-note">Lanza utana vid cuando se termina la invisibilidad.</div>
               </div>
               <div class="mb-row">
                 <label class="mb-toggle">
                   <input type="checkbox" id="minibia-bot-auto-magic-shield-enabled" />
-                  <span>Auto Utamo Vita</span>
+                  <span>Escudo mágico automático</span>
                 </label>
-                <div class="mb-small-note">Casts utamo vita whenever magic shield is not active.</div>
+                <div class="mb-small-note">Lanza utamo vita cuando se termina el escudo mágico.</div>
               </div>
               <div class="mb-row">
                 <label class="mb-toggle">
                   <input type="checkbox" id="minibia-bot-equip-ring-enabled" />
-                  <span>Equip Ring</span>
+                  <span>Equipar anillo automáticamente</span>
                 </label>
                 <div></div>
               </div>
             </div>
           </div>
           <div class="mb-section mb-column-section">
-            <div class="mb-note">Loaded routines: Panic Runner, magic level trainer, auto eat, auto invisible, auto utamo vita, equip ring, auto heal, auto attack, and talk.</div>
+            <div class="mb-note">Módulos disponibles: protección, runas, comida, invisibilidad, escudo, anillo, curación, combate y respuestas.</div>
           </div>
         </div>
         <div class="mb-side-column">
           <div class="mb-section mb-column-section">
-            <div class="mb-label">Xray</div>
-            <button type="button" class="mb-small-button" id="minibia-bot-xray-overlay-toggle">Disable Overlay</button>
-            <div class="mb-small-note" id="minibia-bot-xray-overlay-status">Overlay: on</div>
+            <div class="mb-label">Radar de criaturas</div>
+            <button type="button" class="mb-small-button" id="minibia-bot-xray-overlay-toggle">Ocultar radar</button>
+            <div class="mb-small-note" id="minibia-bot-xray-overlay-status">Radar: activo</div>
             <label class="mb-field" for="minibia-bot-xray-floor-select">
-              <span class="mb-field-label">Floor Filter</span>
+              <span class="mb-field-label">Filtrar por piso</span>
               <select id="minibia-bot-xray-floor-select">
-                <option value="all">All floors</option>
+                <option value="all">Todos los pisos</option>
               </select>
             </label>
             <div class="mb-list" id="minibia-bot-visible-creatures-list"></div>
           </div>
           <div class="mb-section mb-column-section">
-            <div class="mb-label">Auto Heal</div>
+            <div class="mb-label">Curación automática</div>
             <div class="mb-stack">
               <label class="mb-toggle">
                 <input type="checkbox" id="minibia-bot-auto-heal-enabled" />
-                <span>Enable Auto Heal</span>
+                <span>Activar curación automática</span>
               </label>
               <div class="mb-field-grid">
                 <label class="mb-field" for="minibia-bot-auto-heal-min-hp">
-                  <span class="mb-field-label">Minimum HP</span>
+                  <span class="mb-field-label">Vida mínima</span>
                   <input type="number" id="minibia-bot-auto-heal-min-hp" min="0" placeholder="250" />
                 </label>
                 <label class="mb-field" for="minibia-bot-auto-heal-hp-hotkey">
-                  <span class="mb-field-label">HP Hotkey (1-12)</span>
+                  <span class="mb-field-label">Tecla de vida (1-12)</span>
                   <input type="number" id="minibia-bot-auto-heal-hp-hotkey" min="1" max="12" placeholder="1" />
                 </label>
                 <label class="mb-field" for="minibia-bot-auto-heal-min-mana">
-                  <span class="mb-field-label">Minimum Mana</span>
+                  <span class="mb-field-label">Mana mínima</span>
                   <input type="number" id="minibia-bot-auto-heal-min-mana" min="0" placeholder="150" />
                 </label>
                 <label class="mb-field" for="minibia-bot-auto-heal-mana-hotkey">
-                  <span class="mb-field-label">Mana Hotkey (1-12)</span>
+                  <span class="mb-field-label">Tecla de mana (1-12)</span>
                   <input type="number" id="minibia-bot-auto-heal-mana-hotkey" min="1" max="12" placeholder="2" />
                 </label>
               </div>
-              <div class="mb-small-note">Checks about twenty times per second. HP is used before mana, and unregistered hotkey presses are retried quickly.</div>
+              <div class="mb-small-note">Revisa la vida y el mana continuamente. Usa primero la tecla de vida.</div>
             </div>
           </div>
           <div class="mb-section mb-column-section">
-            <div class="mb-label">Talk</div>
+            <div class="mb-label">Respuestas automáticas</div>
             <div class="mb-stack">
               <label class="mb-toggle">
                 <input type="checkbox" id="minibia-bot-talk-enabled" />
-                <span>Enable Auto Reply</span>
+                <span>Activar respuestas</span>
               </label>
-              <input type="password" id="minibia-bot-talk-api-key" placeholder="Gemini API key" />
-              <textarea id="minibia-bot-talk-prompt" placeholder="Reply style prompt"></textarea>
-              <div class="mb-small-note" id="minibia-bot-talk-status">Status: idle</div>
-              <div class="mb-small-note">Replies only to the newest unseen message in Default chat.</div>
-              <div class="mb-small-note">It will not reply to itself and will not admit it is a bot.</div>
+              <input type="password" id="minibia-bot-talk-api-key" placeholder="Clave API de Gemini" />
+              <textarea id="minibia-bot-talk-prompt" placeholder="Cómo quieres que responda"></textarea>
+              <div class="mb-small-note" id="minibia-bot-talk-status">Estado: inactivo</div>
+              <div class="mb-small-note">Responde al mensaje nuevo más reciente del chat Default.</div>
+              <div class="mb-small-note">Ignora sus propios mensajes.</div>
             </div>
           </div>
         </div>
         <div class="mb-cave-column">
           <div class="mb-section mb-column-section">
-            <div class="mb-label">Cave Bot</div>
+            <div class="mb-label">Cavebot</div>
+            <div class="mb-small-note mb-cave-intro">Crea una ruta, guarda puntos y ejecútala automáticamente.</div>
             <div class="mb-stack">
-              <div class="mb-field-grid">
+              <div class="mb-cave-card">
                 <label class="mb-field" for="minibia-bot-cave-preset-select">
+                  <span class="mb-field-label">Ruta guardada</span>
                   <select id="minibia-bot-cave-preset-select"></select>
                 </label>
-              </div>
               <div class="mb-cave-preset-actions">
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-new">Nuevo</button>
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-delete">Borrar</button>
@@ -7897,6 +7969,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                 </div>
                 <div class="mb-small-note" id="minibia-bot-cave-transfer-status" role="status"></div>
               </div>
+              </div>
+              <div class="mb-cave-card">
+                <div class="mb-cave-card-title">1 · Grabar puntos</div>
+                <div class="mb-small-note">Toca un tipo para guardar la casilla donde estás.</div>
               <div class="mb-field"><span>Tipo de punto</span>
                 <input type="hidden" id="minibia-bot-cave-type" value="node" />
                 <div class="mb-cave-choice-group" id="minibia-bot-cave-type-options" role="group" aria-label="Tipo de punto">
@@ -7907,52 +7983,61 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                   <button type="button" data-cave-type="action" aria-label="Añadir punto Acción">Acción</button>
                 </div>
                 <div class="mb-cave-legend" aria-label="Qué hace cada tipo de punto">
-                  <span><b>Node / Walk</b> · Punto flexible</span>
-                  <span><b>Stand</b> · Llega al SQM exacto</span>
-                  <span><b>Label</b> · Marca con nombre para goto</span>
-                  <span><b>Acción</b> · Espera, omite o salta a un Label</span>
+                  <span><b>Node / Walk</b> · Punto flexible de paso</span>
+                  <span><b>Stand</b> · Llega a esa casilla exacta</span>
+                  <span><b>Label</b> · Marca con nombre para saltos</span>
+                  <span><b>Acción</b> · Esperar, omitir o ir a una marca</span>
                 </div>
-                <div class="mb-small-note">Toca un tipo para guardar el SQM actual.</div>
               </div>
-              <div class="mb-field"><span>Recorrido</span>
+              </div>
+              <div class="mb-cave-card">
+                <div class="mb-cave-card-title">2 · Sentido y puntos</div>
+                <div class="mb-field"><span>Cómo recorrer la ruta</span>
                 <input type="hidden" id="minibia-bot-cave-mode" value="pingpong" />
                 <div class="mb-cave-choice-group" id="minibia-bot-cave-mode-options" role="group" aria-label="Modo de recorrido">
                   <button type="button" data-cave-mode="pingpong" aria-pressed="true">Ida y vuelta</button>
-                  <button type="button" data-cave-mode="loop" aria-pressed="false">Loop — circuito</button>
+                  <button type="button" data-cave-mode="loop" aria-pressed="false">Circuito continuo</button>
                 </div>
+                <div class="mb-small-note">Ida y vuelta: recorre ambos sentidos. Circuito: vuelve del último punto al primero.</div>
               </div>
-              <div class="mb-small-note">Action: wait:2000, skip:1 o goto:SALIDA. Stand llega al SQM exacto.</div>
-              <details class="mb-cave-route-details"><summary id="minibia-bot-cave-route-summary">Puntos del recorrido (0) ▾</summary><pre id="minibia-bot-cave-route"></pre></details>
-              <button type="button" class="mb-small-button" id="minibia-bot-cave-remove-last">Quitar último</button>
-              <div class="mb-small-note" id="minibia-bot-cave-closest">Closest start: no waypoints</div>
-              <div class="mb-small-note" id="minibia-bot-cave-transition-status">Transitions learned: none</div>
+              <details class="mb-cave-route-details"><summary id="minibia-bot-cave-route-summary">Ver puntos guardados</summary><pre id="minibia-bot-cave-route"></pre></details>
+              <button type="button" class="mb-small-button" id="minibia-bot-cave-remove-last">Deshacer último punto</button>
+              </div>
+              <div class="mb-cave-card">
+                <div class="mb-cave-card-title">3 · Ejecutar</div>
+                <div class="mb-small-note" id="minibia-bot-cave-status" role="status" aria-live="polite">Sin puntos todavía</div>
               <div class="mb-actions mb-actions-inline-two">
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-start">Iniciar</button>
+                <button type="button" class="mb-small-button mb-primary-button" id="minibia-bot-cave-start">Iniciar ruta</button>
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-stop" style="background:#b91c1c;color:white;border-color:#ef4444">Detener</button>
               </div>
-              <div class="mb-small-note" id="minibia-bot-cave-status">Status: no waypoints</div>
+              </div>
+              <details class="mb-cave-diagnostics">
+                <summary>Detalles de navegación</summary>
+                <div class="mb-small-note" id="minibia-bot-cave-closest">Inicio recomendado: sin puntos</div>
+                <div class="mb-small-note" id="minibia-bot-cave-transition-status">Cambios de piso: todavía no aprendidos</div>
+              </details>
             </div>
           </div>
           <div class="mb-section mb-column-section">
-            <div class="mb-label">Auto Attack</div>
+            <div class="mb-label">Combate automático</div>
             <div class="mb-stack">
               <label class="mb-toggle">
                 <input type="checkbox" id="minibia-bot-auto-attack-enabled" />
-                <span>Enable Auto Attack</span>
+                <span>Activar ataque automático</span>
               </label>
               <label class="mb-toggle">
                 <input type="checkbox" id="minibia-bot-auto-attack-melee" />
-                <span>Melee Mode</span>
+                <span>Modo cuerpo a cuerpo</span>
               </label>
               <label class="mb-field" for="minibia-bot-auto-attack-hotkey">
-                <span class="mb-field-label">Target Hotkey (1-12)</span>
+                <span class="mb-field-label">Tecla de objetivo (1-12)</span>
                 <input type="number" id="minibia-bot-auto-attack-hotkey" min="1" max="12" placeholder="3" />
               </label>
               <label class="mb-field" for="minibia-bot-auto-attack-rune-hotkey">
-                <span class="mb-field-label">Rune Hotkey (1-12)</span>
+                <span class="mb-field-label">Tecla de runa (1-12)</span>
                 <input type="number" id="minibia-bot-auto-attack-rune-hotkey" min="1" max="12" placeholder="4" />
               </label>
-              <div class="mb-small-note">Melee mode uses the target hotkey, then walks adjacent to the target. Non-melee mode uses the target hotkey to acquire a target and the rune hotkey to cast on that target.</div>
+              <div class="mb-small-note">Cuerpo a cuerpo: se acerca al objetivo. A distancia: usa la runa seleccionada.</div>
             </div>
           </div>
         </div>
@@ -8160,7 +8245,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
           const code = window.minibiaBotExportCode();
           try {
             await navigator.clipboard.writeText(code);
-            copySetupButton.textContent = "Código copiado";
+            copySetupButton.textContent = "Configuración copiada";
           } catch {
             const input = document.createElement("textarea");
             input.value = code;
@@ -8345,11 +8430,11 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const recordCaveWaypoint = (type) => {
       const options = { type };
       if (type === "label" || type === "action") {
-        const value = window.prompt(type === "label" ? "Nombre del punto (ej. SALIDA):" : "Acción: wait:2000, skip:1 o goto:SALIDA");
+        const value = window.prompt(type === "label" ? "Nombre para esta marca (ej. SALIDA):" : "Instrucción: wait:2000, skip:1 o goto:SALIDA");
         if (!value?.trim()) return;
         options[type === "label" ? "label" : "action"] = value.trim();
       }
-      if (!bot.cave.addWaypointCurrentSpot(options)) window.alert("Punto inválido. Usa wait:milisegundos, skip:entero o goto:NOMBRE.");
+      if (!bot.cave.addWaypointCurrentSpot(options)) window.alert("No se pudo guardar. Revisa la instrucción: wait:milisegundos, skip:entero o goto:NOMBRE.");
       refreshCaveStatus();
       refreshCavePresetControls();
       refreshCaveClosestStatus();
@@ -8414,7 +8499,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     if (cavePresetNewButton) {
       cavePresetNewButton.addEventListener("click", () => {
-        const name = window.prompt("Name the new cave preset:");
+        const name = window.prompt("Nombre de la nueva ruta:");
         if (name == null) {
           return;
         }
