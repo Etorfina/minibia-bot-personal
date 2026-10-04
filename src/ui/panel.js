@@ -245,6 +245,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const status = bot.cave?.status?.();
 
     const routeList = document.getElementById("minibia-bot-cave-route");
+    const routeSummary = document.getElementById("minibia-bot-cave-route-summary");
+    if (routeSummary) routeSummary.textContent = `Puntos del recorrido (${route.length}) ▾`;
     if (routeList) {
       routeList.textContent = route.map((point, index) =>
         `${status?.running && index === status.currentIndex ? "▶ " : ""}${index + 1}. ${point.type.toUpperCase()} ${point.x},${point.y},${point.z}${point.label ? " — " + point.label : ""}${point.action ? " — " + point.action : ""}`
@@ -1051,6 +1053,20 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-mobile .mb-toggle { font-size: 14px; min-height: 44px; }
       #minibia-bot-panel.mb-mobile .mb-note,
       #minibia-bot-panel.mb-mobile .mb-small-note { font-size: 12px; }
+      #minibia-bot-panel.mb-mobile .mb-titlebar button { min-height: 38px; padding: 5px 8px; }
+      #minibia-bot-panel.mb-mobile .mb-mobile-tabs button { min-height: 38px; padding: 6px 9px; }
+      #minibia-bot-panel.mb-mobile .mb-cave-column .mb-section { padding-top: 4px; }
+      #minibia-bot-panel.mb-mobile .mb-cave-column .mb-stack { gap: 6px; }
+      #minibia-bot-panel.mb-mobile .mb-cave-column button,
+      #minibia-bot-panel.mb-mobile .mb-cave-column select { min-height: 38px; padding: 6px 8px; }
+      #minibia-bot-panel.mb-mobile .mb-cave-column .mb-label { margin-bottom: 5px; }
+      #minibia-bot-panel.mb-mobile .mb-cave-column .mb-small-note { margin: 0; line-height: 1.3; }
+      #minibia-bot-panel.mb-mobile .mb-cave-column .mb-field { gap: 3px; }
+      #minibia-bot-panel .mb-cave-route-details { border: 1px solid rgba(224,200,148,.25); border-radius: 7px; padding: 6px 8px; }
+      #minibia-bot-panel .mb-cave-route-details summary { cursor: pointer; color: #d3c49d; }
+      #minibia-bot-panel .mb-cave-route-details pre { max-height: 150px; overflow: auto; white-space: pre-wrap; font-size: 11px; margin: 6px 0 0; }
+      #minibia-bot-panel .mb-cave-transfer[hidden] { display: none; }
+      #minibia-bot-panel .mb-cave-transfer textarea { min-height: 90px; font-size: 12px; font-family: monospace; }
     `;
     document.head.appendChild(style);
 
@@ -1224,8 +1240,21 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                 </label>
               </div>
               <div class="mb-actions mb-actions-inline-two">
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-new">New</button>
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-delete">Delete</button>
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-new">Nuevo</button>
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-delete">Borrar</button>
+              </div>
+              <div class="mb-actions mb-actions-inline-two">
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-import">Importar</button>
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-export">Exportar</button>
+              </div>
+              <div class="mb-cave-transfer mb-stack" id="minibia-bot-cave-transfer" hidden>
+                <label class="mb-field" for="minibia-bot-cave-transfer-text" id="minibia-bot-cave-transfer-label"></label>
+                <textarea id="minibia-bot-cave-transfer-text" spellcheck="false"></textarea>
+                <div class="mb-actions mb-actions-inline-two">
+                  <button type="button" id="minibia-bot-cave-transfer-primary"></button>
+                  <button type="button" id="minibia-bot-cave-transfer-secondary"></button>
+                </div>
+                <div class="mb-small-note" id="minibia-bot-cave-transfer-status" role="status"></div>
               </div>
               <label class="mb-field">Tipo de punto
                 <select id="minibia-bot-cave-type">
@@ -1240,16 +1269,16 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                 <select id="minibia-bot-cave-mode"><option value="pingpong">Ida y vuelta</option><option value="loop">Loop — circuito</option></select>
               </label>
               <div class="mb-small-note">Action: wait:2000, skip:1 o goto:SALIDA. Stand llega al SQM exacto.</div>
-              <pre id="minibia-bot-cave-route" style="max-height:160px;overflow:auto;white-space:pre-wrap;font-size:11px"></pre>
+              <details class="mb-cave-route-details"><summary id="minibia-bot-cave-route-summary">Puntos del recorrido (0) ▾</summary><pre id="minibia-bot-cave-route"></pre></details>
               <div class="mb-actions mb-actions-inline-two">
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-record">Añadir punto</button>
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-remove-last">Remove Last</button>
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-remove-last">Quitar último</button>
               </div>
               <div class="mb-small-note" id="minibia-bot-cave-closest">Closest start: no waypoints</div>
               <div class="mb-small-note" id="minibia-bot-cave-transition-status">Transitions learned: none</div>
               <div class="mb-actions mb-actions-inline-two">
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-start">Start</button>
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-stop" style="background:#b91c1c;color:white;border-color:#ef4444">Stop</button>
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-start">Iniciar</button>
+                <button type="button" class="mb-small-button" id="minibia-bot-cave-stop" style="background:#b91c1c;color:white;border-color:#ef4444">Detener</button>
               </div>
               <div class="mb-small-note" id="minibia-bot-cave-status">Status: no waypoints</div>
             </div>
@@ -1359,6 +1388,58 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const cavePresetSelect = panel.querySelector("#minibia-bot-cave-preset-select");
     const cavePresetNewButton = panel.querySelector("#minibia-bot-cave-preset-new");
     const cavePresetDeleteButton = panel.querySelector("#minibia-bot-cave-preset-delete");
+    const caveImportButton = panel.querySelector("#minibia-bot-cave-import");
+    const caveExportButton = panel.querySelector("#minibia-bot-cave-export");
+    const caveTransfer = panel.querySelector("#minibia-bot-cave-transfer");
+    const caveTransferText = panel.querySelector("#minibia-bot-cave-transfer-text");
+    const caveTransferLabel = panel.querySelector("#minibia-bot-cave-transfer-label");
+    const caveTransferPrimary = panel.querySelector("#minibia-bot-cave-transfer-primary");
+    const caveTransferSecondary = panel.querySelector("#minibia-bot-cave-transfer-secondary");
+    const caveTransferStatus = panel.querySelector("#minibia-bot-cave-transfer-status");
+    let caveTransferMode = "";
+    const openCaveTransfer = (mode) => {
+      caveTransferMode = mode;
+      caveTransfer.hidden = false;
+      caveTransferStatus.textContent = "";
+      caveTransferText.readOnly = mode === "export";
+      caveTransferLabel.textContent = mode === "export" ? "Comparte este recorrido" : "Pega aquí el recorrido recibido";
+      caveTransferPrimary.textContent = mode === "export" ? "Copiar" : "Guardar recorrido";
+      caveTransferSecondary.textContent = mode === "export" && navigator.share ? "Compartir" : "Cerrar";
+      caveTransferText.placeholder = mode === "import" ? "Pega aquí el JSON del recorrido" : "";
+      caveTransferText.value = mode === "export" ? bot.cave.exportPreset() : "";
+      caveTransferText.focus();
+      if (mode === "export") caveTransferText.select();
+    };
+    caveImportButton.addEventListener("click", () => openCaveTransfer("import"));
+    caveExportButton.addEventListener("click", () => {
+      try { openCaveTransfer("export"); }
+      catch (error) { caveTransfer.hidden = false; caveTransferStatus.textContent = error.message; }
+    });
+    caveTransferPrimary.addEventListener("click", async () => {
+      if (caveTransferMode === "import") {
+        try {
+          const imported = bot.cave.importPreset(caveTransferText.value);
+          refreshCavePresetControls(); refreshCaveStatus();
+          refreshCaveClosestStatus(); refreshCaveTransitionStatus();
+          caveTransferStatus.textContent = `Guardado: ${imported.name} (${imported.waypoints} puntos).`;
+          caveTransferText.value = "";
+        } catch (error) { caveTransferStatus.textContent = error.message; }
+      } else {
+        try {
+          await navigator.clipboard.writeText(caveTransferText.value);
+          caveTransferStatus.textContent = "Copiado. Envíalo a otro dispositivo o persona.";
+        } catch {
+          caveTransferText.focus(); caveTransferText.select();
+          caveTransferStatus.textContent = "Texto seleccionado: usa Copiar en el menú del navegador.";
+        }
+      }
+    });
+    caveTransferSecondary.addEventListener("click", async () => {
+      if (caveTransferMode === "export" && navigator.share) {
+        try { await navigator.share({ title: cavePresetSelect.value || "Recorrido Minibia", text: caveTransferText.value }); }
+        catch (error) { if (error.name !== "AbortError") caveTransferStatus.textContent = "No se pudo compartir; usa Copiar."; }
+      } else { caveTransfer.hidden = true; }
+    });
 
     const refreshMasterControls = () => {
       const paused = bot.master?.isPaused?.();
