@@ -20,13 +20,19 @@ window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
       healRetryMs: 200,
       healConfirmMs: 250,
       minHp: 250,
+      hpThresholdMode: "absolute",
       hpHotbarSlot: 1,
       minMana: 150,
+      manaThresholdMode: "absolute",
       manaHotbarSlot: 2,
       enabled: false,
     },
     bot.storage.get(configStorageKey, {})
   );
+  config.hpThresholdMode = config.hpThresholdMode === "percentage" ? "percentage" : "absolute";
+  config.manaThresholdMode = config.manaThresholdMode === "percentage" ? "percentage" : "absolute";
+  if (config.hpThresholdMode === "percentage" && Number(config.minHp) > 100) config.minHp = 50;
+  if (config.manaThresholdMode === "percentage" && Number(config.minMana) > 100) config.minMana = 50;
 
   function persistConfig() {
     bot.storage.set(configStorageKey, { ...config });
@@ -61,6 +67,15 @@ window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
     }
 
     return normalized;
+  }
+
+  function thresholdReached(stat, threshold, mode) {
+    if (!stat || !Number.isFinite(stat.current)) return false;
+    if (mode === "percentage") {
+      if (!Number.isFinite(stat.max) || stat.max <= 0) return false;
+      return (stat.current / stat.max) * 100 <= Math.min(100, Math.max(0, Number(threshold) || 0));
+    }
+    return stat.current <= Math.max(0, Number(threshold) || 0);
   }
 
   function hasPendingAttempt() {
@@ -122,7 +137,7 @@ window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
 
     return (
       hp.current > 0 &&
-      hp.current <= Math.max(0, Number(config.minHp) || 0) &&
+      thresholdReached(hp, config.minHp, config.hpThresholdMode) &&
       now - state.lastHpHealAt >= config.healCooldownMs &&
       now - state.lastHpAttemptAt >= Math.max(50, Number(config.healRetryMs) || 0)
     );
@@ -134,7 +149,7 @@ window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
     if (!mana || !slot || state.pendingManaAttempt || state.pendingHpAttempt) return false;
 
     return (
-      mana.current <= Math.max(0, Number(config.minMana) || 0) &&
+      thresholdReached(mana, config.minMana, config.manaThresholdMode) &&
       now - state.lastManaHealAt >= config.healCooldownMs &&
       now - state.lastManaAttemptAt >= Math.max(50, Number(config.healRetryMs) || 0)
     );
@@ -284,6 +299,28 @@ window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
 
     if (Object.prototype.hasOwnProperty.call(nextConfig, "minMana")) {
       nextConfig.minMana = Math.max(0, Number(nextConfig.minMana) || 0);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(nextConfig, "hpThresholdMode")) {
+      nextConfig.hpThresholdMode = nextConfig.hpThresholdMode === "percentage" ? "percentage" : "absolute";
+      if (nextConfig.hpThresholdMode === "percentage" && !Object.prototype.hasOwnProperty.call(nextConfig, "minHp") && Number(config.minHp) > 100) {
+        config.minHp = 50;
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(nextConfig, "manaThresholdMode")) {
+      nextConfig.manaThresholdMode = nextConfig.manaThresholdMode === "percentage" ? "percentage" : "absolute";
+      if (nextConfig.manaThresholdMode === "percentage" && !Object.prototype.hasOwnProperty.call(nextConfig, "minMana") && Number(config.minMana) > 100) {
+        config.minMana = 50;
+      }
+    }
+
+    if ((nextConfig.hpThresholdMode ?? config.hpThresholdMode) === "percentage" && Object.prototype.hasOwnProperty.call(nextConfig, "minHp")) {
+      nextConfig.minHp = Math.min(100, Math.max(0, Number(nextConfig.minHp) || 0));
+    }
+
+    if ((nextConfig.manaThresholdMode ?? config.manaThresholdMode) === "percentage" && Object.prototype.hasOwnProperty.call(nextConfig, "minMana")) {
+      nextConfig.minMana = Math.min(100, Math.max(0, Number(nextConfig.minMana) || 0));
     }
 
     if (Object.prototype.hasOwnProperty.call(nextConfig, "healRetryMs")) {
