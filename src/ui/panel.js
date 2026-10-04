@@ -254,11 +254,11 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
   function refreshAttackTargetList() {
     const list = document.getElementById("minibia-bot-attack-target-list");
     if (!list) return;
-    const names = Array.isArray(bot.attack?.config?.targetPriority) ? bot.attack.config.targetPriority : [];
+    const targets = Array.isArray(bot.attack?.config?.targetPriority) ? bot.attack.config.targetPriority : [];
     const count = document.getElementById("minibia-bot-attack-target-count");
     const onlyListed = document.getElementById("minibia-bot-attack-only-listed");
     const selection = document.getElementById("minibia-bot-attack-selection");
-    if (count) count.textContent = String(names.length);
+    if (count) count.textContent = String(targets.length);
     if (onlyListed) onlyListed.checked = !!bot.attack?.config?.onlyPriorityTargets;
     if (selection) selection.value = bot.attack?.config?.targetSelectionMode === "list" ? "list" : "proximity";
 
@@ -271,7 +271,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       return;
     }
 
-    names.forEach((name, index) => {
+    targets.forEach((target, index) => {
+      const name = target.name;
       const row = document.createElement("div");
       row.className = "mb-attack-target-row";
       row.setAttribute("role", "listitem");
@@ -282,6 +283,21 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       label.className = "mb-attack-target-name";
       label.textContent = name;
       row.append(rank, label);
+      const stance = document.createElement("select");
+      stance.className = "mb-attack-target-stance";
+      stance.dataset.attackPriorityStanceIndex = String(index);
+      stance.setAttribute("aria-label", `Modo de combate para ${name}`);
+      [
+        ["default", "General"],
+        ["melee", "Cerca"],
+        ["ranged", "Lejos"],
+      ].forEach(([value, text]) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = text;
+        stance.appendChild(option);
+      });
+      stance.value = target.stance || "default";
       const controls = document.createElement("span");
       controls.className = "mb-attack-target-controls";
       [["up", "↑", "Subir"], ["down", "↓", "Bajar"], ["remove", "×", "Quitar"]].forEach(([action, glyph, verb]) => {
@@ -296,7 +312,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         button.disabled = (action === "up" && index === 0) || (action === "down" && index === names.length - 1);
         controls.appendChild(button);
       });
-      row.appendChild(controls);
+      row.append(stance, controls);
       list.appendChild(row);
     });
   }
@@ -305,7 +321,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const list = document.getElementById("minibia-bot-attack-visible-list");
     if (!list) return;
     const monsters = bot.attack?.status?.().nearbyMonsters || [];
-    const priority = new Set((bot.attack?.config?.targetPriority || []).map((name) => String(name).toLocaleLowerCase()));
+    const priority = new Set((bot.attack?.config?.targetPriority || []).map((target) => String(target.name).toLocaleLowerCase()));
     const names = [...new Set(monsters.map((monster) => String(monster?.name || "").trim()).filter(Boolean))]
       .filter((name) => !priority.has(name.toLocaleLowerCase()));
     const signature = names.join("\u0000");
@@ -1258,9 +1274,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel .mb-attack-visible-empty { flex: 0 0 auto; padding: 5px 2px; color: #92908b; font-size: 11px; }
       #minibia-bot-panel .mb-attack-target-list { display: grid; gap: 4px; max-height: 156px; overflow: auto; }
       #minibia-bot-panel .mb-attack-empty { padding: 7px 8px; border: 1px dashed rgba(255,255,255,.12); border-radius: 7px; color: #9d9b96; font-size: 11px; }
-      #minibia-bot-panel .mb-attack-target-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 6px; min-height: 34px; padding: 3px 5px; border: 1px solid rgba(255,255,255,.08); border-radius: 7px; background: rgba(255,255,255,.025); }
+      #minibia-bot-panel .mb-attack-target-row { display: grid; grid-template-columns: 22px minmax(70px, 1fr) auto auto; align-items: center; gap: 6px; min-height: 34px; padding: 3px 5px; border: 1px solid rgba(255,255,255,.08); border-radius: 7px; background: rgba(255,255,255,.025); }
       #minibia-bot-panel .mb-attack-target-rank { color: #c8b17f; text-align: center; font-size: 10px; }
       #minibia-bot-panel .mb-attack-target-name { overflow: hidden; color: #e8e3d8; text-overflow: ellipsis; white-space: nowrap; }
+      #minibia-bot-panel .mb-attack-target-stance { width: auto; min-width: 78px; min-height: 28px; padding: 2px 18px 2px 6px; border-radius: 6px; font-size: 10px; }
       #minibia-bot-panel .mb-attack-target-controls { display: flex; gap: 3px; }
       #minibia-bot-panel .mb-attack-target-controls .mb-attack-row-action { width: 28px; min-width: 28px; min-height: 28px; padding: 2px; border-radius: 6px; font-size: 13px; }
       #minibia-bot-panel .mb-attack-only-listed { padding-top: 6px; border-top: 1px solid rgba(255,255,255,.07); font-size: 11px; }
@@ -1544,7 +1561,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                   <input type="text" id="minibia-bot-attack-target-name" maxlength="48" placeholder="Nombre del monstruo" aria-label="Nombre del monstruo" />
                   <button type="button" class="mb-small-button" id="minibia-bot-attack-target-add">Añadir</button>
                 </div>
-                <div class="mb-attack-target-list" id="minibia-bot-attack-target-list" role="list" aria-label="Monstruos en orden de prioridad"></div>
+                  <div class="mb-small-note">Cada criatura puede usar el modo general o tener su propio alcance.</div>
+                  <div class="mb-attack-target-list" id="minibia-bot-attack-target-list" role="list" aria-label="Monstruos en orden de prioridad"></div>
                 <div class="mb-small-note" id="minibia-bot-attack-target-feedback" role="status" aria-live="polite"></div>
                 <label class="mb-toggle mb-attack-only-listed">
                   <input type="checkbox" id="minibia-bot-attack-only-listed" />
@@ -1561,12 +1579,19 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
               </div>
 
               <div class="mb-attack-card">
-                <div class="mb-attack-card-title">Modo y acciones</div>
-                <label class="mb-toggle mb-attack-mode">
-                  <input type="checkbox" id="minibia-bot-auto-attack-melee" />
-                  <span>Cuerpo a cuerpo · perseguir objetivo</span>
+                <div class="mb-attack-card-title">Alcance y acciones</div>
+                <label class="mb-field" for="minibia-bot-attack-stance">
+                  <span class="mb-field-label">Modo general</span>
+                  <select id="minibia-bot-attack-stance">
+                    <option value="melee">Cerca · perseguir hasta 1 SQM</option>
+                    <option value="ranged">Lejos · mantener distancia</option>
+                  </select>
                 </label>
-                <div class="mb-small-note">Desactívalo para mantener 2–3 casillas de distancia.</div>
+                <label class="mb-field" for="minibia-bot-attack-range">
+                  <span class="mb-field-label">Distancia máxima (2–8 SQM)</span>
+                  <input type="number" id="minibia-bot-attack-range" min="2" max="8" value="3" inputmode="numeric" />
+                </label>
+                <div class="mb-small-note">Por defecto mantiene 2–3 SQM. Cada monstruo puede cambiar el modo general con su selector.</div>
                 <div class="mb-field-grid mb-attack-hotkeys">
                   <label class="mb-field" for="minibia-bot-auto-attack-hotkey">
                     <span class="mb-field-label">Objetivo (1–12)</span>
@@ -1637,7 +1662,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const autoHealMinManaInput = panel.querySelector("#minibia-bot-auto-heal-min-mana");
     const autoHealManaHotkeyInput = panel.querySelector("#minibia-bot-auto-heal-mana-hotkey");
     const autoAttackEnabledInput = panel.querySelector("#minibia-bot-auto-attack-enabled");
-    const autoAttackMeleeInput = panel.querySelector("#minibia-bot-auto-attack-melee");
+    const autoAttackStanceInput = panel.querySelector("#minibia-bot-attack-stance");
+    const autoAttackRangeInput = panel.querySelector("#minibia-bot-attack-range");
     const autoAttackHotkeyInput = panel.querySelector("#minibia-bot-auto-attack-hotkey");
     const autoAttackRuneHotkeyInput = panel.querySelector("#minibia-bot-auto-attack-rune-hotkey");
     const autoAttackTargetNameInput = panel.querySelector("#minibia-bot-attack-target-name");
@@ -2151,7 +2177,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         autoAttackTargetNameInput?.focus();
         return;
       }
-      if (priority.some((entry) => entry.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+      if (priority.some((entry) => entry.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
         if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = `${name} ya está en la lista.`;
         return;
       }
@@ -2159,7 +2185,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = "La lista admite hasta 50 criaturas.";
         return;
       }
-      bot.attack.updateConfig({ targetPriority: [...priority, name] });
+      bot.attack.updateConfig({ targetPriority: [...priority, { name, stance: "default" }] });
       if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = `${name} añadido.`;
       if (autoAttackTargetNameInput) autoAttackTargetNameInput.value = "";
       refreshAttackTargetList();
@@ -2194,6 +2220,17 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = "Orden actualizado.";
       refreshAttackTargetList();
       refreshAttackVisibleList();
+    });
+    autoAttackTargetList?.addEventListener("change", (event) => {
+      const select = event.target.closest("select[data-attack-priority-stance-index]");
+      if (!select) return;
+      const priority = [...(bot.attack?.config?.targetPriority || [])];
+      const index = Number(select.dataset.attackPriorityStanceIndex);
+      if (!Number.isInteger(index) || !priority[index]) return;
+      priority[index] = { ...priority[index], stance: select.value };
+      bot.attack.updateConfig({ targetPriority: priority });
+      if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = `Modo de ${priority[index].name} actualizado.`;
+      refreshAttackTargetList();
     });
     if (autoAttackTargetOnlyInput) {
       autoAttackTargetOnlyInput.checked = !!bot.attack?.config?.onlyPriorityTargets;
@@ -2231,10 +2268,19 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       });
     }
 
-    if (autoAttackMeleeInput) {
-      autoAttackMeleeInput.checked = bot.attack?.config?.meleeMode !== false;
-      autoAttackMeleeInput.addEventListener("change", () => {
-        bot.attack.updateConfig({ meleeMode: autoAttackMeleeInput.checked });
+    if (autoAttackStanceInput) {
+      autoAttackStanceInput.value = bot.attack?.config?.meleeMode === false ? "ranged" : "melee";
+      autoAttackStanceInput.addEventListener("change", () => {
+        bot.attack.updateConfig({ meleeMode: autoAttackStanceInput.value === "melee" });
+      });
+    }
+
+    if (autoAttackRangeInput) {
+      autoAttackRangeInput.value = String(bot.attack?.config?.rangedDistance ?? 3);
+      autoAttackRangeInput.addEventListener("change", () => {
+        const distance = Math.min(8, Math.max(2, Math.trunc(Number(autoAttackRangeInput.value) || 3)));
+        autoAttackRangeInput.value = String(distance);
+        bot.attack.updateConfig({ rangedDistance: distance });
       });
     }
 
@@ -2253,7 +2299,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
           return bot.attack.config.runeHotbarSlot ?? null;
         })();
-        const meleeMode = !!autoAttackMeleeInput?.checked;
+        const meleeMode = autoAttackStanceInput?.value !== "ranged";
 
         if (autoAttackEnabledInput.checked) {
           bot.attack.start({ targetHotbarSlot, runeHotbarSlot, meleeMode });
