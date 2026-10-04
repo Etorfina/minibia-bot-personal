@@ -797,6 +797,17 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         background: linear-gradient(180deg, #755f3d, #4f4028);
       }
 
+      #minibia-bot-panel #minibia-bot-stop-all {
+        border-color: #e06b6b;
+        background: #a9222b;
+        color: #fff;
+      }
+
+      #minibia-bot-panel #minibia-bot-stop-all:hover,
+      #minibia-bot-panel #minibia-bot-stop-all[data-active="true"] {
+        background: #ca2935;
+      }
+
       #minibia-bot-panel input,
       #minibia-bot-panel textarea {
         width: 100%;
