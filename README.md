@@ -63,7 +63,7 @@ El README original se conserva en el respaldo local `minibia-bot-base-y-trabajo.
 
 ## Cavebot V1
 
-En **Cueva**, selecciona el tipo y pulsa **Añadir punto** en el lugar correspondiente:
+En **Cueva**, toca **Node**, **Stand** o **Walk** para guardar la posición actual como punto en un solo toque. **Label** y **Acción** preguntan el nombre o la instrucción antes de guardar.
 
 - **Node / Walk:** puntos flexibles. La tolerancia por defecto es 1; una configuración anterior con tolerancia 0 conserva su precisión.
 - **Stand:** debe llegar exactamente al SQM.
@@ -78,4 +78,4 @@ El combate tiene prioridad sobre la ruta. Tras 8 segundos sin acercarse al punto
 
 Pruebas de comportamiento: `node --test tests/cave.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
 
-Si ves **Record Spot** en vez de **Añadir punto**, tu página aún usa un bundle anterior. Ejecuta el cargador de arriba: comprueba el selector de Cavebot V1 y usa una revisión verificada si la ruta `main` entrega una copia en caché. El botón Reload Bot por sí solo reinicia el código que ya estaba en memoria.
+Si ves **Record Spot** en vez de los botones **Node / Stand / Walk**, tu página aún usa un bundle anterior. Ejecuta el cargador de arriba y recarga Minibia para aplicar la interfaz nueva.
