@@ -72,6 +72,8 @@ En **Cueva**, selecciona el tipo y pulsa **Añadir punto** en el lugar correspon
 
 **Ida y vuelta** recorre los puntos en ambas direcciones, incluidas las acciones. **Loop** vuelve del último al primero; graba también el tramo de regreso. Cada preset guarda su modo de recorrido. START comienza por el punto de movimiento más cercano.
 
+Para compartir un preset, selecciónalo y pulsa **Exportar** debajo de **Nuevo / Borrar**. Usa **Copiar** o **Compartir** y envía el texto JSON. En el otro dispositivo abre **Importar**, pega el texto y pulsa **Guardar recorrido**. Se guarda como un preset nuevo, incluyendo puntos, modo y transiciones de piso aprendidas; si el nombre ya existe se añade un número para no sobrescribirlo. La lista de puntos se puede desplegar tocando **Puntos del recorrido**.
+
 El combate tiene prioridad sobre la ruta. Tras 8 segundos sin acercarse al punto, el antiatasco puede omitir un Node/Walk solamente si el siguiente punto también es flexible, está en el mismo piso y el pathfinder confirma una ruta. En los demás casos detiene Cavebot y muestra el punto que requiere revisión. No omite acciones, Stand ni cambios de piso. Las transiciones aprendidas y Auto Loot del juego siguen funcionando como antes.
 
 Pruebas de comportamiento: `node --test tests/cave.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
