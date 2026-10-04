@@ -642,7 +642,7 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
       return getMonsterCandidates(now).length > 0 && !getCurrentTarget();
     }
 
-    return getNearbyMonsters().length > 0;
+    return getMonsterCandidates(now).length > 0;
   }
 
   function triggerAttack(now = Date.now()) {
@@ -666,6 +666,10 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
     }
 
     if (config.meleeMode) {
+      return false;
+    }
+
+    if (config.onlyPriorityTargets) {
       return false;
     }
 
