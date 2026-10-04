@@ -5,264 +5,173 @@ window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
   const state = {
     running: false,
     timerId: null,
-    lastHpHealAt: 0,
-    lastManaHealAt: 0,
-    lastHpAttemptAt: 0,
-    lastManaAttemptAt: 0,
-    pendingHpAttempt: null,
-    pendingManaAttempt: null,
+    lastActionAt: 0,
+    lastAction: null,
+    lastAttempt: null,
+    pending: null,
+    attempts: Object.create(null),
+    successes: Object.create(null),
   };
 
-  const config = Object.assign(
-    {
-      tickMs: 50,
-      healCooldownMs: 1200,
-      healRetryMs: 200,
-      healConfirmMs: 250,
-      minHp: 250,
-      hpThresholdMode: "absolute",
-      hpHotbarSlot: 1,
-      minMana: 150,
-      manaThresholdMode: "absolute",
-      manaHotbarSlot: 2,
-      enabled: false,
-    },
-    bot.storage.get(configStorageKey, {})
-  );
+  const saved = bot.storage.get(configStorageKey, {}) || {};
+  const legacyRules = [
+    { id: "legacy-hp", kind: "spell", name: "Spell Hi", slot: saved.hpHotbarSlot ?? 1, stat: "hp", operator: "below", value: saved.minHp ?? 250, unit: saved.hpThresholdMode === "percentage" ? "percent" : "points", manaCost: 0, cooldownMs: saved.healCooldownMs ?? 1200, enabled: true },
+    { id: "legacy-mana", kind: "potion", name: "Mana", slot: saved.manaHotbarSlot ?? 2, stat: "mana", operator: "below", value: saved.minMana ?? 150, unit: saved.manaThresholdMode === "percentage" ? "percent" : "points", manaCost: 0, cooldownMs: saved.healCooldownMs ?? 1200, enabled: true },
+  ];
+
+  const config = Object.assign({
+    tickMs: 100,
+    delayMs: 0,
+    minimumMana: 0,
+    healCooldownMs: 1200,
+    minHp: 250,
+    hpThresholdMode: "absolute",
+    hpHotbarSlot: 1,
+    minMana: 150,
+    manaThresholdMode: "absolute",
+    manaHotbarSlot: 2,
+    enabled: false,
+    rules: Array.isArray(saved.rules) ? saved.rules : legacyRules,
+  }, saved);
   config.hpThresholdMode = config.hpThresholdMode === "percentage" ? "percentage" : "absolute";
   config.manaThresholdMode = config.manaThresholdMode === "percentage" ? "percentage" : "absolute";
-  if (config.hpThresholdMode === "percentage" && Number(config.minHp) > 100) config.minHp = 50;
-  if (config.manaThresholdMode === "percentage" && Number(config.minMana) > 100) config.minMana = 50;
+  config.rules = normalizeRules(config.rules);
+
+  function normalizeRules(value) {
+    if (!Array.isArray(value)) return [];
+    const seen = new Set();
+    return value.slice(0, 24).map((source, index) => {
+      const rule = source && typeof source === "object" ? source : {};
+      const id = String(rule.id || `heal-${index + 1}`).slice(0, 48);
+      return {
+        id: seen.has(id) ? `heal-${index + 1}-${Date.now()}` : (seen.add(id), id),
+        kind: ["spell", "rune", "potion"].includes(rule.kind) ? rule.kind : "spell",
+        name: String(rule.name || "Acción de curación").trim().slice(0, 48),
+        slot: normalizeHotbarSlot(rule.slot),
+        stat: rule.stat === "mana" ? "mana" : "hp",
+        operator: rule.operator === "above" ? "above" : "below",
+        value: clampNumber(rule.value, rule.unit === "percent" ? 100 : 1000000, 0),
+        unit: rule.unit === "percent" ? "percent" : "points",
+        manaCost: clampNumber(rule.manaCost, 1000000, 0),
+        cooldownMs: clampNumber(rule.cooldownMs, 60000, 1200),
+        enabled: rule.enabled !== false,
+      };
+    });
+  }
+
+  function clampNumber(value, max, fallback) {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.min(max, Math.max(0, number)) : fallback;
+  }
+
+  function normalizeHotbarSlot(value) {
+    const slot = Math.trunc(Number(value));
+    return Number.isFinite(slot) && slot >= 1 && slot <= 12 ? slot : null;
+  }
 
   function persistConfig() {
-    bot.storage.set(configStorageKey, { ...config });
+    bot.storage.set(configStorageKey, { ...config, rules: config.rules.map((rule) => ({ ...rule })) });
   }
 
   function readStats() {
-    const playerState = bot.getPlayerSnapshot?.();
-
-    return playerState
-      ? {
-          hp: {
-            current: Number(playerState.health ?? 0),
-            max: Number(playerState.maxHealth ?? 0),
-          },
-          mana: {
-            current: Number(playerState.mana ?? 0),
-            max: Number(playerState.maxMana ?? 0),
-          },
-        }
-      : { hp: null, mana: null };
+    const player = bot.getPlayerSnapshot?.();
+    return player ? {
+      hp: { current: Number(player.health ?? 0), max: Number(player.maxHealth ?? 0) },
+      mana: { current: Number(player.mana ?? 0), max: Number(player.maxMana ?? 0) },
+    } : { hp: null, mana: null };
   }
 
-  function normalizeHotbarSlot(slot) {
-    const value = Number(slot);
-    if (!Number.isFinite(value)) {
-      return null;
+  function readRuleValue(rule, stats) {
+    const stat = stats[rule.stat];
+    if (!stat || !Number.isFinite(stat.current)) return null;
+    if (rule.unit === "percent") {
+      if (!Number.isFinite(stat.max) || stat.max <= 0) return null;
+      return (stat.current / stat.max) * 100;
     }
-
-    const normalized = Math.trunc(value);
-    if (normalized < 1 || normalized > 12) {
-      return null;
-    }
-
-    return normalized;
+    return stat.current;
   }
 
-  function thresholdReached(stat, threshold, mode) {
-    if (!stat || !Number.isFinite(stat.current)) return false;
-    if (mode === "percentage") {
-      if (!Number.isFinite(stat.max) || stat.max <= 0) return false;
-      return (stat.current / stat.max) * 100 <= Math.min(100, Math.max(0, Number(threshold) || 0));
-    }
-    return stat.current <= Math.max(0, Number(threshold) || 0);
+  function conditionMet(rule, stats) {
+    const actual = readRuleValue(rule, stats);
+    if (actual == null) return false;
+    return rule.operator === "above" ? actual >= rule.value : actual <= rule.value;
   }
 
-  function hasPendingAttempt() {
-    return !!(state.pendingHpAttempt || state.pendingManaAttempt);
+  function canUseRule(rule, now, stats) {
+    if (!rule.enabled || !rule.slot || !conditionMet(rule, stats)) return false;
+    if (Number(stats.mana?.current ?? 0) < Math.max(config.minimumMana, rule.manaCost)) return false;
+    if (state.pending || now - state.lastActionAt < Number(config.delayMs || 0)) return false;
+    return now - Number(state.attempts[rule.id] || 0) >= rule.cooldownMs;
   }
 
-  function didHpHealSucceed(stats, attempt) {
-    if (!stats?.hp || !attempt) {
-      return false;
-    }
-
-    return (
-      stats.hp.current > attempt.hpBefore ||
-      (Number.isFinite(attempt.manaBefore) && Number.isFinite(stats.mana?.current) && stats.mana.current < attempt.manaBefore)
-    );
+  function didActionWork(before, after) {
+    return Number(after?.hp?.current ?? 0) > Number(before?.hp?.current ?? 0) ||
+      Number(after?.mana?.current ?? 0) > Number(before?.mana?.current ?? 0) ||
+      Number(after?.mana?.current ?? 0) < Number(before?.mana?.current ?? 0);
   }
 
-  function didManaHealSucceed(stats, attempt) {
-    if (!stats?.mana || !attempt) {
-      return false;
-    }
-
-    return (
-      stats.mana.current > attempt.manaBefore ||
-      (Number.isFinite(attempt.hpBefore) && Number.isFinite(stats.hp?.current) && stats.hp.current > attempt.hpBefore)
-    );
-  }
-
-  function resolvePendingAttempts(stats, now = Date.now()) {
-    const hpAttempt = state.pendingHpAttempt;
-    if (hpAttempt) {
-      if (didHpHealSucceed(stats, hpAttempt)) {
-        state.lastHpHealAt = hpAttempt.attemptedAt;
-        state.pendingHpAttempt = null;
-        bot.log("confirmed hp heal", { slot: hpAttempt.slot });
-      } else if (now - hpAttempt.attemptedAt >= Math.max(50, Number(config.healConfirmMs) || 0)) {
-        state.pendingHpAttempt = null;
-        bot.log("hp heal did not register", { slot: hpAttempt.slot });
-      }
-    }
-
-    const manaAttempt = state.pendingManaAttempt;
-    if (manaAttempt) {
-      if (didManaHealSucceed(stats, manaAttempt)) {
-        state.lastManaHealAt = manaAttempt.attemptedAt;
-        state.pendingManaAttempt = null;
-        bot.log("confirmed mana heal", { slot: manaAttempt.slot });
-      } else if (now - manaAttempt.attemptedAt >= Math.max(50, Number(config.healConfirmMs) || 0)) {
-        state.pendingManaAttempt = null;
-        bot.log("mana heal did not register", { slot: manaAttempt.slot });
-      }
+  function resolvePending(now, stats) {
+    if (!state.pending) return;
+    if (didActionWork(state.pending.stats, stats)) {
+      state.successes[state.pending.ruleId] = state.pending.at;
+      state.lastAction = state.pending.ruleName;
+      bot.log("confirmed healing action", { name: state.pending.ruleName, slot: state.pending.slot });
+      state.pending = null;
+    } else if (now - state.pending.at >= Math.max(100, Number(config.confirmMs) || 600)) {
+      bot.log("healing action not confirmed", { name: state.pending.ruleName, slot: state.pending.slot });
+      state.pending = null;
     }
   }
 
-  function canUseHpHeal(now = Date.now(), stats = readStats()) {
-    const { hp } = stats;
-    const slot = normalizeHotbarSlot(config.hpHotbarSlot);
-    if (!hp || !slot || state.pendingHpAttempt) return false;
-
-    return (
-      hp.current > 0 &&
-      thresholdReached(hp, config.minHp, config.hpThresholdMode) &&
-      now - state.lastHpHealAt >= config.healCooldownMs &&
-      now - state.lastHpAttemptAt >= Math.max(50, Number(config.healRetryMs) || 0)
-    );
-  }
-
-  function canUseManaHeal(now = Date.now(), stats = readStats()) {
-    const { mana } = stats;
-    const slot = normalizeHotbarSlot(config.manaHotbarSlot);
-    if (!mana || !slot || state.pendingManaAttempt || state.pendingHpAttempt) return false;
-
-    return (
-      thresholdReached(mana, config.minMana, config.manaThresholdMode) &&
-      now - state.lastManaHealAt >= config.healCooldownMs &&
-      now - state.lastManaAttemptAt >= Math.max(50, Number(config.healRetryMs) || 0)
-    );
-  }
-
-  function triggerHpHeal(now = Date.now(), stats = readStats()) {
-    if (!canUseHpHeal(now, stats)) {
-      return false;
-    }
-
-    const slot = normalizeHotbarSlot(config.hpHotbarSlot);
-    const clicked = bot.clickHotbar(slot - 1);
-    if (clicked) {
-      state.lastHpAttemptAt = now;
-      state.pendingHpAttempt = {
-        attemptedAt: now,
-        slot,
-        hpBefore: Number(stats.hp?.current ?? 0),
-        manaBefore: Number(stats.mana?.current ?? 0),
-      };
-      bot.log("pressed hp heal hotkey", { slot, minHp: config.minHp });
-    }
-
-    return clicked;
-  }
-
-  function triggerManaHeal(now = Date.now(), stats = readStats()) {
-    if (!canUseManaHeal(now, stats)) {
-      return false;
-    }
-
-    const slot = normalizeHotbarSlot(config.manaHotbarSlot);
-    const clicked = bot.clickHotbar(slot - 1);
-    if (clicked) {
-      state.lastManaAttemptAt = now;
-      state.pendingManaAttempt = {
-        attemptedAt: now,
-        slot,
-        hpBefore: Number(stats.hp?.current ?? 0),
-        manaBefore: Number(stats.mana?.current ?? 0),
-      };
-      bot.log("pressed mana heal hotkey", { slot, minMana: config.minMana });
-    }
-
-    return clicked;
+  function triggerRule(rule, now, stats) {
+    if (!canUseRule(rule, now, stats)) return false;
+    const clicked = bot.clickHotbar(rule.slot - 1);
+    if (!clicked) return false;
+    state.attempts[rule.id] = now;
+    state.lastActionAt = now;
+    state.lastAttempt = { id: rule.id, name: rule.name, kind: rule.kind, slot: rule.slot, at: now };
+    state.pending = { ruleId: rule.id, ruleName: rule.name, slot: rule.slot, stats, at: now };
+    bot.log("triggered healing rule", { name: rule.name, kind: rule.kind, slot: rule.slot, stat: rule.stat });
+    return true;
   }
 
   function tryHeal() {
-    if (!config.enabled) {
-      return false;
-    }
-
+    if (!config.enabled) return false;
     const now = Date.now();
     const stats = readStats();
-
-    resolvePendingAttempts(stats, now);
-
-    if (hasPendingAttempt()) {
-      return false;
+    resolvePending(now, stats);
+    if (state.pending) return false;
+    for (const rule of config.rules) {
+      if (triggerRule(rule, now, stats)) return true;
     }
-
-    if (triggerHpHeal(now, stats)) {
-      return true;
-    }
-
-    return triggerManaHeal(now, stats);
+    return false;
   }
 
   function scheduleNextTick() {
     if (!state.running) return;
-
-    state.timerId = window.setTimeout(() => {
-      tick();
-    }, config.tickMs);
+    state.timerId = window.setTimeout(tick, Math.max(50, Number(config.tickMs) || 100));
   }
 
   function tick() {
     if (!state.running) return;
-
-    try {
-      tryHeal();
-    } catch (error) {
-      bot.log("auto heal tick failed", error?.message || error);
-    } finally {
-      scheduleNextTick();
-    }
+    try { tryHeal(); } catch (error) { bot.log("auto heal tick failed", error?.message || error); }
+    finally { scheduleNextTick(); }
   }
 
   function start(overrides = {}) {
-    Object.assign(config, overrides, { enabled: true });
-    persistConfig();
-
-    if (state.running) {
-      bot.log("auto heal already running");
-      return false;
-    }
-
+    updateConfig({ ...overrides, enabled: true });
+    if (state.running) return false;
     state.running = true;
-    bot.log("auto heal started", { ...config });
+    bot.log("auto heal started", { rules: config.rules.length });
     tick();
     return true;
   }
 
   function stop(options = {}) {
-    const shouldPersistEnabled = options.persistEnabled !== false;
     state.running = false;
-
-    if (state.timerId != null) {
-      window.clearTimeout(state.timerId);
-      state.timerId = null;
-    }
-
-    if (shouldPersistEnabled) {
+    if (state.timerId != null) window.clearTimeout(state.timerId);
+    state.timerId = null;
+    if (options.persistEnabled !== false) {
       config.enabled = false;
       persistConfig();
     }
@@ -270,89 +179,77 @@ window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
     return true;
   }
 
+  function updateConfig(next = {}) {
+    const hpMode = next.hpThresholdMode ?? config.hpThresholdMode;
+    const manaMode = next.manaThresholdMode ?? config.manaThresholdMode;
+    if (Object.prototype.hasOwnProperty.call(next, "hpThresholdMode") && hpMode === "percentage" && !Object.prototype.hasOwnProperty.call(next, "minHp") && Number(config.minHp) > 100) next.minHp = 50;
+    if (Object.prototype.hasOwnProperty.call(next, "manaThresholdMode") && manaMode === "percentage" && !Object.prototype.hasOwnProperty.call(next, "minMana") && Number(config.minMana) > 100) next.minMana = 50;
+    if (Object.prototype.hasOwnProperty.call(next, "minHp")) next.minHp = clampNumber(next.minHp, hpMode === "percentage" ? 100 : 1000000, 0);
+    if (Object.prototype.hasOwnProperty.call(next, "minMana")) next.minMana = clampNumber(next.minMana, manaMode === "percentage" ? 100 : 1000000, 0);
+    const hasRules = Object.prototype.hasOwnProperty.call(next, "rules");
+    if (!hasRules) {
+      const hpRule = config.rules.find((rule) => rule.stat === "hp");
+      const manaRule = config.rules.find((rule) => rule.stat === "mana");
+      if (hpRule) {
+        if (Object.prototype.hasOwnProperty.call(next, "minHp")) hpRule.value = clampNumber(next.minHp, (next.hpThresholdMode ?? config.hpThresholdMode) === "percentage" ? 100 : 1000000, 0);
+        if (Object.prototype.hasOwnProperty.call(next, "hpThresholdMode")) hpRule.unit = next.hpThresholdMode === "percentage" ? "percent" : "points";
+        if (Object.prototype.hasOwnProperty.call(next, "hpHotbarSlot")) hpRule.slot = normalizeHotbarSlot(next.hpHotbarSlot);
+      }
+      if (manaRule) {
+        if (Object.prototype.hasOwnProperty.call(next, "minMana")) manaRule.value = clampNumber(next.minMana, (next.manaThresholdMode ?? config.manaThresholdMode) === "percentage" ? 100 : 1000000, 0);
+        if (Object.prototype.hasOwnProperty.call(next, "manaThresholdMode")) manaRule.unit = next.manaThresholdMode === "percentage" ? "percent" : "points";
+        if (Object.prototype.hasOwnProperty.call(next, "manaHotbarSlot")) manaRule.slot = normalizeHotbarSlot(next.manaHotbarSlot);
+      }
+      if (Object.prototype.hasOwnProperty.call(next, "healCooldownMs")) {
+        for (const rule of config.rules) rule.cooldownMs = clampNumber(next.healCooldownMs, 60000, 1200);
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(next, "rules")) next.rules = normalizeRules(next.rules);
+    if (Object.prototype.hasOwnProperty.call(next, "tickMs")) next.tickMs = Math.max(50, clampNumber(next.tickMs, 5000, 100));
+    if (Object.prototype.hasOwnProperty.call(next, "delayMs")) next.delayMs = clampNumber(next.delayMs, 60000, 0);
+    if (Object.prototype.hasOwnProperty.call(next, "minimumMana")) next.minimumMana = clampNumber(next.minimumMana, 1000000, 0);
+    Object.assign(config, next);
+    persistConfig();
+    bot.log("auto heal config updated", { rules: config.rules.length });
+    return { ...config, rules: config.rules.map((rule) => ({ ...rule })) };
+  }
+
   function status() {
     return {
       running: state.running,
-      config: { ...config },
+      config: { ...config, rules: config.rules.map((rule) => ({ ...rule })) },
       stats: readStats(),
-      lastHpHealAt: state.lastHpHealAt,
-      lastManaHealAt: state.lastManaHealAt,
-      lastHpAttemptAt: state.lastHpAttemptAt,
-      lastManaAttemptAt: state.lastManaAttemptAt,
-      pendingHpAttempt: state.pendingHpAttempt ? { ...state.pendingHpAttempt } : null,
-      pendingManaAttempt: state.pendingManaAttempt ? { ...state.pendingManaAttempt } : null,
+      lastActionAt: state.lastActionAt,
+      lastAction: state.lastAction,
+      lastAttempt: state.lastAttempt ? { ...state.lastAttempt } : null,
+      pending: state.pending ? { ...state.pending } : null,
     };
   }
 
-  function updateConfig(nextConfig = {}) {
-    if (Object.prototype.hasOwnProperty.call(nextConfig, "hpHotbarSlot")) {
-      nextConfig.hpHotbarSlot = normalizeHotbarSlot(nextConfig.hpHotbarSlot) ?? config.hpHotbarSlot;
-    }
-
-    if (Object.prototype.hasOwnProperty.call(nextConfig, "manaHotbarSlot")) {
-      nextConfig.manaHotbarSlot = normalizeHotbarSlot(nextConfig.manaHotbarSlot) ?? config.manaHotbarSlot;
-    }
-
-    if (Object.prototype.hasOwnProperty.call(nextConfig, "minHp")) {
-      nextConfig.minHp = Math.max(0, Number(nextConfig.minHp) || 0);
-    }
-
-    if (Object.prototype.hasOwnProperty.call(nextConfig, "minMana")) {
-      nextConfig.minMana = Math.max(0, Number(nextConfig.minMana) || 0);
-    }
-
-    if (Object.prototype.hasOwnProperty.call(nextConfig, "hpThresholdMode")) {
-      nextConfig.hpThresholdMode = nextConfig.hpThresholdMode === "percentage" ? "percentage" : "absolute";
-      if (nextConfig.hpThresholdMode === "percentage" && !Object.prototype.hasOwnProperty.call(nextConfig, "minHp") && Number(config.minHp) > 100) {
-        config.minHp = 50;
-      }
-    }
-
-    if (Object.prototype.hasOwnProperty.call(nextConfig, "manaThresholdMode")) {
-      nextConfig.manaThresholdMode = nextConfig.manaThresholdMode === "percentage" ? "percentage" : "absolute";
-      if (nextConfig.manaThresholdMode === "percentage" && !Object.prototype.hasOwnProperty.call(nextConfig, "minMana") && Number(config.minMana) > 100) {
-        config.minMana = 50;
-      }
-    }
-
-    if ((nextConfig.hpThresholdMode ?? config.hpThresholdMode) === "percentage" && Object.prototype.hasOwnProperty.call(nextConfig, "minHp")) {
-      nextConfig.minHp = Math.min(100, Math.max(0, Number(nextConfig.minHp) || 0));
-    }
-
-    if ((nextConfig.manaThresholdMode ?? config.manaThresholdMode) === "percentage" && Object.prototype.hasOwnProperty.call(nextConfig, "minMana")) {
-      nextConfig.minMana = Math.min(100, Math.max(0, Number(nextConfig.minMana) || 0));
-    }
-
-    if (Object.prototype.hasOwnProperty.call(nextConfig, "healRetryMs")) {
-      nextConfig.healRetryMs = Math.max(50, Number(nextConfig.healRetryMs) || 50);
-    }
-
-    if (Object.prototype.hasOwnProperty.call(nextConfig, "healConfirmMs")) {
-      nextConfig.healConfirmMs = Math.max(50, Number(nextConfig.healConfirmMs) || 50);
-    }
-
-    Object.assign(config, nextConfig);
-    persistConfig();
-    bot.log("auto heal config updated", { ...config });
-    return { ...config };
+  function getLegacyRule(stat) {
+    return config.rules.find((rule) => rule.stat === stat && rule.enabled) || config.rules.find((rule) => rule.stat === stat) || null;
   }
 
-  if (config.enabled) {
-    start();
+  function canUseStat(stat, now = Date.now(), stats = readStats()) {
+    const rule = getLegacyRule(stat);
+    return !!rule && canUseRule(rule, now, stats);
+  }
+
+  function triggerStat(stat, now = Date.now(), stats = readStats()) {
+    const rule = getLegacyRule(stat);
+    return !!rule && triggerRule(rule, now, stats);
   }
 
   bot.heal = {
-    start,
-    stop,
-    status,
-    updateConfig,
-    readStats,
-    tryHeal,
-    canUseHpHeal,
-    canUseManaHeal,
-    triggerHpHeal,
-    triggerManaHeal,
+    start, stop, status, updateConfig, readStats, tryHeal,
+    canUseHpHeal: (now, stats) => canUseStat("hp", now, stats),
+    canUseManaHeal: (now, stats) => canUseStat("mana", now, stats),
+    triggerHpHeal: (now, stats) => triggerStat("hp", now, stats),
+    triggerManaHeal: (now, stats) => triggerStat("mana", now, stats),
     normalizeHotbarSlot,
     config,
   };
+
+  if (config.enabled) start();
+  bot.addCleanup(() => stop({ persistEnabled: false }));
 };
