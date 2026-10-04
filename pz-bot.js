@@ -7706,6 +7706,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel .mb-cave-choice-group button { width: auto; min-height: 34px; padding: 5px 9px; border-radius: 7px; font-size: 12px; }
       #minibia-bot-panel .mb-cave-choice-group button[aria-pressed="true"] { background: #a17a39; border-color: #e3c17d; color: #fff; }
       #minibia-bot-panel .mb-cave-choice-group button:focus-visible { outline: 2px solid #f4d48c; outline-offset: 2px; }
+      #minibia-bot-panel .mb-cave-preset-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+      #minibia-bot-panel .mb-cave-preset-actions button { min-height: 36px; padding: 4px 3px; font-size: 11px; }
+      #minibia-bot-panel .mb-cave-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; padding: 7px 8px; border: 1px solid rgba(224,200,148,.18); border-radius: 7px; background: rgba(12,9,6,.25); color: #c7b990; font-size: 10px; line-height: 1.3; }
+      #minibia-bot-panel .mb-cave-legend b { color: #f0d69a; font-weight: 600; }
     `;
     document.head.appendChild(style);
 
@@ -7878,11 +7882,9 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                   <select id="minibia-bot-cave-preset-select"></select>
                 </label>
               </div>
-              <div class="mb-actions mb-actions-inline-two">
+              <div class="mb-cave-preset-actions">
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-new">Nuevo</button>
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-preset-delete">Borrar</button>
-              </div>
-              <div class="mb-actions mb-actions-inline-two">
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-import">Importar</button>
                 <button type="button" class="mb-small-button" id="minibia-bot-cave-export">Exportar</button>
               </div>
@@ -7898,12 +7900,19 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
               <div class="mb-field"><span>Tipo de punto</span>
                 <input type="hidden" id="minibia-bot-cave-type" value="node" />
                 <div class="mb-cave-choice-group" id="minibia-bot-cave-type-options" role="group" aria-label="Tipo de punto">
-                  <button type="button" data-cave-type="node" aria-pressed="true">Node</button>
-                  <button type="button" data-cave-type="stand" aria-pressed="false">Stand</button>
-                  <button type="button" data-cave-type="walk" aria-pressed="false">Walk</button>
-                  <button type="button" data-cave-type="label" aria-pressed="false">Label</button>
-                  <button type="button" data-cave-type="action" aria-pressed="false">Acción</button>
+                  <button type="button" data-cave-type="node" aria-label="Añadir punto Node">Node</button>
+                  <button type="button" data-cave-type="stand" aria-label="Añadir punto Stand">Stand</button>
+                  <button type="button" data-cave-type="walk" aria-label="Añadir punto Walk">Walk</button>
+                  <button type="button" data-cave-type="label" aria-label="Añadir punto Label">Label</button>
+                  <button type="button" data-cave-type="action" aria-label="Añadir punto Acción">Acción</button>
                 </div>
+                <div class="mb-cave-legend" aria-label="Qué hace cada tipo de punto">
+                  <span><b>Node / Walk</b> · Punto flexible</span>
+                  <span><b>Stand</b> · Llega al SQM exacto</span>
+                  <span><b>Label</b> · Marca con nombre para goto</span>
+                  <span><b>Acción</b> · Espera, omite o salta a un Label</span>
+                </div>
+                <div class="mb-small-note">Toca un tipo para guardar el SQM actual.</div>
               </div>
               <div class="mb-field"><span>Recorrido</span>
                 <input type="hidden" id="minibia-bot-cave-mode" value="pingpong" />
@@ -7914,10 +7923,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
               </div>
               <div class="mb-small-note">Action: wait:2000, skip:1 o goto:SALIDA. Stand llega al SQM exacto.</div>
               <details class="mb-cave-route-details"><summary id="minibia-bot-cave-route-summary">Puntos del recorrido (0) ▾</summary><pre id="minibia-bot-cave-route"></pre></details>
-              <div class="mb-actions mb-actions-inline-two">
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-record">Añadir punto</button>
-                <button type="button" class="mb-small-button" id="minibia-bot-cave-remove-last">Quitar último</button>
-              </div>
+              <button type="button" class="mb-small-button" id="minibia-bot-cave-remove-last">Quitar último</button>
               <div class="mb-small-note" id="minibia-bot-cave-closest">Closest start: no waypoints</div>
               <div class="mb-small-note" id="minibia-bot-cave-transition-status">Transitions learned: none</div>
               <div class="mb-actions mb-actions-inline-two">
@@ -8025,7 +8031,6 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const stopAllButton = panel.querySelector("#minibia-bot-stop-all");
     const reloadButton = panel.querySelector("#minibia-bot-reload");
     const copySetupButton = panel.querySelector("#minibia-bot-copy-setup");
-    const caveRecordButton = panel.querySelector("#minibia-bot-cave-record");
     const caveRemoveLastButton = panel.querySelector("#minibia-bot-cave-remove-last");
     const caveStartButton = panel.querySelector("#minibia-bot-cave-start");
     const caveStopButton = panel.querySelector("#minibia-bot-cave-stop");
@@ -8337,9 +8342,22 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       });
     }
 
+    const recordCaveWaypoint = (type) => {
+      const options = { type };
+      if (type === "label" || type === "action") {
+        const value = window.prompt(type === "label" ? "Nombre del punto (ej. SALIDA):" : "Acción: wait:2000, skip:1 o goto:SALIDA");
+        if (!value?.trim()) return;
+        options[type === "label" ? "label" : "action"] = value.trim();
+      }
+      if (!bot.cave.addWaypointCurrentSpot(options)) window.alert("Punto inválido. Usa wait:milisegundos, skip:entero o goto:NOMBRE.");
+      refreshCaveStatus();
+      refreshCavePresetControls();
+      refreshCaveClosestStatus();
+      refreshCaveTransitionStatus();
+    };
     panel.querySelectorAll("[data-cave-type]").forEach(button => button.addEventListener("click", () => {
       panel.querySelector("#minibia-bot-cave-type").value = button.dataset.caveType;
-      panel.querySelectorAll("[data-cave-type]").forEach(option => option.setAttribute("aria-pressed", String(option === button)));
+      recordCaveWaypoint(button.dataset.caveType);
     }));
     panel.querySelectorAll("[data-cave-mode]").forEach(button => button.addEventListener("click", () => {
       const mode = button.dataset.caveMode;
@@ -8347,23 +8365,6 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       panel.querySelectorAll("[data-cave-mode]").forEach(option => option.setAttribute("aria-pressed", String(option === button)));
       bot.cave.updateConfig({ routeMode: mode });
     }));
-    if (caveRecordButton) {
-      caveRecordButton.addEventListener("click", () => {
-        const type = panel.querySelector("#minibia-bot-cave-type")?.value || "node";
-        const options = { type };
-        if (type === "label" || type === "action") {
-          const value = window.prompt(type === "label" ? "Nombre del punto (ej. SALIDA):" : "Acción: wait:2000, skip:1 o goto:SALIDA");
-          if (!value?.trim()) return;
-          options[type === "label" ? "label" : "action"] = value.trim();
-        }
-        if (!bot.cave.addWaypointCurrentSpot(options)) window.alert("Punto inválido. Usa wait:milisegundos, skip:entero o goto:NOMBRE.");
-        refreshCaveStatus();
-        refreshCavePresetControls();
-        refreshCaveClosestStatus();
-        refreshCaveTransitionStatus();
-      });
-    }
-
     if (caveRemoveLastButton) {
       caveRemoveLastButton.addEventListener("click", () => {
         bot.cave.removeLastWaypoint();
