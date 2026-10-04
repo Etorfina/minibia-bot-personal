@@ -251,6 +251,84 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
           : "Activo · esperando criaturas cercanas";
   }
 
+  function refreshAttackTargetList() {
+    const list = document.getElementById("minibia-bot-attack-target-list");
+    if (!list) return;
+    const names = Array.isArray(bot.attack?.config?.targetPriority) ? bot.attack.config.targetPriority : [];
+    const count = document.getElementById("minibia-bot-attack-target-count");
+    const onlyListed = document.getElementById("minibia-bot-attack-only-listed");
+    const selection = document.getElementById("minibia-bot-attack-selection");
+    if (count) count.textContent = String(names.length);
+    if (onlyListed) onlyListed.checked = !!bot.attack?.config?.onlyPriorityTargets;
+    if (selection) selection.value = bot.attack?.config?.targetSelectionMode === "list" ? "list" : "proximity";
+
+    list.replaceChildren();
+    if (!names.length) {
+      const empty = document.createElement("div");
+      empty.className = "mb-attack-empty";
+      empty.textContent = "Sin prioridades; por defecto elige el objetivo más cercano.";
+      list.appendChild(empty);
+      return;
+    }
+
+    names.forEach((name, index) => {
+      const row = document.createElement("div");
+      row.className = "mb-attack-target-row";
+      row.setAttribute("role", "listitem");
+      const rank = document.createElement("span");
+      rank.className = "mb-attack-target-rank";
+      rank.textContent = String(index + 1);
+      const label = document.createElement("span");
+      label.className = "mb-attack-target-name";
+      label.textContent = name;
+      row.append(rank, label);
+      const controls = document.createElement("span");
+      controls.className = "mb-attack-target-controls";
+      [["up", "↑", "Subir"], ["down", "↓", "Bajar"], ["remove", "×", "Quitar"]].forEach(([action, glyph, verb]) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "mb-attack-row-action";
+        button.dataset.attackPriorityAction = action;
+        button.dataset.attackPriorityIndex = String(index);
+        button.textContent = glyph;
+        button.setAttribute("aria-label", `${verb} ${name}`);
+        button.title = `${verb} ${name}`;
+        button.disabled = (action === "up" && index === 0) || (action === "down" && index === names.length - 1);
+        controls.appendChild(button);
+      });
+      row.appendChild(controls);
+      list.appendChild(row);
+    });
+  }
+
+  function refreshAttackVisibleList() {
+    const list = document.getElementById("minibia-bot-attack-visible-list");
+    if (!list) return;
+    const monsters = bot.attack?.status?.().nearbyMonsters || [];
+    const priority = new Set((bot.attack?.config?.targetPriority || []).map((name) => String(name).toLocaleLowerCase()));
+    const names = [...new Set(monsters.map((monster) => String(monster?.name || "").trim()).filter(Boolean))]
+      .filter((name) => !priority.has(name.toLocaleLowerCase()));
+    const signature = names.join("\u0000");
+    if (list.dataset.signature === signature) return;
+    list.dataset.signature = signature;
+    list.replaceChildren();
+    if (!names.length) {
+      const empty = document.createElement("span");
+      empty.className = "mb-attack-visible-empty";
+      empty.textContent = monsters.length ? "Todas las detectadas ya están en la lista." : "No hay criaturas visibles en este piso.";
+      list.appendChild(empty);
+      return;
+    }
+    names.forEach((name) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.attackVisibleTarget = name;
+      button.textContent = `+ ${name}`;
+      button.setAttribute("aria-label", `Añadir ${name} a la prioridad`);
+      list.appendChild(button);
+    });
+  }
+
   function refreshCaveStatus() {
     const statusLabel = document.getElementById("minibia-bot-cave-status");
     const startButton = document.getElementById("minibia-bot-cave-start");
@@ -1144,6 +1222,9 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-mobile .mb-attack-layout { gap: 8px; }
       #minibia-bot-panel.mb-mobile .mb-attack-card { padding: 10px; gap: 7px; }
       #minibia-bot-panel.mb-mobile .mb-attack-card .mb-small-note { font-size: 11px; line-height: 1.35; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-list { max-height: 126px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-hotkeys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #minibia-bot-panel.mb-mobile .mb-attack-visible-list button { min-height: 34px; }
       #minibia-bot-panel .mb-cave-route-details { border: 1px solid rgba(224,200,148,.25); border-radius: 7px; padding: 6px 8px; }
       #minibia-bot-panel .mb-cave-route-details summary { cursor: pointer; color: #d3c49d; }
       #minibia-bot-panel .mb-cave-route-details pre { max-height: 150px; overflow: auto; white-space: pre-wrap; font-size: 11px; margin: 6px 0 0; }
@@ -1167,6 +1248,24 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel .mb-attack-status[data-active="true"] { border-color: rgba(113,155,121,.65); background: rgba(69,107,77,.3); color: #c8e8ce; }
       #minibia-bot-panel .mb-attack-enable { padding-top: 8px; border-top: 1px solid rgba(255,255,255,.08); font-weight: 650; }
       #minibia-bot-panel .mb-attack-hotkeys { gap: 8px; }
+      #minibia-bot-panel .mb-attack-count { min-width: 24px; padding: 2px 7px; border-radius: 999px; background: rgba(255,255,255,.08); color: #d9c397; text-align: center; font-size: 10px; }
+      #minibia-bot-panel .mb-attack-add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+      #minibia-bot-panel .mb-attack-add-row input { min-width: 0; min-height: 36px; padding: 6px 9px; }
+      #minibia-bot-panel .mb-attack-add-row button { width: auto; min-height: 36px; padding: 6px 11px; }
+      #minibia-bot-panel .mb-attack-detected-label { margin-top: 1px; }
+      #minibia-bot-panel .mb-attack-visible-list { display: flex; gap: 5px; max-width: 100%; overflow-x: auto; padding: 1px 1px 4px; }
+      #minibia-bot-panel .mb-attack-visible-list button { width: auto; flex: 0 0 auto; min-height: 30px; padding: 4px 8px; border-radius: 999px; background: #292b2d; font-size: 11px; }
+      #minibia-bot-panel .mb-attack-visible-empty { flex: 0 0 auto; padding: 5px 2px; color: #92908b; font-size: 11px; }
+      #minibia-bot-panel .mb-attack-target-list { display: grid; gap: 4px; max-height: 156px; overflow: auto; }
+      #minibia-bot-panel .mb-attack-empty { padding: 7px 8px; border: 1px dashed rgba(255,255,255,.12); border-radius: 7px; color: #9d9b96; font-size: 11px; }
+      #minibia-bot-panel .mb-attack-target-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 6px; min-height: 34px; padding: 3px 5px; border: 1px solid rgba(255,255,255,.08); border-radius: 7px; background: rgba(255,255,255,.025); }
+      #minibia-bot-panel .mb-attack-target-rank { color: #c8b17f; text-align: center; font-size: 10px; }
+      #minibia-bot-panel .mb-attack-target-name { overflow: hidden; color: #e8e3d8; text-overflow: ellipsis; white-space: nowrap; }
+      #minibia-bot-panel .mb-attack-target-controls { display: flex; gap: 3px; }
+      #minibia-bot-panel .mb-attack-target-controls .mb-attack-row-action { width: 28px; min-width: 28px; min-height: 28px; padding: 2px; border-radius: 6px; font-size: 13px; }
+      #minibia-bot-panel .mb-attack-only-listed { padding-top: 6px; border-top: 1px solid rgba(255,255,255,.07); font-size: 11px; }
+      #minibia-bot-panel .mb-attack-selection-field { gap: 3px; }
+      #minibia-bot-panel .mb-attack-selection-field select { min-height: 34px; padding: 5px 8px; font-size: 12px; }
       #minibia-bot-panel .mb-cave-diagnostics { padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; color: #c2beb6; font-size: 11px; }
       #minibia-bot-panel .mb-cave-diagnostics summary { cursor: pointer; color: #cfc7b8; }
       #minibia-bot-panel .mb-cave-diagnostics[open] { display: grid; gap: 6px; }
@@ -1432,16 +1531,42 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
               </div>
 
               <div class="mb-attack-card">
-                <div class="mb-attack-card-title">Estilo de combate</div>
-                <label class="mb-toggle mb-attack-mode">
-                  <input type="checkbox" id="minibia-bot-auto-attack-melee" />
-                  <span>Cuerpo a cuerpo</span>
+                <div class="mb-attack-card-heading">
+                  <div>
+                    <div class="mb-attack-card-title">Monstruos prioritarios</div>
+                    <div class="mb-small-note">Añade nombres y ordénalos como en Targeting.</div>
+                  </div>
+                  <span class="mb-attack-count" id="minibia-bot-attack-target-count">0</span>
+                </div>
+                <div class="mb-small-note mb-attack-detected-label">Detectados ahora · toca para priorizar</div>
+                <div class="mb-attack-visible-list" id="minibia-bot-attack-visible-list" role="list" aria-label="Criaturas visibles para añadir"></div>
+                <div class="mb-attack-add-row">
+                  <input type="text" id="minibia-bot-attack-target-name" maxlength="48" placeholder="Nombre del monstruo" aria-label="Nombre del monstruo" />
+                  <button type="button" class="mb-small-button" id="minibia-bot-attack-target-add">Añadir</button>
+                </div>
+                <div class="mb-attack-target-list" id="minibia-bot-attack-target-list" role="list" aria-label="Monstruos en orden de prioridad"></div>
+                <div class="mb-small-note" id="minibia-bot-attack-target-feedback" role="status" aria-live="polite"></div>
+                <label class="mb-toggle mb-attack-only-listed">
+                  <input type="checkbox" id="minibia-bot-attack-only-listed" />
+                  <span>Atacar solo los de esta lista</span>
                 </label>
-                <div class="mb-small-note">Activado: persigue al objetivo para acercarse. Desactivado: mantiene 2–3 casillas de distancia.</div>
+                <label class="mb-field mb-attack-selection-field" for="minibia-bot-attack-selection">
+                  <span class="mb-field-label">Elegir objetivo por</span>
+                  <select id="minibia-bot-attack-selection">
+                    <option value="proximity">Más cercano</option>
+                    <option value="list">Orden de la lista</option>
+                  </select>
+                </label>
+                <div class="mb-small-note">La lista define la prioridad; si no hay coincidencias, se usa la criatura más cercana salvo que limites el ataque a la lista.</div>
               </div>
 
               <div class="mb-attack-card">
-                <div class="mb-attack-card-title">Casillas de la barra</div>
+                <div class="mb-attack-card-title">Modo y acciones</div>
+                <label class="mb-toggle mb-attack-mode">
+                  <input type="checkbox" id="minibia-bot-auto-attack-melee" />
+                  <span>Cuerpo a cuerpo · perseguir objetivo</span>
+                </label>
+                <div class="mb-small-note">Desactívalo para mantener 2–3 casillas de distancia.</div>
                 <div class="mb-field-grid mb-attack-hotkeys">
                   <label class="mb-field" for="minibia-bot-auto-attack-hotkey">
                     <span class="mb-field-label">Objetivo (1–12)</span>
@@ -1452,7 +1577,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                     <input type="number" id="minibia-bot-auto-attack-rune-hotkey" min="1" max="12" inputmode="numeric" placeholder="Sin asignar" />
                   </label>
                 </div>
-                <div class="mb-small-note">Asigna en el juego la acción y la runa a esas mismas casillas.</div>
+                <div class="mb-small-note">Coloca la acción de atacar y la runa en esas mismas casillas de la barra del juego.</div>
               </div>
             </div>
           </section>
@@ -1515,6 +1640,13 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const autoAttackMeleeInput = panel.querySelector("#minibia-bot-auto-attack-melee");
     const autoAttackHotkeyInput = panel.querySelector("#minibia-bot-auto-attack-hotkey");
     const autoAttackRuneHotkeyInput = panel.querySelector("#minibia-bot-auto-attack-rune-hotkey");
+    const autoAttackTargetNameInput = panel.querySelector("#minibia-bot-attack-target-name");
+    const autoAttackTargetAddButton = panel.querySelector("#minibia-bot-attack-target-add");
+    const autoAttackTargetList = panel.querySelector("#minibia-bot-attack-target-list");
+    const autoAttackVisibleList = panel.querySelector("#minibia-bot-attack-visible-list");
+    const autoAttackTargetOnlyInput = panel.querySelector("#minibia-bot-attack-only-listed");
+    const autoAttackSelectionInput = panel.querySelector("#minibia-bot-attack-selection");
+    const autoAttackTargetFeedback = panel.querySelector("#minibia-bot-attack-target-feedback");
     const talkEnabledInput = panel.querySelector("#minibia-bot-talk-enabled");
     const talkApiKeyInput = panel.querySelector("#minibia-bot-talk-api-key");
     const talkPromptInput = panel.querySelector("#minibia-bot-talk-prompt");
@@ -2011,6 +2143,71 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       });
     }
 
+    const addAttackPriorityName = (suggestedName = null) => {
+      const name = String(suggestedName ?? autoAttackTargetNameInput?.value ?? "").trim();
+      const priority = Array.isArray(bot.attack?.config?.targetPriority) ? [...bot.attack.config.targetPriority] : [];
+      if (!name) {
+        if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = "Escribe el nombre de una criatura.";
+        autoAttackTargetNameInput?.focus();
+        return;
+      }
+      if (priority.some((entry) => entry.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+        if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = `${name} ya está en la lista.`;
+        return;
+      }
+      if (priority.length >= 50) {
+        if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = "La lista admite hasta 50 criaturas.";
+        return;
+      }
+      bot.attack.updateConfig({ targetPriority: [...priority, name] });
+      if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = `${name} añadido.`;
+      if (autoAttackTargetNameInput) autoAttackTargetNameInput.value = "";
+      refreshAttackTargetList();
+      refreshAttackVisibleList();
+    };
+
+    autoAttackTargetAddButton?.addEventListener("click", addAttackPriorityName);
+    autoAttackVisibleList?.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-attack-visible-target]");
+      if (button) addAttackPriorityName(button.dataset.attackVisibleTarget);
+    });
+    autoAttackTargetNameInput?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        addAttackPriorityName();
+      }
+    });
+    autoAttackTargetList?.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-attack-priority-action]");
+      if (!button) return;
+      const priority = [...(bot.attack?.config?.targetPriority || [])];
+      const index = Number(button.dataset.attackPriorityIndex);
+      const action = button.dataset.attackPriorityAction;
+      if (!Number.isInteger(index) || index < 0 || index >= priority.length) return;
+      if (action === "remove") priority.splice(index, 1);
+      else {
+        const nextIndex = index + (action === "up" ? -1 : 1);
+        if (nextIndex < 0 || nextIndex >= priority.length) return;
+        [priority[index], priority[nextIndex]] = [priority[nextIndex], priority[index]];
+      }
+      bot.attack.updateConfig({ targetPriority: priority });
+      if (autoAttackTargetFeedback) autoAttackTargetFeedback.textContent = "Orden actualizado.";
+      refreshAttackTargetList();
+      refreshAttackVisibleList();
+    });
+    if (autoAttackTargetOnlyInput) {
+      autoAttackTargetOnlyInput.checked = !!bot.attack?.config?.onlyPriorityTargets;
+      autoAttackTargetOnlyInput.addEventListener("change", () => {
+        bot.attack.updateConfig({ onlyPriorityTargets: autoAttackTargetOnlyInput.checked });
+      });
+    }
+    if (autoAttackSelectionInput) {
+      autoAttackSelectionInput.value = bot.attack?.config?.targetSelectionMode === "list" ? "list" : "proximity";
+      autoAttackSelectionInput.addEventListener("change", () => {
+        bot.attack.updateConfig({ targetSelectionMode: autoAttackSelectionInput.value });
+      });
+    }
+
     if (autoAttackHotkeyInput) {
       autoAttackHotkeyInput.value = String(bot.attack?.config?.targetHotbarSlot ?? 3);
       autoAttackHotkeyInput.addEventListener("change", () => {
@@ -2159,6 +2356,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     refreshAutoInvisibleStatus();
     refreshAutoMagicShieldStatus();
     refreshAutoAttackStatus();
+    refreshAttackTargetList();
+    refreshAttackVisibleList();
     refreshAutoEatStatus();
     refreshCaveStatus();
     refreshEquipRingStatus();
@@ -2222,7 +2421,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       window.clearInterval(caveStatusTimerId);
     });
 
-    const autoAttackStatusTimerId = window.setInterval(refreshAutoAttackStatus, 1000);
+    const autoAttackStatusTimerId = window.setInterval(() => {
+      refreshAutoAttackStatus();
+      refreshAttackVisibleList();
+    }, 1000);
     bot.addCleanup(() => window.clearInterval(autoAttackStatusTimerId));
 
   }
