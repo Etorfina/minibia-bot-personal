@@ -6865,7 +6865,21 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const autoAttackToggle = document.getElementById("minibia-bot-auto-attack-enabled");
     if (!autoAttackToggle) return;
 
-    autoAttackToggle.checked = !!bot.attack?.status?.().running;
+    const status = bot.attack?.status?.() || {};
+    autoAttackToggle.checked = !!status.running;
+    const summary = document.getElementById("minibia-bot-auto-attack-status");
+    if (!summary) return;
+
+    const targetName = status.currentTarget?.name;
+    const nearbyCount = Array.isArray(status.nearbyMonsters) ? status.nearbyMonsters.length : 0;
+    summary.dataset.active = String(!!status.running);
+    summary.textContent = !status.running
+      ? "Detenido"
+      : targetName
+        ? `Atacando: ${targetName}`
+        : nearbyCount
+          ? `Buscando objetivo · ${nearbyCount} criatura${nearbyCount === 1 ? "" : "s"} cerca`
+          : "Activo · esperando criaturas cercanas";
   }
 
   function refreshCaveStatus() {
@@ -7758,6 +7772,9 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-mobile .mb-cave-column .mb-label { margin-bottom: 5px; }
       #minibia-bot-panel.mb-mobile .mb-cave-column .mb-small-note { margin: 0; line-height: 1.3; }
       #minibia-bot-panel.mb-mobile .mb-cave-column .mb-field { gap: 3px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-layout { gap: 8px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card { padding: 10px; gap: 7px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card .mb-small-note { font-size: 11px; line-height: 1.35; }
       #minibia-bot-panel .mb-cave-route-details { border: 1px solid rgba(224,200,148,.25); border-radius: 7px; padding: 6px 8px; }
       #minibia-bot-panel .mb-cave-route-details summary { cursor: pointer; color: #d3c49d; }
       #minibia-bot-panel .mb-cave-route-details pre { max-height: 150px; overflow: auto; white-space: pre-wrap; font-size: 11px; margin: 6px 0 0; }
@@ -7772,6 +7789,15 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel .mb-cave-card { display: grid; gap: 9px; padding: 11px; border: 1px solid rgba(255,255,255,.075); border-radius: 10px; background: #202224; }
       #minibia-bot-panel .mb-cave-card-title { color: #f0d4a0; font-size: 12px; font-weight: 750; }
       #minibia-bot-panel .mb-cave-intro { margin: -3px 0 2px; }
+      #minibia-bot-panel .mb-attack-intro { margin: -3px 0 2px; }
+      #minibia-bot-panel .mb-attack-layout { display: grid; gap: 9px; }
+      #minibia-bot-panel .mb-attack-card { display: grid; gap: 8px; padding: 11px; border: 1px solid rgba(255,255,255,.075); border-radius: 10px; background: #202224; }
+      #minibia-bot-panel .mb-attack-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+      #minibia-bot-panel .mb-attack-card-title { color: #f0d4a0; font-size: 12px; font-weight: 750; }
+      #minibia-bot-panel .mb-attack-status { flex: 0 0 auto; padding: 3px 8px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: #292b2d; color: #c3c0b9; font-size: 10px; line-height: 1.4; }
+      #minibia-bot-panel .mb-attack-status[data-active="true"] { border-color: rgba(113,155,121,.65); background: rgba(69,107,77,.3); color: #c8e8ce; }
+      #minibia-bot-panel .mb-attack-enable { padding-top: 8px; border-top: 1px solid rgba(255,255,255,.08); font-weight: 650; }
+      #minibia-bot-panel .mb-attack-hotkeys { gap: 8px; }
       #minibia-bot-panel .mb-cave-diagnostics { padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; color: #c2beb6; font-size: 11px; }
       #minibia-bot-panel .mb-cave-diagnostics summary { cursor: pointer; color: #cfc7b8; }
       #minibia-bot-panel .mb-cave-diagnostics[open] { display: grid; gap: 6px; }
@@ -8018,28 +8044,49 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
               </details>
             </div>
           </div>
-          <div class="mb-section mb-column-section">
-            <div class="mb-label">Combate automático</div>
-            <div class="mb-stack">
-              <label class="mb-toggle">
-                <input type="checkbox" id="minibia-bot-auto-attack-enabled" />
-                <span>Activar ataque automático</span>
-              </label>
-              <label class="mb-toggle">
-                <input type="checkbox" id="minibia-bot-auto-attack-melee" />
-                <span>Modo cuerpo a cuerpo</span>
-              </label>
-              <label class="mb-field" for="minibia-bot-auto-attack-hotkey">
-                <span class="mb-field-label">Tecla de objetivo (1-12)</span>
-                <input type="number" id="minibia-bot-auto-attack-hotkey" min="1" max="12" placeholder="3" />
-              </label>
-              <label class="mb-field" for="minibia-bot-auto-attack-rune-hotkey">
-                <span class="mb-field-label">Tecla de runa (1-12)</span>
-                <input type="number" id="minibia-bot-auto-attack-rune-hotkey" min="1" max="12" placeholder="4" />
-              </label>
-              <div class="mb-small-note">Cuerpo a cuerpo: se acerca al objetivo. A distancia: usa la runa seleccionada.</div>
+          <section class="mb-section mb-column-section" aria-labelledby="minibia-bot-attack-title">
+            <div class="mb-label" id="minibia-bot-attack-title">Attack Target</div>
+            <div class="mb-small-note mb-attack-intro">Elige criaturas visibles del mismo piso. Puede funcionar junto con Cavebot.</div>
+            <div class="mb-attack-layout">
+              <div class="mb-attack-card mb-attack-main">
+                <div class="mb-attack-card-heading">
+                  <div>
+                    <div class="mb-attack-card-title">Ataque automático</div>
+                    <div class="mb-small-note">Busca objetivos visibles en tu mismo piso.</div>
+                  </div>
+                  <span class="mb-attack-status" id="minibia-bot-auto-attack-status" role="status" aria-live="polite" data-active="false">Detenido</span>
+                </div>
+                <label class="mb-toggle mb-attack-enable">
+                  <input type="checkbox" id="minibia-bot-auto-attack-enabled" />
+                  <span>Activar Attack Target</span>
+                </label>
+              </div>
+
+              <div class="mb-attack-card">
+                <div class="mb-attack-card-title">Estilo de combate</div>
+                <label class="mb-toggle mb-attack-mode">
+                  <input type="checkbox" id="minibia-bot-auto-attack-melee" />
+                  <span>Cuerpo a cuerpo</span>
+                </label>
+                <div class="mb-small-note">Activado: persigue al objetivo para acercarse. Desactivado: mantiene 2–3 casillas de distancia.</div>
+              </div>
+
+              <div class="mb-attack-card">
+                <div class="mb-attack-card-title">Casillas de la barra</div>
+                <div class="mb-field-grid mb-attack-hotkeys">
+                  <label class="mb-field" for="minibia-bot-auto-attack-hotkey">
+                    <span class="mb-field-label">Objetivo (1–12)</span>
+                    <input type="number" id="minibia-bot-auto-attack-hotkey" min="1" max="12" inputmode="numeric" placeholder="3" />
+                  </label>
+                  <label class="mb-field" for="minibia-bot-auto-attack-rune-hotkey">
+                    <span class="mb-field-label">Runa (opcional)</span>
+                    <input type="number" id="minibia-bot-auto-attack-rune-hotkey" min="1" max="12" inputmode="numeric" placeholder="Sin asignar" />
+                  </label>
+                </div>
+                <div class="mb-small-note">Asigna en el juego la acción y la runa a esas mismas casillas.</div>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     `;
@@ -8805,6 +8852,9 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     bot.addCleanup(() => {
       window.clearInterval(caveStatusTimerId);
     });
+
+    const autoAttackStatusTimerId = window.setInterval(refreshAutoAttackStatus, 1000);
+    bot.addCleanup(() => window.clearInterval(autoAttackStatusTimerId));
 
   }
 
