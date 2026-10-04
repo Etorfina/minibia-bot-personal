@@ -1,6 +1,6 @@
 (async () => {
   const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/307dd3af9f59c2c4821f52d3ba05b1eb8613e8d9/minibia-bot.js.gz.b64";
+  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/ea2ec7c13a387b956d7495423f675a0a7e7b5dee/minibia-bot.js.gz.b64";
   const requiredControls = [
     'data-tab="healing"',
     'id="minibia-bot-heal-spells"',
