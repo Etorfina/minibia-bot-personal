@@ -115,3 +115,29 @@ test('invalid points are rejected; STOP clears pending ticks; restart resets wai
   h.step(20000); assert.equal(h.cave.status().currentIndex, 1);
   h.cave.start(); assert.equal(h.cave.status().waitingUntil, 0);
 });
+test('shared route round trip keeps points, route mode, transitions and existing presets', () => {
+  const source = setup([point(1), point(2, 'label', { label: 'SALIDA' }), point(2, 'action', { action: 'goto:SALIDA' })]);
+  source.cave.updateConfig({ routeMode: 'loop' });
+  const shared = JSON.parse(source.cave.exportPreset());
+  shared.transitions = [{ from: { x: 2, y: 0, z: 7 }, to: { x: 2, y: 1, z: 6 }, count: 3, lastSeenAt: 10000 }];
+  const recipient = setup([point(9)]);
+  const first = recipient.cave.importPreset(JSON.stringify(shared));
+  assert.equal(first.waypoints, 3);
+  assert.equal(recipient.cave.status().config.routeMode, 'loop');
+  assert.equal(recipient.cave.getRoute()[2].action, 'goto:SALIDA');
+  assert.equal(recipient.cave.getTransitions()[0].to.z, 6);
+  const second = recipient.cave.importPreset(JSON.stringify(shared));
+  assert.equal(second.name, 'Default (3)');
+  assert.equal(recipient.cave.getPresetNames().length, 3);
+  recipient.cave.loadPreset('Default');
+  assert.equal(recipient.cave.getRoute()[0].x, 9);
+});
+test('import rejects malformed and oversized data without changing the active route', () => {
+  const h = setup([point(1)]);
+  const original = h.cave.exportPreset();
+  for (const invalid of ['oops', '{}', JSON.stringify({ ...JSON.parse(original), route: [point(2, 'action', { action: 'eval:bad' })] }), 'x'.repeat(500001)]) {
+    assert.throws(() => h.cave.importPreset(invalid));
+    assert.equal(h.cave.getRoute()[0].x, 1);
+    assert.equal(h.cave.getPresetNames().length, 1);
+  }
+});
