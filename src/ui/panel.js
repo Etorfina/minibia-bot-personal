@@ -253,7 +253,11 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       ).join("\n");
     }
     const routeMode = document.getElementById("minibia-bot-cave-mode");
-    if (routeMode && document.activeElement !== routeMode) routeMode.value = status?.config?.routeMode || "pingpong";
+    const activeMode = status?.config?.routeMode || "pingpong";
+    if (routeMode) routeMode.value = activeMode;
+    document.querySelectorAll("#minibia-bot-cave-mode-options [data-cave-mode]").forEach(button => {
+      button.setAttribute("aria-pressed", String(button.dataset.caveMode === activeMode));
+    });
     if (statusLabel) {
       if (status?.lastError) {
         statusLabel.textContent = status.lastError;
@@ -1067,6 +1071,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel .mb-cave-route-details pre { max-height: 150px; overflow: auto; white-space: pre-wrap; font-size: 11px; margin: 6px 0 0; }
       #minibia-bot-panel .mb-cave-transfer[hidden] { display: none; }
       #minibia-bot-panel .mb-cave-transfer textarea { min-height: 90px; font-size: 12px; font-family: monospace; }
+      #minibia-bot-panel .mb-cave-choice-group { display: flex; flex-wrap: wrap; gap: 5px; }
+      #minibia-bot-panel .mb-cave-choice-group button { width: auto; min-height: 34px; padding: 5px 9px; border-radius: 7px; font-size: 12px; }
+      #minibia-bot-panel .mb-cave-choice-group button[aria-pressed="true"] { background: #a17a39; border-color: #e3c17d; color: #fff; }
+      #minibia-bot-panel .mb-cave-choice-group button:focus-visible { outline: 2px solid #f4d48c; outline-offset: 2px; }
     `;
     document.head.appendChild(style);
 
@@ -1256,18 +1264,23 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                 </div>
                 <div class="mb-small-note" id="minibia-bot-cave-transfer-status" role="status"></div>
               </div>
-              <label class="mb-field">Tipo de punto
-                <select id="minibia-bot-cave-type">
-                  <option value="node">Node — flexible</option>
-                  <option value="stand">Stand — exacto</option>
-                  <option value="walk">Walk — flexible</option>
-                  <option value="label">Label — nombre</option>
-                  <option value="action">Action — acción</option>
-                </select>
-              </label>
-              <label class="mb-field">Recorrido
-                <select id="minibia-bot-cave-mode"><option value="pingpong">Ida y vuelta</option><option value="loop">Loop — circuito</option></select>
-              </label>
+              <div class="mb-field"><span>Tipo de punto</span>
+                <input type="hidden" id="minibia-bot-cave-type" value="node" />
+                <div class="mb-cave-choice-group" id="minibia-bot-cave-type-options" role="group" aria-label="Tipo de punto">
+                  <button type="button" data-cave-type="node" aria-pressed="true">Node</button>
+                  <button type="button" data-cave-type="stand" aria-pressed="false">Stand</button>
+                  <button type="button" data-cave-type="walk" aria-pressed="false">Walk</button>
+                  <button type="button" data-cave-type="label" aria-pressed="false">Label</button>
+                  <button type="button" data-cave-type="action" aria-pressed="false">Acción</button>
+                </div>
+              </div>
+              <div class="mb-field"><span>Recorrido</span>
+                <input type="hidden" id="minibia-bot-cave-mode" value="pingpong" />
+                <div class="mb-cave-choice-group" id="minibia-bot-cave-mode-options" role="group" aria-label="Modo de recorrido">
+                  <button type="button" data-cave-mode="pingpong" aria-pressed="true">Ida y vuelta</button>
+                  <button type="button" data-cave-mode="loop" aria-pressed="false">Loop — circuito</button>
+                </div>
+              </div>
               <div class="mb-small-note">Action: wait:2000, skip:1 o goto:SALIDA. Stand llega al SQM exacto.</div>
               <details class="mb-cave-route-details"><summary id="minibia-bot-cave-route-summary">Puntos del recorrido (0) ▾</summary><pre id="minibia-bot-cave-route"></pre></details>
               <div class="mb-actions mb-actions-inline-two">
@@ -1693,9 +1706,16 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       });
     }
 
-    panel.querySelector("#minibia-bot-cave-mode")?.addEventListener("change", event => {
-      bot.cave.updateConfig({ routeMode: event.target.value });
-    });
+    panel.querySelectorAll("[data-cave-type]").forEach(button => button.addEventListener("click", () => {
+      panel.querySelector("#minibia-bot-cave-type").value = button.dataset.caveType;
+      panel.querySelectorAll("[data-cave-type]").forEach(option => option.setAttribute("aria-pressed", String(option === button)));
+    }));
+    panel.querySelectorAll("[data-cave-mode]").forEach(button => button.addEventListener("click", () => {
+      const mode = button.dataset.caveMode;
+      panel.querySelector("#minibia-bot-cave-mode").value = mode;
+      panel.querySelectorAll("[data-cave-mode]").forEach(option => option.setAttribute("aria-pressed", String(option === button)));
+      bot.cave.updateConfig({ routeMode: mode });
+    }));
     if (caveRecordButton) {
       caveRecordButton.addEventListener("click", () => {
         const type = panel.querySelector("#minibia-bot-cave-type")?.value || "node";
