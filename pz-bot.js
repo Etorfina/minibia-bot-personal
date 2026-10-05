@@ -950,15 +950,20 @@ window.__minibiaBotBundle.installXrayModule = function installXrayModule(bot) {
         padding: 10px;
       }
       #minibia-bot-panel.mb-desktop .mb-body {
-        display: block;
+        display: flex;
+        flex-direction: column;
         max-height: calc(100dvh - 104px);
         overflow: auto;
         overscroll-behavior: contain;
+        min-height: 0;
       }
       #minibia-bot-panel.mb-desktop .mb-main-column,
       #minibia-bot-panel.mb-desktop .mb-side-column,
       #minibia-bot-panel.mb-desktop .mb-cave-column,
-      #minibia-bot-panel.mb-desktop .mb-healing-column { display: contents; }
+      #minibia-bot-panel.mb-desktop .mb-healing-column {
+        display: block;
+        min-width: 0;
+      }
       #minibia-bot-panel.mb-desktop .mb-mobile-tabs {
         display: flex !important;
         gap: 4px;
@@ -7358,16 +7363,23 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     if (nextCollapsed) {
       centerToolbar(panel);
     } else {
-      const rect = panel.getBoundingClientRect();
-      const next = clampPanelPosition(panel, rect.left, rect.top);
-      panel.style.left = `${next.left}px`;
-      panel.style.top = `${next.top}px`;
+      // Measure after the hidden body has participated in layout. Measuring in
+      // the same task uses the collapsed panel height and leaves it misplaced.
       requestAnimationFrame(() => {
-        panel.style.transform = "translateZ(0)";
-        void panel.offsetHeight;
+        const rect = panel.getBoundingClientRect();
+        const next = clampPanelPosition(panel, rect.left, rect.top);
+        panel.style.left = `${next.left}px`;
+        panel.style.top = `${next.top}px`;
+        panel.style.right = "auto";
+
+        // A second frame accounts for the final width/height after wrapping,
+        // tab visibility and native controls have settled in desktop browsers.
         requestAnimationFrame(() => {
-          panel.style.removeProperty("transform");
-          void panel.offsetHeight;
+          const settled = panel.getBoundingClientRect();
+          const finalPosition = clampPanelPosition(panel, settled.left, settled.top);
+          panel.style.left = `${finalPosition.left}px`;
+          panel.style.top = `${finalPosition.top}px`;
+          panel.style.right = "auto";
         });
       });
     }
