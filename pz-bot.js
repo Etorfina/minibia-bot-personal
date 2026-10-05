@@ -943,30 +943,30 @@ window.__minibiaBotBundle.installXrayModule = function installXrayModule(bot) {
       #minibia-bot-panel.mb-mobile .mb-attack-hotkeys { gap: 4px; }
 
       /* Escritorio: panel flotante compacto con navegación por pestañas. */
-      #minibia-bot-panel:not(.mb-mobile) {
+      #minibia-bot-panel.mb-desktop {
         box-sizing: border-box;
         width: min(560px, calc(100vw - 24px));
         max-width: calc(100vw - 24px);
         padding: 10px;
       }
-      #minibia-bot-panel:not(.mb-mobile) .mb-body {
+      #minibia-bot-panel.mb-desktop .mb-body {
         display: block;
         max-height: calc(100dvh - 104px);
         overflow: auto;
         overscroll-behavior: contain;
       }
-      #minibia-bot-panel:not(.mb-mobile) .mb-main-column,
-      #minibia-bot-panel:not(.mb-mobile) .mb-side-column,
-      #minibia-bot-panel:not(.mb-mobile) .mb-cave-column,
-      #minibia-bot-panel:not(.mb-mobile) .mb-healing-column { display: contents; }
-      #minibia-bot-panel:not(.mb-mobile) .mb-mobile-tabs {
-        display: flex;
+      #minibia-bot-panel.mb-desktop .mb-main-column,
+      #minibia-bot-panel.mb-desktop .mb-side-column,
+      #minibia-bot-panel.mb-desktop .mb-cave-column,
+      #minibia-bot-panel.mb-desktop .mb-healing-column { display: contents; }
+      #minibia-bot-panel.mb-desktop .mb-mobile-tabs {
+        display: flex !important;
         gap: 4px;
         overflow-x: auto;
         margin-bottom: 7px;
         scrollbar-width: thin;
       }
-      #minibia-bot-panel:not(.mb-mobile) .mb-mobile-tabs button {
+      #minibia-bot-panel.mb-desktop .mb-mobile-tabs button {
         width: auto;
         min-width: max-content;
         min-height: 32px;
@@ -977,19 +977,19 @@ window.__minibiaBotBundle.installXrayModule = function installXrayModule(bot) {
         color: #cbc8c1;
         font-size: 11px;
       }
-      #minibia-bot-panel:not(.mb-mobile) .mb-mobile-tabs button[aria-selected="true"] {
+      #minibia-bot-panel.mb-desktop .mb-mobile-tabs button[aria-selected="true"] {
         background: #8e6c38;
         border-color: #bd985a;
         color: #fff;
       }
-      #minibia-bot-panel:not(.mb-mobile) .mb-column-section { display: none; }
-      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="status"] [data-mobile-tab="status"],
-      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="cave"] [data-mobile-tab="cave"],
-      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="combat"] [data-mobile-tab="combat"],
-      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="healing"] [data-mobile-tab="healing"],
-      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="safety"] [data-mobile-tab="safety"],
-      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
-      #minibia-bot-panel:not(.mb-mobile)[data-collapsed="true"] .mb-mobile-tabs { display: none; }
+      #minibia-bot-panel.mb-desktop .mb-column-section { display: none; }
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="status"] [data-mobile-tab="status"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="cave"] [data-mobile-tab="cave"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="combat"] [data-mobile-tab="combat"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="healing"] [data-mobile-tab="healing"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="safety"] [data-mobile-tab="safety"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
+      #minibia-bot-panel.mb-desktop[data-collapsed="true"] .mb-mobile-tabs { display: none; }
 
     `;
     document.head.appendChild(style);
@@ -7362,6 +7362,14 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       const next = clampPanelPosition(panel, rect.left, rect.top);
       panel.style.left = `${next.left}px`;
       panel.style.top = `${next.top}px`;
+      requestAnimationFrame(() => {
+        panel.style.transform = "translateZ(0)";
+        void panel.offsetHeight;
+        requestAnimationFrame(() => {
+          panel.style.removeProperty("transform");
+          void panel.offsetHeight;
+        });
+      });
     }
   }
 
@@ -8426,6 +8434,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       const narrowTouchScreen = mobileQuery.matches && window.matchMedia("(pointer: coarse)").matches;
       const mobile = narrowTouchScreen || /iPhone|iPod|Android/i.test(navigator.userAgent);
       panel.classList.toggle("mb-mobile", mobile);
+      panel.classList.toggle("mb-desktop", !mobile);
       if (mobile) {
         const rect = panel.getBoundingClientRect();
         const next = clampPanelPosition(panel, rect.left, rect.top);
