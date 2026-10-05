@@ -12,6 +12,12 @@
   fix.id = "minibia-bot-collapsed-nav-fix";
   fix.textContent = '#minibia-bot-panel.mb-desktop .mb-mobile-tabs[hidden] { display: none !important; }';
   document.head.appendChild(fix);
+  const placeToolbarAtTop = () => {
+    const panel = document.getElementById("minibia-bot-panel");
+    if (panel?.dataset.collapsed === "true") panel.style.top = "16px";
+  };
+  placeToolbarAtTop();
+  document.getElementById("minibia-bot-collapse")?.addEventListener("click", () => requestAnimationFrame(placeToolbarAtTop));
   if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-heal-spells") || !document.getElementById("minibia-bot-heal-items") || !document.getElementById("minibia-bot-heal-status") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) throw new Error("La versión se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
-  console.info("[minibia-bot] develop cargado con corrección de navegación plegada");
+  console.info("[minibia-bot] develop cargado con panel compacto arriba y pestañas ocultas al cerrar");
 })().catch(error => { console.error(error); alert(error.message); });
