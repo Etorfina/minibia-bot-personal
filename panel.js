@@ -1293,6 +1293,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-mobile .mb-attack-target-list { max-height: 126px; }
       #minibia-bot-panel.mb-mobile .mb-attack-hotkeys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       #minibia-bot-panel.mb-mobile .mb-attack-visible-list button { min-height: 34px; }
+      #minibia-bot-panel .mb-cave-undo { justify-self: start; width: auto; min-height: 34px; padding: 5px 10px; }
+      #minibia-bot-panel .mb-cave-route-details { width: 100%; box-sizing: border-box; }
       #minibia-bot-panel .mb-cave-route-details { border: 1px solid rgba(224,200,148,.25); border-radius: 7px; padding: 6px 8px; }
       #minibia-bot-panel .mb-cave-route-details summary { cursor: pointer; color: #d3c49d; }
       #minibia-bot-panel .mb-cave-route-details pre { max-height: 150px; overflow: auto; white-space: pre-wrap; font-size: 11px; margin: 6px 0 0; }
@@ -1525,6 +1527,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                   <span><b>Acción</b> · Esperar, omitir o ir a una marca</span>
                 </div>
               </div>
+              <button type="button" class="mb-small-button mb-cave-undo" id="minibia-bot-cave-remove-last">Deshacer último punto</button>
+              <details class="mb-cave-route-details"><summary id="minibia-bot-cave-route-summary">Ver puntos guardados</summary><pre id="minibia-bot-cave-route"></pre></details>
               </div>
               <div class="mb-cave-card">
                 <div class="mb-cave-card-title">2 · Sentido y puntos</div>
@@ -1536,8 +1540,6 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                 </div>
                 <div class="mb-small-note">Ida y vuelta: recorre ambos sentidos. Circuito: vuelve del último punto al primero.</div>
               </div>
-              <details class="mb-cave-route-details"><summary id="minibia-bot-cave-route-summary">Ver puntos guardados</summary><pre id="minibia-bot-cave-route"></pre></details>
-              <button type="button" class="mb-small-button" id="minibia-bot-cave-remove-last">Deshacer último punto</button>
               </div>
               <div class="mb-cave-card">
                 <div class="mb-cave-card-title">3 · Ejecutar</div>
