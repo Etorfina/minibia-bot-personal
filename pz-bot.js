@@ -942,59 +942,7 @@ window.__minibiaBotBundle.installXrayModule = function installXrayModule(bot) {
       #minibia-bot-panel.mb-mobile #minibia-bot-auto-attack-rune-hotkey { min-height: 30px !important; padding: 3px 6px; }
       #minibia-bot-panel.mb-mobile .mb-attack-hotkeys { gap: 4px; }
 
-      /* Escritorio: panel flotante compacto con navegación por pestañas. */
-      #minibia-bot-panel.mb-desktop {
-        box-sizing: border-box;
-        width: min(560px, calc(100vw - 24px));
-        max-width: calc(100vw - 24px);
-        padding: 10px;
-      }
-      #minibia-bot-panel.mb-desktop .mb-body {
-        display: flex;
-        flex-direction: column;
-        max-height: calc(100dvh - 104px);
-        overflow: auto;
-        overscroll-behavior: contain;
-        min-height: 0;
-      }
-      #minibia-bot-panel.mb-desktop .mb-main-column,
-      #minibia-bot-panel.mb-desktop .mb-side-column,
-      #minibia-bot-panel.mb-desktop .mb-cave-column,
-      #minibia-bot-panel.mb-desktop .mb-healing-column {
-        display: block;
-        min-width: 0;
-      }
-      #minibia-bot-panel.mb-desktop .mb-mobile-tabs {
-        display: flex !important;
-        gap: 4px;
-        overflow-x: auto;
-        margin-bottom: 7px;
-        scrollbar-width: thin;
-      }
-      #minibia-bot-panel.mb-desktop .mb-mobile-tabs button {
-        width: auto;
-        min-width: max-content;
-        min-height: 32px;
-        padding: 4px 9px;
-        border-radius: 7px;
-        background: #25282a;
-        border-color: rgba(255,255,255,.09);
-        color: #cbc8c1;
-        font-size: 11px;
-      }
-      #minibia-bot-panel.mb-desktop .mb-mobile-tabs button[aria-selected="true"] {
-        background: #8e6c38;
-        border-color: #bd985a;
-        color: #fff;
-      }
-      #minibia-bot-panel.mb-desktop .mb-column-section { display: none; }
-      #minibia-bot-panel.mb-desktop[data-mobile-tab="status"] [data-mobile-tab="status"],
-      #minibia-bot-panel.mb-desktop[data-mobile-tab="cave"] [data-mobile-tab="cave"],
-      #minibia-bot-panel.mb-desktop[data-mobile-tab="combat"] [data-mobile-tab="combat"],
-      #minibia-bot-panel.mb-desktop[data-mobile-tab="healing"] [data-mobile-tab="healing"],
-      #minibia-bot-panel.mb-desktop[data-mobile-tab="safety"] [data-mobile-tab="safety"],
-      #minibia-bot-panel.mb-desktop[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
-      #minibia-bot-panel.mb-desktop[data-collapsed="true"] .mb-mobile-tabs { display: none; }
+
 
     `;
     document.head.appendChild(style);
@@ -8100,11 +8048,68 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel .mb-cave-column .mb-cave-undo { min-height: 27px; padding: 3px 7px; font-size: 10px; }
        #minibia-bot-panel .mb-cave-column .mb-cave-choice-group .mb-cave-undo { min-height: 28px; padding: 3px 7px; font-size: 10px; background: rgba(12,9,6,.42); border-color: rgba(224,200,148,.3); color: #f0d69a; white-space: nowrap; }
       #minibia-bot-panel .mb-cave-column .mb-actions button { min-height: 32px; padding: 4px 7px; font-size: 11px; }
+
+
+      /* Escritorio: panel flotante compacto con navegación por pestañas. */
+      #minibia-bot-panel.mb-desktop {
+        box-sizing: border-box;
+        width: min(560px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+        padding: 10px;
+      }
+      #minibia-bot-panel.mb-desktop .mb-body {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100dvh - 104px);
+        overflow: auto;
+        overscroll-behavior: contain;
+        min-height: 0;
+      }
+      #minibia-bot-panel.mb-desktop .mb-main-column,
+      #minibia-bot-panel.mb-desktop .mb-side-column,
+      #minibia-bot-panel.mb-desktop .mb-cave-column,
+      #minibia-bot-panel.mb-desktop .mb-healing-column {
+        display: block;
+        min-width: 0;
+      }
+      #minibia-bot-panel.mb-desktop .mb-mobile-tabs {
+        display: flex !important;
+        gap: 4px;
+        overflow-x: auto;
+        margin-bottom: 7px;
+        scrollbar-width: thin;
+      }
+      #minibia-bot-panel.mb-desktop .mb-mobile-tabs button {
+        width: auto;
+        min-width: max-content;
+        min-height: 32px;
+        padding: 4px 9px;
+        border-radius: 7px;
+        background: #25282a;
+        border-color: rgba(255,255,255,.09);
+        color: #cbc8c1;
+        font-size: 11px;
+      }
+      #minibia-bot-panel.mb-desktop .mb-mobile-tabs button[aria-selected="true"] {
+        background: #8e6c38;
+        border-color: #bd985a;
+        color: #fff;
+      }
+      #minibia-bot-panel.mb-desktop .mb-column-section { display: none; }
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="status"] [data-mobile-tab="status"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="cave"] [data-mobile-tab="cave"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="combat"] [data-mobile-tab="combat"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="healing"] [data-mobile-tab="healing"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="safety"] [data-mobile-tab="safety"],
+      #minibia-bot-panel.mb-desktop[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
+      #minibia-bot-panel.mb-desktop[data-collapsed="true"] .mb-mobile-tabs { display: none; }
     `;
     document.head.appendChild(style);
 
     const panel = document.createElement("div");
     panel.id = "minibia-bot-panel";
+    panel.classList.add("mb-desktop");
+
     panel.innerHTML = `
       <div class="mb-titlebar" role="toolbar" aria-label="Controles del bot">
         <span class="mb-brand"><span class="mb-brand-mark">MB</span><span>MINIBIA BOT</span></span>

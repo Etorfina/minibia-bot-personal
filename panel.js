@@ -1464,6 +1464,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     const panel = document.createElement("div");
     panel.id = "minibia-bot-panel";
+    panel.classList.add("mb-desktop");
+
     panel.innerHTML = `
       <div class="mb-titlebar" role="toolbar" aria-label="Controles del bot">
         <span class="mb-brand"><span class="mb-brand-mark">MB</span><span>MINIBIA BOT</span></span>
