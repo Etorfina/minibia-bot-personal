@@ -1,5 +1,5 @@
 (async () => {
-  const bundleUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/develop/minibia-bot.js.gz.b64";
+  const bundleUrl = "https://cdn.jsdelivr.net/gh/Etorfina/minibia-bot-personal@develop/minibia-bot.js.gz.b64";
   const requiredControls = ['data-tab="healing"','id="minibia-bot-heal-spells"','id="minibia-bot-heal-items"','id="minibia-bot-heal-status"','id="minibia-bot-attack-target-list"','id="minibia-bot-attack-stance"','id="minibia-bot-attack-range"'];
   const response = await fetch(bundleUrl + "?v=" + Date.now(), { cache: "no-store" });
   if (!response.ok) throw new Error("No pude descargar el bot: HTTP " + response.status);
