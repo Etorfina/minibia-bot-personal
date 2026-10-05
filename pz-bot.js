@@ -7548,75 +7548,29 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       }
       #minibia-bot-panel .mb-healing-column { grid-column: 1 / -1; }
 
-      #minibia-bot-panel .mb-heal-layout {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(190px, .72fr);
-        gap: 10px;
-        align-items: start;
-      }
-      #minibia-bot-panel .mb-heal-group,
-      #minibia-bot-panel .mb-heal-conditions {
-        min-width: 0;
-        padding: 10px;
-        border: 1px solid rgba(255,255,255,.08);
-        border-radius: 10px;
-        background: #17191b;
-      }
-      #minibia-bot-panel .mb-heal-group-title {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-        color: #e7d2ac;
-        font-size: 12px;
-        font-weight: 750;
-        letter-spacing: .035em;
-        text-transform: uppercase;
-      }
-      #minibia-bot-panel .mb-heal-rule-list { display: grid; gap: 8px; }
-      #minibia-bot-panel .mb-heal-rule {
-        padding: 7px 9px;
-        border: 1px solid rgba(255,255,255,.09);
-        border-radius: 9px;
-        background: #202225;
-      }
-      #minibia-bot-panel .mb-heal-rule-head {
-        display: grid;
-        grid-template-columns: auto minmax(0,1fr) auto auto auto auto;
-        gap: 6px;
-        align-items: center;
-      }
-      #minibia-bot-panel .mb-heal-rule-head input[type="checkbox"] { width: auto; margin: 0; }
-      #minibia-bot-panel .mb-heal-rule-head button { min-height: 32px; width: auto; padding: 5px 8px; }
-      #minibia-bot-panel .mb-heal-rule-toggle { min-width: 0; border: 0; background: transparent; text-align: left; padding: 4px; }
-      #minibia-bot-panel .mb-heal-rule-toggle strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-      #minibia-bot-panel .mb-heal-rule-summary { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #aaa394; font-size: 10px; margin-top: 2px; }
-      #minibia-bot-panel .mb-heal-rule[data-expanded="true"] { border-color: rgba(190,151,83,.45); }
-      #minibia-bot-panel .mb-heal-rule-details { margin-top: 8px; }
-      #minibia-bot-panel .mb-heal-priority {
-        color: #c8b997;
-        font-size: 10px;
-        white-space: nowrap;
-      }
-      #minibia-bot-panel .mb-heal-rule-grid {
-        display: grid;
-        grid-template-columns: repeat(2,minmax(0,1fr));
-        gap: 7px;
-      }
-      #minibia-bot-panel .mb-heal-rule-grid .mb-field-label { font-size: 10px; }
-      #minibia-bot-panel .mb-heal-rule-grid input,
-      #minibia-bot-panel .mb-heal-rule-grid select { min-height: 34px; padding: 6px 8px; }
-      #minibia-bot-panel .mb-heal-add { min-height: 34px; width: auto; padding: 6px 9px; font-size: 11px; }
-      #minibia-bot-panel .mb-heal-live {
-        padding: 8px;
-        border: 1px solid rgba(116,164,132,.24);
-        border-radius: 8px;
-        background: rgba(44,81,63,.28);
-        color: #dbe9dd;
-        font-size: 11px;
-        line-height: 1.5;
-      }
+      #minibia-bot-panel .mb-heal-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(190px,.72fr); gap:8px; align-items:start; }
+      #minibia-bot-panel .mb-heal-group, #minibia-bot-panel .mb-heal-conditions { min-width:0; padding:9px; border:1px solid rgba(255,255,255,.08); border-radius:10px; background:#17191b; }
+      #minibia-bot-panel .mb-heal-group-title { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:7px; color:#e7d2ac; font-size:11px; font-weight:750; letter-spacing:.035em; text-transform:uppercase; }
+      #minibia-bot-panel .mb-heal-rule-list { display:grid; gap:5px; max-height:190px; overflow:auto; }
+      #minibia-bot-panel .mb-heal-rule { padding:5px 6px; border:1px solid rgba(255,255,255,.08); border-radius:8px; background:#202225; }
+      #minibia-bot-panel .mb-heal-rule-head { display:grid; grid-template-columns:auto minmax(0,1fr) auto auto auto auto; gap:4px; align-items:center; }
+      #minibia-bot-panel .mb-heal-rule-head input[type=checkbox] { width:auto; margin:0; }
+      #minibia-bot-panel .mb-heal-rule-head button { min-height:28px; width:auto; padding:3px 6px; font-size:11px; }
+      #minibia-bot-panel .mb-heal-rule-toggle { min-width:0; border:0; background:transparent; text-align:left; padding:3px; }
+      #minibia-bot-panel .mb-heal-rule-toggle strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; }
+      #minibia-bot-panel .mb-heal-rule-summary { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#aaa394; font-size:9px; margin-top:1px; }
+      #minibia-bot-panel .mb-heal-priority { color:#c8b997; font-size:9px; white-space:nowrap; }
+      #minibia-bot-panel .mb-heal-rule-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+      #minibia-bot-panel .mb-heal-rule-grid .mb-field-label { font-size:10px; }
+      #minibia-bot-panel .mb-heal-rule-grid input, #minibia-bot-panel .mb-heal-rule-grid select { min-height:34px; padding:6px 8px; }
+      #minibia-bot-panel .mb-heal-add-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:7px; }
+      #minibia-bot-panel .mb-heal-add { min-height:34px; width:auto; padding:6px 5px; font-size:10px; }
+      #minibia-bot-panel .mb-heal-editor { padding:9px; border:1px solid rgba(190,151,83,.4); border-radius:9px; background:#202225; }
+      #minibia-bot-panel .mb-heal-editor-actions { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:8px; }
+      #minibia-bot-panel .mb-heal-editor-actions button { min-height:36px; }
+      #minibia-bot-panel .mb-heal-list-summary { padding:6px 8px; margin-bottom:7px; border-radius:7px; background:#17191b; color:#c8b997; font-size:10px; }
+      #minibia-bot-panel .mb-heal-hidden[hidden], #minibia-bot-panel [hidden] { display:none!important; }
+      #minibia-bot-panel .mb-heal-live { padding:8px; border:1px solid rgba(116,164,132,.24); border-radius:8px; background:rgba(44,81,63,.28); color:#dbe9dd; font-size:11px; line-height:1.5; }
 
       #minibia-bot-panel .mb-section {
         padding: 12px;
@@ -8331,34 +8285,25 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                 <span>Activo</span>
               </label>
             </div>
-            <div class="mb-heal-layout" style="margin-top:10px">
+            <div class="mb-heal-layout" style="margin-top:8px">
               <div class="mb-heal-group">
-                <div class="mb-heal-group-title"><span>Hechizos</span><button type="button" class="mb-heal-add" data-heal-add="spell">＋ Añadir</button></div>
+                <div class="mb-heal-group-title"><span>Acciones de curación</span><span id="minibia-bot-heal-count">0</span></div>
+                <div class="mb-heal-list-summary" id="minibia-bot-heal-list-summary" hidden></div>
+                <div class="mb-heal-editor" id="minibia-bot-heal-editor" hidden></div>
                 <div class="mb-heal-rule-list" id="minibia-bot-heal-spells"></div>
-              </div>
-              <div class="mb-heal-group">
-                <div class="mb-heal-group-title"><span>Runas y pociones</span><span></span></div>
-                <div class="mb-row" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:8px">
+                <div class="mb-heal-add-row" id="minibia-bot-heal-add-row">
+                  <button type="button" class="mb-heal-add" data-heal-add="spell">＋ Hechizo</button>
                   <button type="button" class="mb-heal-add" data-heal-add="rune">＋ Runa</button>
                   <button type="button" class="mb-heal-add" data-heal-add="potion">＋ Poción</button>
                 </div>
-                <div class="mb-heal-rule-list" id="minibia-bot-heal-items"></div>
+                <div id="minibia-bot-heal-items" hidden></div>
               </div>
-              <aside class="mb-heal-conditions">
+              <aside class="mb-heal-conditions" id="minibia-bot-heal-conditions">
                 <div class="mb-heal-group-title">Condiciones</div>
                 <div class="mb-stack">
-                  <label class="mb-field" for="minibia-bot-heal-min-mana">
-                    <span class="mb-field-label">Maná mínimo disponible</span>
-                    <input type="number" id="minibia-bot-heal-min-mana" min="0" inputmode="numeric" />
-                  </label>
-                  <label class="mb-field" for="minibia-bot-heal-wait">
-                    <span class="mb-field-label">Wait · revisión (ms)</span>
-                    <input type="number" id="minibia-bot-heal-wait" min="50" max="5000" step="50" inputmode="numeric" />
-                  </label>
-                  <label class="mb-field" for="minibia-bot-heal-delay">
-                    <span class="mb-field-label">Delay · pausa tras acción (ms)</span>
-                    <input type="number" id="minibia-bot-heal-delay" min="0" max="60000" step="50" inputmode="numeric" />
-                  </label>
+                  <label class="mb-field" for="minibia-bot-heal-min-mana"><span class="mb-field-label">Maná mínimo disponible</span><input type="number" id="minibia-bot-heal-min-mana" min="0" inputmode="numeric" /></label>
+                  <label class="mb-field" for="minibia-bot-heal-wait"><span class="mb-field-label">Wait · revisión (ms)</span><input type="number" id="minibia-bot-heal-wait" min="50" max="5000" step="50" inputmode="numeric" /></label>
+                  <label class="mb-field" for="minibia-bot-heal-delay"><span class="mb-field-label">Delay · pausa tras acción (ms)</span><input type="number" id="minibia-bot-heal-delay" min="0" max="60000" step="50" inputmode="numeric" /></label>
                   <div class="mb-heal-live" id="minibia-bot-heal-status" aria-live="polite">Añade y configura una acción para empezar.</div>
                   <div class="mb-small-note">Las reglas se revisan en orden. Asigna el hechizo, la runa o la poción en Minibia; aquí solo se configura el disparador y su casilla.</div>
                   <div class="mb-small-note">Curar a otro jugador requiere una función de objetivo del cliente que Minibia no expone al bot; no se simula con una tecla.</div>
@@ -8884,112 +8829,47 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       const action = status.pending?.ruleName ? ` · Usando: ${status.pending.ruleName}` : status.lastAction ? ` · Última: ${status.lastAction}` : "";
       autoHealStatus.textContent = `ACTIVO · ${ready} reglas listas${action}`;
     };
-    let expandedHealRuleId = null;
+    const healEditor = panel.querySelector("#minibia-bot-heal-editor");
+    const healListSummary = panel.querySelector("#minibia-bot-heal-list-summary");
+    const healAddRow = panel.querySelector("#minibia-bot-heal-add-row");
+    const healConditions = panel.querySelector("#minibia-bot-heal-conditions");
+    const healCount = panel.querySelector("#minibia-bot-heal-count");
+    let editingHealRuleId = null;
+    let editingHealDraft = null;
+    const healRuleDefault = (kind, index) => ({ id:`heal-${kind}-${Date.now()}-${index}`, kind, name:kind==="spell"?(index?"Spell Lo":"Spell Hi"):kind==="rune"?"UH Rune":"Poción", slot:null, stat:"hp", operator:"below", value:0, unit:"percent", manaCost:0, cooldownMs:1200, enabled:false });
     const renderHealRules = () => {
       const rules = Array.isArray(bot.heal?.config?.rules) ? bot.heal.config.rules : [];
-      const option = (value, selected, label) => `<option value="${value}" ${selected === value ? "selected" : ""}>${label}</option>`;
-      const renderRule = (rule, index, group) => `
-        <article class="mb-heal-rule" data-rule-id="${escapeHealText(rule.id)}" data-expanded="${expandedHealRuleId === rule.id}">
-          <div class="mb-heal-rule-head">
-            <input type="checkbox" aria-label="Activar ${escapeHealText(rule.name)}" data-heal-prop="enabled" ${rule.enabled ? "checked" : ""} />
-            <button type="button" class="mb-heal-rule-toggle" data-heal-toggle aria-expanded="${expandedHealRuleId === rule.id}">
-              <strong>${escapeHealText(rule.name || "Acción de curación")}</strong>
-              <span class="mb-heal-rule-summary">${rule.stat === "mana" ? "MP" : "HP"} ${rule.operator === "above" ? ">" : "<"} ${escapeHealText(rule.value)}${rule.unit === "percent" ? "%" : " pts"} · Casilla ${rule.slot || "—"}</span>
-            </button>
-            <span class="mb-heal-priority">#${index + 1}</span>
-            <button type="button" data-heal-move="up" aria-label="Subir prioridad" title="Subir prioridad">↑</button>
-            <button type="button" data-heal-move="down" aria-label="Bajar prioridad" title="Bajar prioridad">↓</button>
-            <button type="button" data-heal-remove aria-label="Eliminar acción" title="Eliminar">×</button>
-          </div>
-          ${expandedHealRuleId === rule.id ? `<div class="mb-heal-rule-details">
-          <label class="mb-field" style="margin-bottom:7px"><span class="mb-field-label">Nombre de la acción</span><input type="text" aria-label="Nombre de la acción" maxlength="48" value="${escapeHealText(rule.name)}" data-heal-prop="name" /></label>
-          <div class="mb-heal-rule-grid">
-            <label class="mb-field"><span class="mb-field-label">Casilla (1–12)</span><input type="number" min="1" max="12" inputmode="numeric" placeholder="Sin asignar" value="${rule.slot ?? ""}" data-heal-prop="slot" /></label>
-            <label class="mb-field"><span class="mb-field-label">Vigilar</span><select data-heal-prop="stat">${option("hp", rule.stat, "Vida · HP")}${option("mana", rule.stat, "Maná · MP")}</select></label>
-            <label class="mb-field"><span class="mb-field-label">Condición</span><select data-heal-prop="operator">${option("below", rule.operator, "Por debajo de")}${option("above", rule.operator, "Por encima de")}</select></label>
-            <label class="mb-field"><span class="mb-field-label">Umbral</span><input type="number" min="0" step="1" inputmode="numeric" value="${rule.value}" data-heal-prop="value" /></label>
-            <label class="mb-field"><span class="mb-field-label">Unidad</span><select data-heal-prop="unit">${option("points", rule.unit, "Puntos")}${option("percent", rule.unit, "Porcentaje")}</select></label>
-            <label class="mb-field"><span class="mb-field-label">Maná requerido</span><input type="number" min="0" step="1" inputmode="numeric" value="${rule.manaCost}" data-heal-prop="manaCost" /></label>
-            <label class="mb-field"><span class="mb-field-label">Delay / CD (ms)</span><input type="number" min="0" max="60000" step="50" inputmode="numeric" value="${rule.cooldownMs}" data-heal-prop="cooldownMs" /></label>
-          </div>
-          </div>` : ""}
-        </article>`;
-      if (autoHealSpellList) autoHealSpellList.innerHTML = rules.map((rule, index) => rule.kind === "spell" ? renderRule(rule, index, "spell") : "").join("") || '<div class="mb-small-note">Sin hechizos configurados. Añade aquí tus hechizos de vida o maná.</div>';
-      if (autoHealItemList) autoHealItemList.innerHTML = rules.map((rule, index) => rule.kind !== "spell" ? renderRule(rule, index, "item") : "").join("") || '<div class="mb-small-note">Añade runas o pociones para vida o maná.</div>';
+      if (healCount) healCount.textContent = String(rules.length);
+      if (autoHealSpellList) autoHealSpellList.innerHTML = rules.map((rule,index)=>`<article class="mb-heal-rule" data-rule-id="${escapeHealText(rule.id)}"><div class="mb-heal-rule-head"><input type="checkbox" aria-label="Activar ${escapeHealText(rule.name)}" data-heal-enabled ${rule.enabled?"checked":""}/><button type="button" class="mb-heal-rule-toggle" data-heal-edit><strong>${escapeHealText(rule.name||"Acción de curación")}</strong><span class="mb-heal-rule-summary">${rule.kind==="spell"?"Hechizo":rule.kind==="rune"?"Runa":"Poción"} · ${rule.stat==="mana"?"MP":"HP"} ${rule.operator==="above"?">":"<"} ${escapeHealText(rule.value)}${rule.unit==="percent"?"%":" pts"} · Casilla ${rule.slot||"—"}</span></button><span class="mb-heal-priority">#${index+1}</span><button type="button" data-heal-move="up" aria-label="Subir">↑</button><button type="button" data-heal-move="down" aria-label="Bajar">↓</button><button type="button" data-heal-remove aria-label="Eliminar">×</button></div></article>`).join("") || '<div class="mb-small-note">No hay acciones. Añade un hechizo, una runa o una poción.</div>';
+      if(autoHealItemList) autoHealItemList.innerHTML="";
+      const editing=!!editingHealDraft;
+      if(autoHealSpellList) autoHealSpellList.hidden=editing;
+      if(healAddRow) healAddRow.hidden=editing;
+      if(healConditions) healConditions.hidden=editing;
+      if(healListSummary){healListSummary.hidden=!editing;healListSummary.textContent=editing?`Lista minimizada · ${rules.length} acciones guardadas`:"";}
+      if(!healEditor)return;
+      healEditor.hidden=!editing;
+      if(!editing){healEditor.innerHTML="";refreshHealStatus();return;}
+      const r=editingHealDraft, opt=(v,s,l)=>`<option value="${v}" ${s===v?"selected":""}>${l}</option>`;
+      healEditor.innerHTML=`<div class="mb-heal-group-title">${editingHealRuleId?"Editar acción":"Nueva acción"}</div><label class="mb-field"><span class="mb-field-label">Nombre de la acción</span><input type="text" maxlength="48" value="${escapeHealText(r.name)}" data-heal-draft="name"/></label><div class="mb-heal-rule-grid"><label class="mb-field"><span class="mb-field-label">Casilla (1–12)</span><input type="number" min="1" max="12" inputmode="numeric" placeholder="Sin asignar" value="${r.slot??""}" data-heal-draft="slot"/></label><label class="mb-field"><span class="mb-field-label">Vigilar</span><select data-heal-draft="stat">${opt("hp",r.stat,"Vida · HP")}${opt("mana",r.stat,"Maná · MP")}</select></label><label class="mb-field"><span class="mb-field-label">Condición</span><select data-heal-draft="operator">${opt("below",r.operator,"Por debajo de")}${opt("above",r.operator,"Por encima de")}</select></label><label class="mb-field"><span class="mb-field-label">Umbral</span><input type="number" min="0" step="1" value="${r.value}" data-heal-draft="value"/></label><label class="mb-field"><span class="mb-field-label">Unidad</span><select data-heal-draft="unit">${opt("points",r.unit,"Puntos")}${opt("percent",r.unit,"Porcentaje")}</select></label><label class="mb-field"><span class="mb-field-label">Maná requerido</span><input type="number" min="0" value="${r.manaCost}" data-heal-draft="manaCost"/></label><label class="mb-field"><span class="mb-field-label">Delay / CD (ms)</span><input type="number" min="0" max="60000" value="${r.cooldownMs}" data-heal-draft="cooldownMs"/></label></div><div class="mb-heal-editor-actions"><button type="button" data-heal-save>Guardar</button><button type="button" data-heal-cancel>Volver a la lista</button></div>`;
       refreshHealStatus();
     };
-
-    const saveHealRules = (rules) => {
-      bot.heal.updateConfig({ rules });
-      renderHealRules();
-    };
-    const healRuleDefault = (kind, index) => ({
-      id: `heal-${kind}-${Date.now()}-${index}`,
-      kind,
-      name: kind === "spell" ? (index ? "Spell Lo" : "Spell Hi") : kind === "rune" ? "UH Rune" : "Poción",
-      slot: null,
-      stat: "hp",
-      operator: "below",
-      value: 0,
-      unit: "percent",
-      manaCost: 0,
-      cooldownMs: 1200,
-      enabled: false,
+    const saveHealRules = (rules) => { bot.heal.updateConfig({rules}); renderHealRules(); };
+    const readHealDraft = () => { for(const el of healEditor.querySelectorAll("[data-heal-draft]")){const p=el.dataset.healDraft;if(p==="slot")editingHealDraft.slot=el.value===""?null:Math.min(12,Math.max(1,Number(el.value)||1));else if(p==="value"||p==="manaCost"||p==="cooldownMs")editingHealDraft[p]=Math.max(0,Number(el.value)||0);else editingHealDraft[p]=p==="name"?(el.value.trim().slice(0,48)||"Acción de curación"):el.value;} };
+    panel.addEventListener("click",(event)=>{
+      const add=event.target.closest("[data-heal-add]");
+      if(add){const rules=[...bot.heal.config.rules];if(rules.length>=24)return;const kind=add.dataset.healAdd;editingHealRuleId=null;editingHealDraft=healRuleDefault(kind,rules.filter(x=>x.kind===kind).length);renderHealRules();return;}
+      const card=event.target.closest(".mb-heal-rule");
+      if(card){const rules=[...bot.heal.config.rules], index=rules.findIndex(x=>x.id===card.dataset.ruleId);if(index<0)return;
+        if(event.target.closest("[data-heal-edit]")){editingHealRuleId=rules[index].id;editingHealDraft={...rules[index]};renderHealRules();return;}
+        if(event.target.matches("[data-heal-enabled]")){rules[index].enabled=event.target.checked;saveHealRules(rules);return;}
+        if(event.target.closest("[data-heal-remove]")){rules.splice(index,1);saveHealRules(rules);return;}
+        const move=event.target.closest("[data-heal-move]")?.dataset.healMove;if(move){const dest=move==="up"?index-1:index+1;if(dest<0||dest>=rules.length)return;[rules[index],rules[dest]]=[rules[dest],rules[index]];saveHealRules(rules);}return;
+      }
+      if(event.target.closest("[data-heal-cancel]")){editingHealDraft=null;editingHealRuleId=null;renderHealRules();return;}
+      if(event.target.closest("[data-heal-save]")){readHealDraft();const rules=[...bot.heal.config.rules],index=editingHealRuleId?rules.findIndex(x=>x.id===editingHealRuleId):-1;if(index>=0)rules[index]={...editingHealDraft};else rules.push({...editingHealDraft});editingHealDraft=null;editingHealRuleId=null;saveHealRules(rules);}
     });
-
-    panel.addEventListener("click", (event) => {
-      const add = event.target.closest("[data-heal-add]");
-      if (add) {
-        const rules = [...bot.heal.config.rules];
-        if (rules.length >= 24) return;
-        const kind = add.dataset.healAdd;
-        const nextRule = healRuleDefault(kind, rules.filter((rule) => rule.kind === kind).length);
-        rules.push(nextRule);
-        expandedHealRuleId = nextRule.id;
-        saveHealRules(rules);
-        return;
-      }
-      const card = event.target.closest(".mb-heal-rule");
-      if (!card) return;
-      if (event.target.closest("[data-heal-toggle]")) {
-        expandedHealRuleId = expandedHealRuleId === card.dataset.ruleId ? null : card.dataset.ruleId;
-        renderHealRules();
-        return;
-      }
-      const rules = [...bot.heal.config.rules];
-      const index = rules.findIndex((rule) => rule.id === card.dataset.ruleId);
-      if (index < 0) return;
-      if (event.target.closest("[data-heal-remove]")) {
-        rules.splice(index, 1);
-        if (expandedHealRuleId === card.dataset.ruleId) expandedHealRuleId = null;
-        saveHealRules(rules);
-        return;
-      }
-      const move = event.target.closest("[data-heal-move]")?.dataset.healMove;
-      if (move) {
-        const destination = move === "up" ? index - 1 : index + 1;
-        if (destination < 0 || destination >= rules.length) return;
-        [rules[index], rules[destination]] = [rules[destination], rules[index]];
-        saveHealRules(rules);
-      }
-    });
-
-    panel.addEventListener("change", (event) => {
-      const input = event.target.closest("[data-heal-prop]");
-      const card = input?.closest(".mb-heal-rule");
-      if (!input || !card) return;
-      const rules = [...bot.heal.config.rules];
-      const rule = rules.find((entry) => entry.id === card.dataset.ruleId);
-      if (!rule) return;
-      const prop = input.dataset.healProp;
-      if (prop === "enabled") rule.enabled = input.checked;
-      else if (prop === "name") rule.name = input.value.trim().slice(0, 48) || "Acción de curación";
-      else if (prop === "slot") rule.slot = input.value === "" ? null : Math.min(12, Math.max(1, Number(input.value) || 1));
-      else if (prop === "value") rule.value = Math.max(0, Number(input.value) || 0);
-      else if (prop === "manaCost" || prop === "cooldownMs") rule[prop] = Math.max(0, Number(input.value) || 0);
-      else rule[prop] = input.value;
-      saveHealRules(rules);
-    });
+    panel.addEventListener("change",(event)=>{const el=event.target.closest("[data-heal-draft]");if(el&&editingHealDraft){const p=el.dataset.healDraft;if(p==="slot")editingHealDraft.slot=el.value===""?null:Math.min(12,Math.max(1,Number(el.value)||1));else if(p==="value"||p==="manaCost"||p==="cooldownMs")editingHealDraft[p]=Math.max(0,Number(el.value)||0);else editingHealDraft[p]=p==="name"?(el.value.trim().slice(0,48)||"Acción de curación"):el.value;}});
 
     if (autoHealWaitInput) {
       autoHealWaitInput.value = String(bot.heal.config.tickMs ?? 100);
