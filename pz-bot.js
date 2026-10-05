@@ -7984,15 +7984,16 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel .mb-primary-button { background: #456b4d; border-color: #719b79; color: #fff; font-weight: 650; }
       #minibia-bot-panel .mb-primary-button:hover { background: #527b5a; }
       #minibia-bot-panel .mb-cave-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; padding: 7px 8px; border: 1px solid rgba(224,200,148,.18); border-radius: 7px; background: rgba(12,9,6,.25); color: #c7b990; font-size: 10px; line-height: 1.3; }
-      #minibia-bot-panel .mb-cave-legend b { color: #f0d69a; font-weight: 600; }
-      #minibia-bot-panel .mb-cave-description { border: 1px solid rgba(224,200,148,.25); border-radius: 7px; padding: 6px 8px; }
-      #minibia-bot-panel .mb-cave-description summary { cursor: pointer; color: #d3c49d; font-size: 11px; }
+      #minibia-bot-panel .mb-cave-legend b { color: #f0d69a; font-weight: 700; }
+      #minibia-bot-panel .mb-cave-description { border: 1px solid rgba(224,200,148,.25); border-radius: 7px; padding: 6px 8px; background: rgba(12,9,6,.18); }
+      #minibia-bot-panel .mb-cave-description summary { cursor: pointer; color: #f0d69a; font-size: 11px; font-weight: 700; padding: 5px 6px; border-radius: 5px; background: rgba(12,9,6,.48); }
       #minibia-bot-panel .mb-cave-description[open] { display: grid; gap: 6px; }
       #minibia-bot-panel .mb-cave-description .mb-cave-legend { margin-top: 0; }
       #minibia-bot-panel .mb-cave-description .mb-small-note { margin-top: 5px; }
       #minibia-bot-panel .mb-cave-column .mb-cave-choice-group button { min-height: 28px; padding: 3px 6px; font-size: 10px; }
       #minibia-bot-panel .mb-cave-column .mb-cave-preset-actions button { min-height: 29px; padding: 3px 4px; font-size: 10px; }
       #minibia-bot-panel .mb-cave-column .mb-cave-undo { min-height: 27px; padding: 3px 7px; font-size: 10px; }
+       #minibia-bot-panel .mb-cave-column .mb-cave-choice-group .mb-cave-undo { min-height: 28px; padding: 3px 7px; font-size: 10px; background: rgba(12,9,6,.42); border-color: rgba(224,200,148,.3); color: #f0d69a; white-space: nowrap; }
       #minibia-bot-panel .mb-cave-column .mb-actions button { min-height: 32px; padding: 4px 7px; font-size: 11px; }
     `;
     document.head.appendChild(style);
@@ -8169,10 +8170,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                   <button type="button" data-cave-type="walk" aria-label="Añadir punto Walk">Walk</button>
                   <button type="button" data-cave-type="label" aria-label="Añadir punto Label">Label</button>
                   <button type="button" data-cave-type="action" aria-label="Añadir punto Acción">Acción</button>
+                  <button type="button" class="mb-small-button mb-cave-undo" id="minibia-bot-cave-remove-last">Deshacer último punto</button>
                 </div>
                 <details class="mb-cave-description">
                   <summary>Descripción · tipos de punto</summary>
-                  <button type="button" class="mb-small-button mb-cave-undo" id="minibia-bot-cave-remove-last">Deshacer último punto</button>
                   <div class="mb-cave-legend" aria-label="Qué hace cada tipo de punto">
                     <span><b>Node / Walk</b> · Punto flexible de paso</span>
                     <span><b>Stand</b> · Llega a esa casilla exacta</span>
@@ -8193,7 +8194,10 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
                 </div>
                 <details class="mb-cave-description">
                   <summary>Descripción · sentido del recorrido</summary>
-                  <div class="mb-small-note">Ida y vuelta: recorre ambos sentidos. Circuito: vuelve del último punto al primero.</div>
+                  <div class="mb-cave-legend" aria-label="Qué hace cada sentido del recorrido">
+                    <span><b>Ida y vuelta</b> · Recorre ambos sentidos.</span>
+                    <span><b>Circuito continuo</b> · Vuelve del último punto al primero.</span>
+                  </div>
                 </details>
               </div>
               </div>
