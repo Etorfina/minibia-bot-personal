@@ -1,33 +1,17 @@
 (async () => {
-  const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/ea2ec7c13a387b956d7495423f675a0a7e7b5dee/minibia-bot.js.gz.b64";
-  const requiredControls = [
-    'data-tab="healing"',
-    'id="minibia-bot-heal-spells"',
-    'id="minibia-bot-heal-items"',
-    'id="minibia-bot-heal-status"',
-    'id="minibia-bot-attack-target-list"',
-    'id="minibia-bot-attack-stance"',
-    'id="minibia-bot-attack-range"'
-  ];
-  const hasTargetingControls = (source) => requiredControls.every((control) => source.includes(control));
-  const decode = async (url) => {
-    const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error(`No pude descargar el bot: HTTP ${response.status}`);
-    const bytes = Uint8Array.from(atob((await response.text()).trim()), c => c.charCodeAt(0));
-    return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
-  };
-  let code = await decode(`${mainUrl}?v=${Date.now()}`);
-  if (!hasTargetingControls(code)) {
-    code = await decode(verifiedUrl);
-  }
-  if (!hasTargetingControls(code)) {
-    throw new Error("La versión descargada no incluye las reglas de curación y controles esperados.");
-  }
-  window.minibiaBotSourceUrl = mainUrl;
+  const bundleUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/develop/minibia-bot.js.gz.b64";
+  const requiredControls = ['data-tab="healing"','id="minibia-bot-heal-spells"','id="minibia-bot-heal-items"','id="minibia-bot-heal-status"','id="minibia-bot-attack-target-list"','id="minibia-bot-attack-stance"','id="minibia-bot-attack-range"'];
+  const response = await fetch(bundleUrl + "?v=" + Date.now(), { cache: "no-store" });
+  if (!response.ok) throw new Error("No pude descargar el bot: HTTP " + response.status);
+  const bytes = Uint8Array.from(atob((await response.text()).trim()), c => c.charCodeAt(0));
+  const code = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  if (!requiredControls.every(control => code.includes(control))) throw new Error("La versión de develop no incluye los controles esperados.");
+  window.minibiaBotSourceUrl = bundleUrl;
   (0, eval)(code);
-  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-heal-spells") || !document.getElementById("minibia-bot-heal-items") || !document.getElementById("minibia-bot-heal-status") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) {
-    throw new Error("La versión nueva se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
-  }
-  console.info("[minibia-bot] HealBot y Attack Target actualizados cargados");
+  const fix = document.createElement("style");
+  fix.id = "minibia-bot-collapsed-nav-fix";
+  fix.textContent = '#minibia-bot-panel.mb-desktop .mb-mobile-tabs[hidden] { display: none !important; }';
+  document.head.appendChild(fix);
+  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-heal-spells") || !document.getElementById("minibia-bot-heal-items") || !document.getElementById("minibia-bot-heal-status") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) throw new Error("La versión se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
+  console.info("[minibia-bot] develop cargado con corrección de navegación plegada");
 })().catch(error => { console.error(error); alert(error.message); });
