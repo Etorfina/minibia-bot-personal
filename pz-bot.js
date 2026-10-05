@@ -906,6 +906,91 @@ window.__minibiaBotBundle.installXrayModule = function installXrayModule(bot) {
         background: rgba(11, 61, 43, 0.8);
         color: #d8ffea;
       }
+
+      /* Combate móvil: controles compactos sin reducir la legibilidad. */
+      #minibia-bot-panel.mb-mobile .mb-section[aria-labelledby="minibia-bot-attack-title"] { padding: 7px !important; }
+      #minibia-bot-panel.mb-mobile .mb-section[aria-labelledby="minibia-bot-attack-title"] > .mb-label { margin: 0 0 3px; font-size: 11px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-intro { margin: 0 0 4px; font-size: 9px; line-height: 1.25; }
+      #minibia-bot-panel.mb-mobile .mb-attack-layout { gap: 4px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card { gap: 4px; padding: 6px; border-radius: 8px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card-heading { align-items: center; gap: 5px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card-title { font-size: 10px; line-height: 1.2; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card .mb-small-note { margin: 0; font-size: 9px; line-height: 1.25; }
+      #minibia-bot-panel.mb-mobile .mb-attack-status { padding: 2px 6px; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-count { min-width: 18px; padding: 1px 5px; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-enable,
+      #minibia-bot-panel.mb-mobile .mb-attack-only-listed { min-height: 30px !important; padding: 3px 2px !important; font-size: 11px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-add-row { gap: 4px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-add-row input { min-height: 34px !important; padding: 4px 7px; font-size: 16px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-add-row button,
+      #minibia-bot-panel.mb-mobile .mb-attack-visible-list button { min-height: 29px !important; padding: 3px 7px; font-size: 10px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-visible-list { gap: 4px; padding: 0 0 2px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-visible-empty { padding: 2px 0; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-list { gap: 3px; max-height: 96px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-empty { padding: 4px 6px; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-row { grid-template-columns: 16px minmax(55px,1fr) auto auto; gap: 3px; min-height: 28px; padding: 2px 4px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-name { font-size: 10px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-stance { min-width: 67px; min-height: 25px !important; padding: 2px 15px 2px 5px; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-controls { gap: 2px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-controls .mb-attack-row-action { width: 23px; min-width: 23px; min-height: 23px !important; padding: 1px; font-size: 11px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-only-listed { padding-top: 4px !important; }
+      #minibia-bot-panel.mb-mobile .mb-attack-selection-field { gap: 2px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-selection-field select,
+      #minibia-bot-panel.mb-mobile #minibia-bot-attack-stance,
+      #minibia-bot-panel.mb-mobile #minibia-bot-attack-range,
+      #minibia-bot-panel.mb-mobile #minibia-bot-auto-attack-hotkey,
+      #minibia-bot-panel.mb-mobile #minibia-bot-auto-attack-rune-hotkey { min-height: 30px !important; padding: 3px 6px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-hotkeys { gap: 4px; }
+
+      /* Escritorio: panel flotante compacto con navegación por pestañas. */
+      #minibia-bot-panel:not(.mb-mobile) {
+        box-sizing: border-box;
+        width: min(560px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+        padding: 10px;
+      }
+      #minibia-bot-panel:not(.mb-mobile) .mb-body {
+        display: block;
+        max-height: calc(100dvh - 104px);
+        overflow: auto;
+        overscroll-behavior: contain;
+      }
+      #minibia-bot-panel:not(.mb-mobile) .mb-main-column,
+      #minibia-bot-panel:not(.mb-mobile) .mb-side-column,
+      #minibia-bot-panel:not(.mb-mobile) .mb-cave-column,
+      #minibia-bot-panel:not(.mb-mobile) .mb-healing-column { display: contents; }
+      #minibia-bot-panel:not(.mb-mobile) .mb-mobile-tabs {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+        margin-bottom: 7px;
+        scrollbar-width: thin;
+      }
+      #minibia-bot-panel:not(.mb-mobile) .mb-mobile-tabs button {
+        width: auto;
+        min-width: max-content;
+        min-height: 32px;
+        padding: 4px 9px;
+        border-radius: 7px;
+        background: #25282a;
+        border-color: rgba(255,255,255,.09);
+        color: #cbc8c1;
+        font-size: 11px;
+      }
+      #minibia-bot-panel:not(.mb-mobile) .mb-mobile-tabs button[aria-selected="true"] {
+        background: #8e6c38;
+        border-color: #bd985a;
+        color: #fff;
+      }
+      #minibia-bot-panel:not(.mb-mobile) .mb-column-section { display: none; }
+      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="status"] [data-mobile-tab="status"],
+      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="cave"] [data-mobile-tab="cave"],
+      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="combat"] [data-mobile-tab="combat"],
+      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="healing"] [data-mobile-tab="healing"],
+      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="safety"] [data-mobile-tab="safety"],
+      #minibia-bot-panel:not(.mb-mobile)[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
+      #minibia-bot-panel:not(.mb-mobile)[data-collapsed="true"] .mb-mobile-tabs { display: none; }
+
     `;
     document.head.appendChild(style);
   }
@@ -7438,7 +7523,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel {
         top: 16px;
         right: 16px;
-        width: 960px;
+        width: min(560px, calc(100vw - 24px));
       }
 
       #minibia-bot-panel[data-collapsed="true"] {
