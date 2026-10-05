@@ -1,11 +1,11 @@
 (async () => {
-  const bundleUrl = "https://cdn.jsdelivr.net/gh/Etorfina/minibia-bot-personal@develop/minibia-bot.js.gz.b64";
+  const bundleUrl = "https://cdn.jsdelivr.net/gh/Etorfina/minibia-bot-personal@main/minibia-bot.js.gz.b64";
   const requiredControls = ['data-tab="healing"','id="minibia-bot-heal-spells"','id="minibia-bot-heal-items"','id="minibia-bot-heal-status"','id="minibia-bot-attack-target-list"','id="minibia-bot-attack-stance"','id="minibia-bot-attack-range"'];
   const response = await fetch(bundleUrl + "?v=" + Date.now(), { cache: "no-store" });
   if (!response.ok) throw new Error("No pude descargar el bot: HTTP " + response.status);
   const bytes = Uint8Array.from(atob((await response.text()).trim()), c => c.charCodeAt(0));
   const code = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
-  if (!requiredControls.every(control => code.includes(control))) throw new Error("La versión de develop no incluye los controles esperados.");
+  if (!requiredControls.every(control => code.includes(control))) throw new Error("La versión de main no incluye los controles esperados.");
   window.minibiaBotSourceUrl = bundleUrl;
   (0, eval)(code);
   document.getElementById("minibia-bot-collapsed-nav-fix")?.remove();
