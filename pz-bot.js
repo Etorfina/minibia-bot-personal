@@ -8423,7 +8423,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     document.body.appendChild(panel);
     const mobileQuery = window.matchMedia("(max-width: 760px)");
     const updateMobile = () => {
-      const mobile = mobileQuery.matches || /iPhone|iPod/i.test(navigator.userAgent);
+      const narrowTouchScreen = mobileQuery.matches && window.matchMedia("(pointer: coarse)").matches;
+      const mobile = narrowTouchScreen || /iPhone|iPod|Android/i.test(navigator.userAgent);
       panel.classList.toggle("mb-mobile", mobile);
       if (mobile) {
         const rect = panel.getBoundingClientRect();
