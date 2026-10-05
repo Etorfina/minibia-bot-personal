@@ -613,6 +613,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     if (!panel) return;
 
     const body = panel.querySelector(".mb-body");
+    const navigation = panel.querySelector(".mb-mobile-tabs");
     const toggle = panel.querySelector("#minibia-bot-collapse");
     const nextCollapsed = !!collapsed;
 
@@ -620,6 +621,9 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
     if (body) {
       body.hidden = nextCollapsed;
+    }
+    if (navigation) {
+      navigation.hidden = nextCollapsed;
     }
 
     if (toggle) {
@@ -912,6 +916,8 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
 
       #minibia-bot-panel .mb-mobile-tabs,
       #minibia-bot-panel .mb-mobile-summary { display: none; }
+      /* El atributo hidden debe imponerse también a los display:flex !important de escritorio. */
+      #minibia-bot-panel .mb-mobile-tabs[hidden] { display: none !important; }
 
       #minibia-bot-panel .mb-side-column,
       #minibia-bot-panel .mb-main-column,
