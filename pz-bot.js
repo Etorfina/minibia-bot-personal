@@ -8934,7 +8934,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       refreshAutoInvisibleStatus();
       refreshAutoMagicShieldStatus();
       refreshAutoAttackStatus();
-      refreshAutoAttackTargetList();
+      refreshAttackTargetList();
       refreshEquipRingStatus();
       refreshPanicStatus();
       refreshXrayStatus();
