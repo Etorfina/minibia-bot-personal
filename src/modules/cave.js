@@ -382,6 +382,28 @@ window.__minibiaBotBundle.installCaveModule = function installCaveModule(bot) {
     };
   }
 
+  function applyProfilePreset(value = {}) {
+    const name = normalizePresetName(value.name) || defaultPresetName;
+    const nextRoute = normalizeRoute(Array.isArray(value.route) ? value.route : []);
+    const nextTransitions = normalizeTransitions(Array.isArray(value.transitions) ? value.transitions : []);
+    if (state.running) stop({ persistEnabled: false });
+
+    config.routeMode = value.routeMode === "loop" ? "loop" : "pingpong";
+    const preset = upsertPreset(name, nextRoute, nextTransitions);
+    if (!preset) return null;
+    preset.routeMode = config.routeMode;
+    persistPresets();
+    loadPresetState(preset.name);
+    config.activePresetName = preset.name;
+    persistConfig();
+    return {
+      name: preset.name,
+      route: getRoute(),
+      transitions: getTransitions(),
+      routeMode: config.routeMode,
+    };
+  }
+
   // Shared routes contain movement data only. Never import bot settings or executable code.
   function exportPreset(name = getActivePresetName()) {
     const preset = getPresetByName(name);
@@ -1798,6 +1820,7 @@ window.__minibiaBotBundle.installCaveModule = function installCaveModule(bot) {
     getTransitions,
     getPresetNames,
     getActivePresetName,
+    applyProfilePreset,
     getCurrentWaypoint,
     createPreset,
     savePreset,
