@@ -104,6 +104,7 @@
     currentBundle.installEquipRingModule(bot);
     currentBundle.installAutoEatModule(bot);
     currentBundle.installTalkModule(bot);
+    currentBundle.installProfileModule(bot);
 
     const moduleNames = persistedEnabledModules.map(([name]) => name);
     bot.master = {
@@ -179,6 +180,7 @@
       equipRing: bot.equipRing.status(),
       eat: bot.eat.status(),
       talk: bot.talk.status(),
+      profiles: bot.profiles.getStatus(),
     });
 
     window.minibiaBot = bot;
