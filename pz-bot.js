@@ -478,6 +478,7 @@ window.__minibiaBotBundle.createBot = function createBot() {
     },
   };
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installPzModule = function installPzModule(bot) {
@@ -673,6 +674,7 @@ window.__minibiaBotBundle.installPzModule = function installPzModule(bot) {
   bot.clearHomePz = clearHomePz;
   bot.goToHomePz = goToHomePz;
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installXrayModule = function installXrayModule(bot) {
@@ -906,44 +908,6 @@ window.__minibiaBotBundle.installXrayModule = function installXrayModule(bot) {
         background: rgba(11, 61, 43, 0.8);
         color: #d8ffea;
       }
-
-      /* Combate móvil: controles compactos sin reducir la legibilidad. */
-      #minibia-bot-panel.mb-mobile .mb-section[aria-labelledby="minibia-bot-attack-title"] { padding: 7px !important; }
-      #minibia-bot-panel.mb-mobile .mb-section[aria-labelledby="minibia-bot-attack-title"] > .mb-label { margin: 0 0 3px; font-size: 11px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-intro { margin: 0 0 4px; font-size: 9px; line-height: 1.25; }
-      #minibia-bot-panel.mb-mobile .mb-attack-layout { gap: 4px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-card { gap: 4px; padding: 6px; border-radius: 8px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-card-heading { align-items: center; gap: 5px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-card-title { font-size: 10px; line-height: 1.2; }
-      #minibia-bot-panel.mb-mobile .mb-attack-card .mb-small-note { margin: 0; font-size: 9px; line-height: 1.25; }
-      #minibia-bot-panel.mb-mobile .mb-attack-status { padding: 2px 6px; font-size: 9px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-count { min-width: 18px; padding: 1px 5px; font-size: 9px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-enable,
-      #minibia-bot-panel.mb-mobile .mb-attack-only-listed { min-height: 30px !important; padding: 3px 2px !important; font-size: 11px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-add-row { gap: 4px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-add-row input { min-height: 34px !important; padding: 4px 7px; font-size: 16px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-add-row button,
-      #minibia-bot-panel.mb-mobile .mb-attack-visible-list button { min-height: 29px !important; padding: 3px 7px; font-size: 10px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-visible-list { gap: 4px; padding: 0 0 2px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-visible-empty { padding: 2px 0; font-size: 9px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-target-list { gap: 3px; max-height: 96px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-empty { padding: 4px 6px; font-size: 9px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-target-row { grid-template-columns: 16px minmax(55px,1fr) auto auto; gap: 3px; min-height: 28px; padding: 2px 4px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-target-name { font-size: 10px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-target-stance { min-width: 67px; min-height: 25px !important; padding: 2px 15px 2px 5px; font-size: 9px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-target-controls { gap: 2px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-target-controls .mb-attack-row-action { width: 23px; min-width: 23px; min-height: 23px !important; padding: 1px; font-size: 11px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-only-listed { padding-top: 4px !important; }
-      #minibia-bot-panel.mb-mobile .mb-attack-selection-field { gap: 2px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-selection-field select,
-      #minibia-bot-panel.mb-mobile #minibia-bot-attack-stance,
-      #minibia-bot-panel.mb-mobile #minibia-bot-attack-range,
-      #minibia-bot-panel.mb-mobile #minibia-bot-auto-attack-hotkey,
-      #minibia-bot-panel.mb-mobile #minibia-bot-auto-attack-rune-hotkey { min-height: 30px !important; padding: 3px 6px; }
-      #minibia-bot-panel.mb-mobile .mb-attack-hotkeys { gap: 4px; }
-
-
-
     `;
     document.head.appendChild(style);
   }
@@ -1158,6 +1122,7 @@ window.__minibiaBotBundle.installXrayModule = function installXrayModule(bot) {
   }
   bot.addCleanup(stopOverlay);
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installPanicModule = function installPanicModule(bot) {
@@ -1777,6 +1742,7 @@ window.__minibiaBotBundle.installPanicModule = function installPanicModule(bot) 
     config,
   };
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installRuneModule = function installRuneModule(bot) {
@@ -2019,6 +1985,7 @@ window.__minibiaBotBundle.installRuneModule = function installRuneModule(bot) {
   bot.startRuneLoop = start;
   bot.stopRuneLoop = stop;
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
@@ -2274,6 +2241,7 @@ window.__minibiaBotBundle.installHealModule = function installHealModule(bot) {
   if (config.enabled) start();
   bot.addCleanup(() => stop({ persistEnabled: false }));
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installAutoInvisibleModule = function installAutoInvisibleModule(bot) {
@@ -2490,6 +2458,7 @@ window.__minibiaBotBundle.installAutoInvisibleModule = function installAutoInvis
     config,
   };
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installAutoMagicShieldModule = function installAutoMagicShieldModule(bot) {
@@ -2728,6 +2697,7 @@ window.__minibiaBotBundle.installAutoMagicShieldModule = function installAutoMag
     config,
   };
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackModule(bot) {
@@ -3661,6 +3631,7 @@ window.__minibiaBotBundle.installAutoAttackModule = function installAutoAttackMo
     config,
   };
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installCaveModule = function installCaveModule(bot) {
@@ -4042,6 +4013,28 @@ window.__minibiaBotBundle.installCaveModule = function installCaveModule(bot) {
       name: preset.name,
       route: getRoute(),
       transitions: getTransitions(),
+    };
+  }
+
+  function applyProfilePreset(value = {}) {
+    const name = normalizePresetName(value.name) || defaultPresetName;
+    const nextRoute = normalizeRoute(Array.isArray(value.route) ? value.route : []);
+    const nextTransitions = normalizeTransitions(Array.isArray(value.transitions) ? value.transitions : []);
+    if (state.running) stop({ persistEnabled: false });
+
+    config.routeMode = value.routeMode === "loop" ? "loop" : "pingpong";
+    const preset = upsertPreset(name, nextRoute, nextTransitions);
+    if (!preset) return null;
+    preset.routeMode = config.routeMode;
+    persistPresets();
+    loadPresetState(preset.name);
+    config.activePresetName = preset.name;
+    persistConfig();
+    return {
+      name: preset.name,
+      route: getRoute(),
+      transitions: getTransitions(),
+      routeMode: config.routeMode,
     };
   }
 
@@ -5461,6 +5454,7 @@ window.__minibiaBotBundle.installCaveModule = function installCaveModule(bot) {
     getTransitions,
     getPresetNames,
     getActivePresetName,
+    applyProfilePreset,
     getCurrentWaypoint,
     createPreset,
     savePreset,
@@ -5802,6 +5796,7 @@ window.__minibiaBotBundle.installEquipRingModule = function installEquipRingModu
     tryEquipRing,
   };
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installAutoEatModule = function installAutoEatModule(bot) {
@@ -6005,6 +6000,7 @@ window.__minibiaBotBundle.installAutoEatModule = function installAutoEatModule(b
     bot.rune.isSated = isSated;
   }
 };
+
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installTalkModule = function installTalkModule(bot) {
@@ -6677,12 +6673,292 @@ window.__minibiaBotBundle.installTalkModule = function installTalkModule(bot) {
     config,
   };
 };
+
+window.__minibiaBotBundle = window.__minibiaBotBundle || {};
+
+window.__minibiaBotBundle.installProfileModule = function installProfileModule(bot) {
+  const storageKey = "minibiaBot.profiles.v1";
+  const masterResumeKey = "minibiaBot.master.resume";
+  const moduleNames = ["rune", "heal", "invisible", "magicShield", "attack", "cave", "equipRing", "eat", "talk"];
+
+  function clone(value) {
+    if (value == null) return value;
+    try { return JSON.parse(JSON.stringify(value)); }
+    catch { return null; }
+  }
+
+  function normalizeCharacterName(value) {
+    return String(value || "").trim().toLocaleLowerCase();
+  }
+
+  function normalizeName(value) {
+    return String(value || "").trim().replace(/\s+/g, " ").slice(0, 60);
+  }
+
+  function readRegistry() {
+    const saved = bot.storage.get(storageKey, null);
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
+      return { version: 1, profiles: [], characters: {}, currentProfileId: null, defaultConfig: null };
+    }
+    return {
+      version: 1,
+      profiles: Array.isArray(saved.profiles) ? saved.profiles.filter((profile) => profile && typeof profile === "object") : [],
+      characters: saved.characters && typeof saved.characters === "object" ? saved.characters : {},
+      currentProfileId: typeof saved.currentProfileId === "string" ? saved.currentProfileId : null,
+      defaultConfig: saved.defaultConfig && typeof saved.defaultConfig === "object" ? saved.defaultConfig : null,
+    };
+  }
+
+  let registry = readRegistry();
+  let activeCharacterName = null;
+  let lastMessage = "";
+  let nextProfileNumber = 1;
+
+  function persist() {
+    bot.storage.set(storageKey, registry);
+  }
+
+  function profileById(id) {
+    return registry.profiles.find((profile) => profile.id === id) || null;
+  }
+
+  function moduleConfig(name) {
+    const module = bot[name];
+    const status = module?.status?.();
+    const config = status?.config || module?.config || {};
+    const safeConfig = clone(config) || {};
+    if (name === "talk") delete safeConfig.apiKey;
+    return safeConfig;
+  }
+
+  function captureConfig() {
+    const caveStatus = bot.cave?.status?.() || {};
+    const caveConfig = clone(caveStatus.config || bot.cave?.config || {}) || {};
+    const talkConfig = moduleConfig("talk");
+
+    return {
+      pzHome: clone(bot.pz?.getHomePz?.() || null),
+      xray: clone(bot.xray?.config || {}) || {},
+      panic: clone(bot.panic?.status?.().config || {}) || {},
+      rune: moduleConfig("rune"),
+      heal: moduleConfig("heal"),
+      invisible: moduleConfig("invisible"),
+      magicShield: moduleConfig("magicShield"),
+      attack: moduleConfig("attack"),
+      cave: {
+        config: caveConfig,
+        route: clone(bot.cave?.getRoute?.() || caveStatus.route || []) || [],
+        transitions: clone(bot.cave?.getTransitions?.() || caveStatus.transitions || []) || [],
+        routeMode: caveConfig.routeMode === "loop" ? "loop" : "pingpong",
+        presetName: caveStatus.activePresetName || caveConfig.activePresetName || "Default",
+      },
+      equipRing: moduleConfig("equipRing"),
+      eat: moduleConfig("eat"),
+      talk: talkConfig,
+    };
+  }
+
+  function makeProfileId() {
+    const randomPart = Math.random().toString(36).slice(2, 7);
+    return `profile-${Date.now().toString(36)}-${nextProfileNumber++}-${randomPart}`;
+  }
+
+  function saveCurrentProfile() {
+    const current = profileById(registry.currentProfileId);
+    if (!current) return null;
+    current.config = captureConfig();
+    current.updatedAt = Date.now();
+    persist();
+    return current;
+  }
+
+  function stopModules() {
+    bot.panic?.stop?.();
+    bot.xray?.stopOverlay?.();
+    moduleNames.forEach((name) => bot[name]?.stop?.({ persistEnabled: false }));
+  }
+
+  function applyConfig(config = {}, profileName = "") {
+    const paused = !!bot.master?.isPaused?.();
+    stopModules();
+
+    if (config.pzHome && bot.pz?.setHomePz) {
+      bot.pz.setHomePz(config.pzHome.x, config.pzHome.y, config.pzHome.z);
+    } else {
+      bot.pz?.clearHomePz?.();
+    }
+
+    const xray = clone(config.xray) || {};
+    bot.xray?.setSelectedFloor?.(xray.selectedFloor ?? null);
+    bot.xray?.setOverlayEnabled?.(paused ? false : !!xray.overlayEnabled);
+
+    const panic = clone(config.panic) || {};
+    bot.panic?.updateConfig?.(paused ? {
+      ...panic,
+      unknownPlayerEnabled: false,
+      healthLossEnabled: false,
+      returnToOriginEnabled: false,
+      gameMasterNames: [],
+    } : panic);
+
+    const cave = clone(config.cave) || {};
+    const caveConfig = clone(cave.config) || {};
+    if (cave.route || cave.transitions) {
+      bot.cave?.applyProfilePreset?.({
+        name: profileName || cave.presetName || caveConfig.activePresetName || "Default",
+        route: cave.route || [],
+        transitions: cave.transitions || [],
+        routeMode: cave.routeMode || caveConfig.routeMode,
+      });
+    }
+
+    const nextConfigs = {
+      rune: config.rune,
+      heal: config.heal,
+      invisible: config.invisible,
+      magicShield: config.magicShield,
+      attack: config.attack,
+      cave: { ...caveConfig, activePresetName: profileName || cave.presetName || caveConfig.activePresetName },
+      equipRing: config.equipRing,
+      eat: config.eat,
+      talk: config.talk,
+    };
+
+    moduleNames.forEach((name) => {
+      const module = bot[name];
+      if (!module?.updateConfig || !nextConfigs[name] || typeof nextConfigs[name] !== "object") return;
+      const next = clone(nextConfigs[name]) || {};
+      if (name === "talk") next.apiKey = module.config?.apiKey || "";
+      module.updateConfig(next);
+    });
+
+    if (paused) {
+      const resume = bot.storage.get(masterResumeKey, null);
+      if (resume && typeof resume === "object") {
+        resume.modules = Object.fromEntries(moduleNames.map((name) => [
+          name,
+          !!nextConfigs[name]?.enabled,
+        ]));
+        resume.panic = clone(config.panic) || {};
+        resume.overlayEnabled = !!xray.overlayEnabled;
+        bot.storage.set(masterResumeKey, resume);
+      }
+      return;
+    }
+
+    moduleNames.forEach((name) => {
+      if (nextConfigs[name]?.enabled) bot[name]?.start?.();
+    });
+  }
+
+  function createProfile(name, config, characterKey = "") {
+    const profile = {
+      id: makeProfileId(),
+      name: normalizeName(name) || `Perfil ${nextProfileNumber}`,
+      config: clone(config) || captureConfig(),
+      updatedAt: Date.now(),
+    };
+    registry.profiles.push(profile);
+    if (characterKey) registry.characters[characterKey] = profile.id;
+    return profile;
+  }
+
+  function profileViews() {
+    return registry.profiles.map(({ id, name, updatedAt }) => ({ id, name, updatedAt }));
+  }
+
+  function getStatus() {
+    const current = profileById(registry.currentProfileId);
+    return {
+      profiles: profileViews(),
+      currentProfileId: current?.id || null,
+      currentProfileName: current?.name || "",
+      characterName: activeCharacterName || bot.getPlayerName?.() || "",
+      message: lastMessage,
+    };
+  }
+
+  function save(name = "") {
+    const requestedName = normalizeName(name) ||
+      profileById(registry.currentProfileId)?.name ||
+      normalizeName(activeCharacterName) || "Mi perfil";
+    let profile = registry.profiles.find((entry) =>
+      normalizeName(entry.name).toLocaleLowerCase() === requestedName.toLocaleLowerCase()
+    );
+    if (!profile) profile = createProfile(requestedName, captureConfig());
+    profile.name = requestedName;
+    profile.config = captureConfig();
+    profile.updatedAt = Date.now();
+    registry.currentProfileId = profile.id;
+    const key = normalizeCharacterName(activeCharacterName);
+    if (key) registry.characters[key] = profile.id;
+    lastMessage = `Perfil “${profile.name}” guardado.`;
+    persist();
+    return { ...profile, config: clone(profile.config) };
+  }
+
+  function use(id) {
+    const profile = profileById(id);
+    if (!profile) return false;
+    if (registry.currentProfileId && registry.currentProfileId !== id) saveCurrentProfile();
+    registry.currentProfileId = id;
+    const key = normalizeCharacterName(activeCharacterName);
+    if (key) registry.characters[key] = id;
+    applyConfig(profile.config, profile.name);
+    lastMessage = `Perfil “${profile.name}” aplicado.`;
+    persist();
+    return true;
+  }
+
+  function createForCharacter(name, characterKey) {
+    if (!registry.defaultConfig) registry.defaultConfig = captureConfig();
+    const profile = createProfile(name, registry.defaultConfig, characterKey);
+    registry.currentProfileId = profile.id;
+    applyConfig(profile.config, profile.name);
+    lastMessage = `Perfil creado para ${name}. Ajusta los módulos y pulsa Guardar perfil.`;
+    persist();
+  }
+
+  function refreshCharacter() {
+    const name = normalizeName(bot.getPlayerName?.());
+    const key = normalizeCharacterName(name);
+    if (!key || key === normalizeCharacterName(activeCharacterName)) return false;
+
+    if (activeCharacterName && registry.currentProfileId) saveCurrentProfile();
+    activeCharacterName = name;
+    if (!registry.defaultConfig) registry.defaultConfig = captureConfig();
+
+    const profileId = registry.characters[key];
+    const profile = profileById(profileId);
+    if (profile) {
+      registry.currentProfileId = profile.id;
+      applyConfig(profile.config, profile.name);
+      lastMessage = `Perfil “${profile.name}” cargado para ${name}.`;
+      persist();
+    } else {
+      createForCharacter(name, key);
+    }
+    return true;
+  }
+
+  const characterTimerId = window.setInterval(refreshCharacter, 1500);
+  bot.addCleanup?.(() => window.clearInterval(characterTimerId));
+
+  bot.profiles = {
+    getProfiles: profileViews,
+    getStatus,
+    save,
+    use,
+    refreshCharacter,
+  };
+};
 window.__minibiaBotBundle = window.__minibiaBotBundle || {};
 
 window.__minibiaBotBundle.installPanel = function installPanel(bot) {
   const panelPositionKey = "minibiaBot.ui.panelPosition";
   const panelCollapsedKey = "minibiaBot.ui.panelCollapsed";
   const mobileTabKey = "minibiaBot.ui.mobileTab";
+  const panelTransparencyKey = "minibiaBot.ui.panelTransparency";
 
   function destroy() {
     document.getElementById("minibia-bot-panel")?.remove();
@@ -7483,12 +7759,12 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         padding: 12px;
         border: 1px solid rgba(205, 171, 111, 0.38);
         border-radius: 14px;
-        background: rgba(20, 21, 22, 0.985);
+        background: rgba(20, 21, 22, var(--mb-panel-opacity, 0.64));
         box-shadow: 0 16px 48px rgba(0, 0, 0, 0.48);
         color: #f2efe8;
         font: 13px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
         user-select: none;
       }
 
@@ -7635,7 +7911,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         padding: 12px;
         border: 1px solid rgba(255,255,255,.08);
         border-radius: 12px;
-        background: #1b1d1f;
+        background: rgba(27, 29, 31, var(--mb-section-opacity, 0.54));
         box-shadow: 0 4px 14px rgba(0,0,0,.16);
       }
 
@@ -8055,6 +8331,40 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
        #minibia-bot-panel .mb-cave-column .mb-cave-choice-group .mb-cave-undo { min-height: 28px; padding: 3px 7px; font-size: 10px; background: rgba(12,9,6,.42); border-color: rgba(224,200,148,.3); color: #f0d69a; white-space: nowrap; }
       #minibia-bot-panel .mb-cave-column .mb-actions button { min-height: 32px; padding: 4px 7px; font-size: 11px; }
 
+      /* Combate móvil: controles compactos sin reducir la legibilidad. */
+      #minibia-bot-panel.mb-mobile .mb-section[aria-labelledby="minibia-bot-attack-title"] { padding: 7px !important; }
+      #minibia-bot-panel.mb-mobile .mb-section[aria-labelledby="minibia-bot-attack-title"] > .mb-label { margin: 0 0 3px; font-size: 11px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-intro { margin: 0 0 4px; font-size: 9px; line-height: 1.25; }
+      #minibia-bot-panel.mb-mobile .mb-attack-layout { gap: 4px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card { gap: 4px; padding: 6px; border-radius: 8px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card-heading { align-items: center; gap: 5px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card-title { font-size: 10px; line-height: 1.2; }
+      #minibia-bot-panel.mb-mobile .mb-attack-card .mb-small-note { margin: 0; font-size: 9px; line-height: 1.25; }
+      #minibia-bot-panel.mb-mobile .mb-attack-status { padding: 2px 6px; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-count { min-width: 18px; padding: 1px 5px; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-enable,
+      #minibia-bot-panel.mb-mobile .mb-attack-only-listed { min-height: 30px !important; padding: 3px 2px !important; font-size: 11px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-add-row { gap: 4px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-add-row input { min-height: 34px !important; padding: 4px 7px; font-size: 16px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-add-row button,
+      #minibia-bot-panel.mb-mobile .mb-attack-visible-list button { min-height: 29px !important; padding: 3px 7px; font-size: 10px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-visible-list { gap: 4px; padding: 0 0 2px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-visible-empty { padding: 2px 0; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-list { gap: 3px; max-height: 96px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-empty { padding: 4px 6px; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-row { grid-template-columns: 16px minmax(55px,1fr) auto auto; gap: 3px; min-height: 28px; padding: 2px 4px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-name { font-size: 10px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-stance { min-width: 67px; min-height: 25px !important; padding: 2px 15px 2px 5px; font-size: 9px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-controls { gap: 2px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-target-controls .mb-attack-row-action { width: 23px; min-width: 23px; min-height: 23px !important; padding: 1px; font-size: 11px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-only-listed { padding-top: 4px !important; }
+      #minibia-bot-panel.mb-mobile .mb-attack-selection-field { gap: 2px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-selection-field select,
+      #minibia-bot-panel.mb-mobile #minibia-bot-attack-stance,
+      #minibia-bot-panel.mb-mobile #minibia-bot-attack-range,
+      #minibia-bot-panel.mb-mobile #minibia-bot-auto-attack-hotkey,
+      #minibia-bot-panel.mb-mobile #minibia-bot-auto-attack-rune-hotkey { min-height: 30px !important; padding: 3px 6px; }
+      #minibia-bot-panel.mb-mobile .mb-attack-hotkeys { gap: 4px; }
 
       /* Escritorio: panel flotante compacto con navegación por pestañas. */
       #minibia-bot-panel.mb-desktop {
@@ -8109,6 +8419,19 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-desktop[data-mobile-tab="safety"] [data-mobile-tab="safety"],
       #minibia-bot-panel.mb-desktop[data-mobile-tab="more"] [data-mobile-tab="more"] { display: block; }
       #minibia-bot-panel.mb-desktop[data-collapsed="true"] .mb-mobile-tabs { display: none; }
+
+    `;
+    style.textContent += `
+      #minibia-bot-panel input:not([type="checkbox"]), #minibia-bot-panel textarea, #minibia-bot-panel select { background-color: rgba(13,19,24,.68) !important; }
+      #minibia-bot-panel .mb-heal-group, #minibia-bot-panel .mb-heal-conditions, #minibia-bot-panel .mb-heal-rule, #minibia-bot-panel .mb-heal-editor, #minibia-bot-panel .mb-heal-list-summary, #minibia-bot-panel .mb-attack-card, #minibia-bot-panel .mb-list-row { background-color: rgba(23,27,30,.52) !important; }
+      #minibia-bot-panel .mb-profile-manager { display: grid; gap: 7px; }
+      #minibia-bot-panel .mb-profile-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 7px; align-items: center; }
+      #minibia-bot-panel .mb-profile-row button { min-height: 34px; white-space: nowrap; }
+      #minibia-bot-panel .mb-profile-opacity { display: grid; grid-template-columns: auto minmax(80px,1fr) 42px; gap: 8px; align-items: center; color: #e7d2ac; font-size: 11px; }
+      #minibia-bot-panel .mb-profile-opacity input { min-width: 0; margin: 0; accent-color: #e5ad4c; }
+      #minibia-bot-panel .mb-profile-opacity output { color: #f2efe8; text-align: right; font-variant-numeric: tabular-nums; }
+      #minibia-bot-panel #minibia-bot-profile-message { min-height: 1em; }
+      @media (max-width: 520px) { #minibia-bot-panel .mb-profile-row { grid-template-columns: minmax(0,1fr); } }
     `;
     document.head.appendChild(style);
 
@@ -8139,6 +8462,26 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
             <div class="mb-mobile-summary" aria-live="off">Cargando estado…</div>
             <button type="button" id="minibia-bot-reload">Reiniciar bot</button>
             <button type="button" id="minibia-bot-copy-setup">Exportar mi configuración</button>
+          </div>
+          <div class="mb-section mb-column-section mb-profile-manager" data-mobile-tab="status">
+            <div class="mb-label">Perfiles por personaje</div>
+            <div class="mb-small-note" id="minibia-bot-profile-character">Detectando personaje…</div>
+            <div class="mb-profile-row">
+              <select id="minibia-bot-profile-select" aria-label="Elegir perfil">
+                <option value="">Sin perfiles guardados</option>
+              </select>
+              <button type="button" id="minibia-bot-profile-use">Usar perfil</button>
+            </div>
+            <div class="mb-profile-row">
+              <input type="text" id="minibia-bot-profile-name" maxlength="60" placeholder="Nombre del perfil" aria-label="Nombre del perfil" />
+              <button type="button" id="minibia-bot-profile-save">Guardar perfil</button>
+            </div>
+            <label class="mb-profile-opacity" for="minibia-bot-panel-opacity">
+              <span>Transparencia del panel</span>
+              <input type="range" id="minibia-bot-panel-opacity" min="15" max="55" step="1" />
+              <output id="minibia-bot-panel-opacity-value" for="minibia-bot-panel-opacity">36%</output>
+            </label>
+            <div class="mb-small-note" id="minibia-bot-profile-message" aria-live="polite"></div>
           </div>
           <div class="mb-section mb-column-section">
             <div class="mb-label">Regreso seguro</div>
@@ -8452,6 +8795,15 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       </div>
     `;
     document.body.appendChild(panel);
+    const savedTransparency = Math.min(55, Math.max(15, Number(bot.storage.get(panelTransparencyKey, 36)) || 36));
+    const setPanelTransparency = (value) => {
+      const transparency = Math.min(55, Math.max(15, Number(value) || 36));
+      const panelOpacity = 1 - transparency / 100;
+      panel.style.setProperty("--mb-panel-opacity", panelOpacity.toFixed(2));
+      panel.style.setProperty("--mb-section-opacity", Math.max(0.4, panelOpacity - 0.1).toFixed(2));
+      return transparency;
+    };
+    setPanelTransparency(savedTransparency);
     const mobileQuery = window.matchMedia("(max-width: 760px)");
     const updateMobile = () => {
       const narrowTouchScreen = mobileQuery.matches && window.matchMedia("(pointer: coarse)").matches;
@@ -8536,6 +8888,14 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const stopAllButton = panel.querySelector("#minibia-bot-stop-all");
     const reloadButton = panel.querySelector("#minibia-bot-reload");
     const copySetupButton = panel.querySelector("#minibia-bot-copy-setup");
+    const profileSelect = panel.querySelector("#minibia-bot-profile-select");
+    const profileUseButton = panel.querySelector("#minibia-bot-profile-use");
+    const profileNameInput = panel.querySelector("#minibia-bot-profile-name");
+    const profileSaveButton = panel.querySelector("#minibia-bot-profile-save");
+    const profileCharacterLabel = panel.querySelector("#minibia-bot-profile-character");
+    const profileMessage = panel.querySelector("#minibia-bot-profile-message");
+    const panelOpacityInput = panel.querySelector("#minibia-bot-panel-opacity");
+    const panelOpacityValue = panel.querySelector("#minibia-bot-panel-opacity-value");
     const caveRemoveLastButton = panel.querySelector("#minibia-bot-cave-remove-last");
     const caveStartButton = panel.querySelector("#minibia-bot-cave-start");
     const caveStopButton = panel.querySelector("#minibia-bot-cave-stop");
@@ -8550,7 +8910,102 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const caveTransferPrimary = panel.querySelector("#minibia-bot-cave-transfer-primary");
     const caveTransferSecondary = panel.querySelector("#minibia-bot-cave-transfer-secondary");
     const caveTransferStatus = panel.querySelector("#minibia-bot-cave-transfer-status");
+    let profileListSignature = "";
+    let renderedProfileId = null;
     let caveTransferMode = "";
+
+    const refreshProfileInputs = () => {
+      const rune = bot.rune?.config || {};
+      if (spellInput) spellInput.value = rune.runeSpellWords || "";
+      if (manaInput) manaInput.value = String(rune.runeManaCost ?? 0);
+      if (autoEatHotkeyInput) autoEatHotkeyInput.value = String(bot.eat?.config?.eatHotbarSlot ?? 10);
+      if (autoAttackSelectionInput) autoAttackSelectionInput.value = bot.attack?.config?.targetSelectionMode === "list" ? "list" : "proximity";
+      if (autoAttackHotkeyInput) autoAttackHotkeyInput.value = String(bot.attack?.config?.targetHotbarSlot ?? 3);
+      if (autoAttackRuneHotkeyInput) autoAttackRuneHotkeyInput.value = bot.attack?.config?.runeHotbarSlot ? String(bot.attack.config.runeHotbarSlot) : "";
+      if (autoAttackStanceInput) autoAttackStanceInput.value = bot.attack?.config?.meleeMode === false ? "ranged" : "melee";
+      if (autoAttackRangeInput) autoAttackRangeInput.value = String(bot.attack?.config?.rangedDistance ?? 3);
+      if (talkPromptInput) talkPromptInput.value = bot.talk?.config?.systemPrompt || "";
+      if (autoHealWaitInput) autoHealWaitInput.value = String(bot.heal?.config?.tickMs ?? 100);
+      if (autoHealDelayInput) autoHealDelayInput.value = String(bot.heal?.config?.delayMs ?? 0);
+      if (autoHealMinManaInput) autoHealMinManaInput.value = String(bot.heal?.config?.minimumMana ?? 0);
+      refreshRuneStatus();
+      refreshAutoEatStatus();
+      refreshAutoHealStatus();
+      refreshAutoInvisibleStatus();
+      refreshAutoMagicShieldStatus();
+      refreshAutoAttackStatus();
+      refreshAutoAttackTargetList();
+      refreshEquipRingStatus();
+      refreshPanicStatus();
+      refreshXrayStatus();
+      refreshHomeLabel();
+      refreshTalkStatus();
+      renderTrustedNames();
+      renderGameMasterNames();
+      if (typeof renderHealRules === "function") renderHealRules();
+      refreshCaveStatus();
+      refreshCavePresetControls();
+      refreshCaveClosestStatus();
+      refreshCaveTransitionStatus();
+    };
+
+    const refreshProfileManager = (forceName = false) => {
+      bot.profiles?.refreshCharacter?.();
+      const status = bot.profiles?.getStatus?.();
+      if (!status) return;
+      const profiles = status.profiles || [];
+      const signature = profiles.map((profile) => `${profile.id}:${profile.name}`).join("|");
+      if (signature !== profileListSignature) {
+        const selected = profileSelect.value || status.currentProfileId || "";
+        profileSelect.replaceChildren();
+        if (!profiles.length) {
+          const empty = document.createElement("option");
+          empty.value = "";
+          empty.textContent = "Sin perfiles guardados";
+          profileSelect.appendChild(empty);
+        } else {
+          profiles.forEach((profile) => {
+            const option = document.createElement("option");
+            option.value = profile.id;
+            option.textContent = profile.name;
+            profileSelect.appendChild(option);
+          });
+        }
+        profileListSignature = signature;
+        if (profiles.some((profile) => profile.id === selected)) profileSelect.value = selected;
+      }
+      if (profileCharacterLabel) {
+        profileCharacterLabel.textContent = status.characterName
+          ? `Personaje: ${status.characterName}`
+          : "Detectando personaje…";
+      }
+      if (status.currentProfileId !== renderedProfileId) {
+        renderedProfileId = status.currentProfileId;
+        profileSelect.value = status.currentProfileId || "";
+        if (profileNameInput) {
+          profileNameInput.value = status.currentProfileName || "";
+          profileNameInput.dataset.profileId = status.currentProfileId || "";
+        }
+        refreshProfileInputs();
+      } else if (forceName && profileNameInput) {
+        profileNameInput.value = status.currentProfileName || "";
+      }
+      if (profileMessage) {
+        profileMessage.textContent = status.message || "Los perfiles se guardan en este navegador.";
+      }
+      if (profileUseButton) profileUseButton.disabled = !profileSelect.value;
+    };
+
+    if (panelOpacityInput) {
+      panelOpacityInput.value = String(savedTransparency);
+      if (panelOpacityValue) panelOpacityValue.value = `${savedTransparency}%`;
+      panelOpacityInput.addEventListener("input", () => {
+        const transparency = setPanelTransparency(panelOpacityInput.value);
+        panelOpacityInput.value = String(transparency);
+        if (panelOpacityValue) panelOpacityValue.value = `${transparency}%`;
+        bot.storage.set(panelTransparencyKey, transparency);
+      });
+    }
     const openCaveTransfer = (mode) => {
       caveTransferMode = mode;
       caveTransfer.hidden = false;
@@ -9257,6 +9712,22 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       refreshHomeLabel();
     });
 
+    profileUseButton?.addEventListener("click", () => {
+      if (!profileSelect?.value || !bot.profiles?.use?.(profileSelect.value)) return;
+      refreshProfileManager(true);
+    });
+    profileSaveButton?.addEventListener("click", () => {
+      bot.profiles?.save?.(profileNameInput?.value || "");
+      refreshProfileManager(true);
+    });
+    profileNameInput?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        profileSaveButton?.click();
+      }
+    });
+
+    refreshProfileManager();
     refreshHomeLabel();
     refreshPanicStatus();
     refreshXrayStatus();
@@ -9291,6 +9762,9 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     refreshMobileSummary();
     const summaryTimerId = window.setInterval(refreshMobileSummary, 1500);
     bot.addCleanup(() => window.clearInterval(summaryTimerId));
+
+    const profilesTimerId = window.setInterval(refreshProfileManager, 1000);
+    bot.addCleanup(() => window.clearInterval(profilesTimerId));
 
     const refreshSafetyStatus = () => {
       const label = panel.querySelector(".mb-safety-status");
@@ -9473,6 +9947,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     currentBundle.installEquipRingModule(bot);
     currentBundle.installAutoEatModule(bot);
     currentBundle.installTalkModule(bot);
+    currentBundle.installProfileModule(bot);
 
     const moduleNames = persistedEnabledModules.map(([name]) => name);
     bot.master = {
@@ -9548,6 +10023,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       equipRing: bot.equipRing.status(),
       eat: bot.eat.status(),
       talk: bot.talk.status(),
+      profiles: bot.profiles.getStatus(),
     });
 
     window.minibiaBot = bot;

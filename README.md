@@ -54,6 +54,12 @@ En la consola del navegador, con el juego abierto:
 
 El botón **Copiar código con mis ajustes** exporta las rutas y opciones del navegador actual. El repositorio conserva el código; los ajustes personales no se sincronizan automáticamente. La clave API y la configuración de Auto Reply se excluyen de la exportación.
 
+## Perfiles por personaje
+
+El bot reconoce el nombre del personaje activo y carga su perfil guardado. Desde **Inicio** puedes elegir otro perfil, aplicarlo al personaje actual, guardar la configuración con un nombre y ajustar la transparencia del panel. Al cambiar de personaje, los cambios del perfil actual se guardan automáticamente. Los perfiles y la transparencia se conservan en el almacenamiento local de ese navegador; la clave API se mantiene fuera de los perfiles.
+
+Para probar esta función en PC o teléfono, copia y ejecuta el contenido de [`minibia-one-code.txt`](https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/develop/minibia-one-code.txt) con Minibia abierto.
+
 ## Barra de inicio
 
 La barra aparece compacta en el centro de la pantalla:
@@ -94,7 +100,7 @@ Para compartir un preset, selecciónalo y pulsa **Exportar** debajo de **Nuevo /
 
 El combate tiene prioridad sobre la ruta. Tras 8 segundos sin acercarse al punto, el antiatasco puede omitir un Node/Walk solamente si el siguiente punto también es flexible, está en el mismo piso y el pathfinder confirma una ruta. En los demás casos detiene Cavebot y muestra el punto que requiere revisión. No omite acciones, Stand ni cambios de piso. Las transiciones aprendidas y Auto Loot del juego siguen funcionando como antes.
 
-Pruebas de comportamiento: `node --test tests/auto-attack.test.cjs tests/cave.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
+Pruebas de comportamiento: `node --test tests/*.test.cjs`. Reconstrucción: `bash build.sh`. Las pruebas usan un cliente simulado; falta validar navegación y combate en una sesión real de Minibia.
 
 Si ves **Record Spot** en vez de los botones **Node / Stand / Walk**, tu página aún usa un bundle anterior. Ejecuta el cargador de arriba y recarga Minibia para aplicar la interfaz nueva.
 

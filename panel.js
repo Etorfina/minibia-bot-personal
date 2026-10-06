@@ -4,6 +4,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
   const panelPositionKey = "minibiaBot.ui.panelPosition";
   const panelCollapsedKey = "minibiaBot.ui.panelCollapsed";
   const mobileTabKey = "minibiaBot.ui.mobileTab";
+  const panelTransparencyKey = "minibiaBot.ui.panelTransparency";
 
   function destroy() {
     document.getElementById("minibia-bot-panel")?.remove();
@@ -804,12 +805,12 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         padding: 12px;
         border: 1px solid rgba(205, 171, 111, 0.38);
         border-radius: 14px;
-        background: rgba(20, 21, 22, 0.985);
+        background: rgba(20, 21, 22, var(--mb-panel-opacity, 0.64));
         box-shadow: 0 16px 48px rgba(0, 0, 0, 0.48);
         color: #f2efe8;
         font: 13px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
         user-select: none;
       }
 
@@ -956,7 +957,7 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
         padding: 12px;
         border: 1px solid rgba(255,255,255,.08);
         border-radius: 12px;
-        background: #1b1d1f;
+        background: rgba(27, 29, 31, var(--mb-section-opacity, 0.54));
         box-shadow: 0 4px 14px rgba(0,0,0,.16);
       }
 
@@ -1466,6 +1467,18 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       #minibia-bot-panel.mb-desktop[data-collapsed="true"] .mb-mobile-tabs { display: none; }
 
     `;
+    style.textContent += `
+      #minibia-bot-panel input:not([type="checkbox"]), #minibia-bot-panel textarea, #minibia-bot-panel select { background-color: rgba(13,19,24,.68) !important; }
+      #minibia-bot-panel .mb-heal-group, #minibia-bot-panel .mb-heal-conditions, #minibia-bot-panel .mb-heal-rule, #minibia-bot-panel .mb-heal-editor, #minibia-bot-panel .mb-heal-list-summary, #minibia-bot-panel .mb-attack-card, #minibia-bot-panel .mb-list-row { background-color: rgba(23,27,30,.52) !important; }
+      #minibia-bot-panel .mb-profile-manager { display: grid; gap: 7px; }
+      #minibia-bot-panel .mb-profile-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 7px; align-items: center; }
+      #minibia-bot-panel .mb-profile-row button { min-height: 34px; white-space: nowrap; }
+      #minibia-bot-panel .mb-profile-opacity { display: grid; grid-template-columns: auto minmax(80px,1fr) 42px; gap: 8px; align-items: center; color: #e7d2ac; font-size: 11px; }
+      #minibia-bot-panel .mb-profile-opacity input { min-width: 0; margin: 0; accent-color: #e5ad4c; }
+      #minibia-bot-panel .mb-profile-opacity output { color: #f2efe8; text-align: right; font-variant-numeric: tabular-nums; }
+      #minibia-bot-panel #minibia-bot-profile-message { min-height: 1em; }
+      @media (max-width: 520px) { #minibia-bot-panel .mb-profile-row { grid-template-columns: minmax(0,1fr); } }
+    `;
     document.head.appendChild(style);
 
     const panel = document.createElement("div");
@@ -1495,6 +1508,26 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
             <div class="mb-mobile-summary" aria-live="off">Cargando estado…</div>
             <button type="button" id="minibia-bot-reload">Reiniciar bot</button>
             <button type="button" id="minibia-bot-copy-setup">Exportar mi configuración</button>
+          </div>
+          <div class="mb-section mb-column-section mb-profile-manager" data-mobile-tab="status">
+            <div class="mb-label">Perfiles por personaje</div>
+            <div class="mb-small-note" id="minibia-bot-profile-character">Detectando personaje…</div>
+            <div class="mb-profile-row">
+              <select id="minibia-bot-profile-select" aria-label="Elegir perfil">
+                <option value="">Sin perfiles guardados</option>
+              </select>
+              <button type="button" id="minibia-bot-profile-use">Usar perfil</button>
+            </div>
+            <div class="mb-profile-row">
+              <input type="text" id="minibia-bot-profile-name" maxlength="60" placeholder="Nombre del perfil" aria-label="Nombre del perfil" />
+              <button type="button" id="minibia-bot-profile-save">Guardar perfil</button>
+            </div>
+            <label class="mb-profile-opacity" for="minibia-bot-panel-opacity">
+              <span>Transparencia del panel</span>
+              <input type="range" id="minibia-bot-panel-opacity" min="15" max="55" step="1" />
+              <output id="minibia-bot-panel-opacity-value" for="minibia-bot-panel-opacity">36%</output>
+            </label>
+            <div class="mb-small-note" id="minibia-bot-profile-message" aria-live="polite"></div>
           </div>
           <div class="mb-section mb-column-section">
             <div class="mb-label">Regreso seguro</div>
@@ -1808,6 +1841,15 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       </div>
     `;
     document.body.appendChild(panel);
+    const savedTransparency = Math.min(55, Math.max(15, Number(bot.storage.get(panelTransparencyKey, 36)) || 36));
+    const setPanelTransparency = (value) => {
+      const transparency = Math.min(55, Math.max(15, Number(value) || 36));
+      const panelOpacity = 1 - transparency / 100;
+      panel.style.setProperty("--mb-panel-opacity", panelOpacity.toFixed(2));
+      panel.style.setProperty("--mb-section-opacity", Math.max(0.4, panelOpacity - 0.1).toFixed(2));
+      return transparency;
+    };
+    setPanelTransparency(savedTransparency);
     const mobileQuery = window.matchMedia("(max-width: 760px)");
     const updateMobile = () => {
       const narrowTouchScreen = mobileQuery.matches && window.matchMedia("(pointer: coarse)").matches;
@@ -1892,6 +1934,14 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const stopAllButton = panel.querySelector("#minibia-bot-stop-all");
     const reloadButton = panel.querySelector("#minibia-bot-reload");
     const copySetupButton = panel.querySelector("#minibia-bot-copy-setup");
+    const profileSelect = panel.querySelector("#minibia-bot-profile-select");
+    const profileUseButton = panel.querySelector("#minibia-bot-profile-use");
+    const profileNameInput = panel.querySelector("#minibia-bot-profile-name");
+    const profileSaveButton = panel.querySelector("#minibia-bot-profile-save");
+    const profileCharacterLabel = panel.querySelector("#minibia-bot-profile-character");
+    const profileMessage = panel.querySelector("#minibia-bot-profile-message");
+    const panelOpacityInput = panel.querySelector("#minibia-bot-panel-opacity");
+    const panelOpacityValue = panel.querySelector("#minibia-bot-panel-opacity-value");
     const caveRemoveLastButton = panel.querySelector("#minibia-bot-cave-remove-last");
     const caveStartButton = panel.querySelector("#minibia-bot-cave-start");
     const caveStopButton = panel.querySelector("#minibia-bot-cave-stop");
@@ -1906,7 +1956,102 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     const caveTransferPrimary = panel.querySelector("#minibia-bot-cave-transfer-primary");
     const caveTransferSecondary = panel.querySelector("#minibia-bot-cave-transfer-secondary");
     const caveTransferStatus = panel.querySelector("#minibia-bot-cave-transfer-status");
+    let profileListSignature = "";
+    let renderedProfileId = null;
     let caveTransferMode = "";
+
+    const refreshProfileInputs = () => {
+      const rune = bot.rune?.config || {};
+      if (spellInput) spellInput.value = rune.runeSpellWords || "";
+      if (manaInput) manaInput.value = String(rune.runeManaCost ?? 0);
+      if (autoEatHotkeyInput) autoEatHotkeyInput.value = String(bot.eat?.config?.eatHotbarSlot ?? 10);
+      if (autoAttackSelectionInput) autoAttackSelectionInput.value = bot.attack?.config?.targetSelectionMode === "list" ? "list" : "proximity";
+      if (autoAttackHotkeyInput) autoAttackHotkeyInput.value = String(bot.attack?.config?.targetHotbarSlot ?? 3);
+      if (autoAttackRuneHotkeyInput) autoAttackRuneHotkeyInput.value = bot.attack?.config?.runeHotbarSlot ? String(bot.attack.config.runeHotbarSlot) : "";
+      if (autoAttackStanceInput) autoAttackStanceInput.value = bot.attack?.config?.meleeMode === false ? "ranged" : "melee";
+      if (autoAttackRangeInput) autoAttackRangeInput.value = String(bot.attack?.config?.rangedDistance ?? 3);
+      if (talkPromptInput) talkPromptInput.value = bot.talk?.config?.systemPrompt || "";
+      if (autoHealWaitInput) autoHealWaitInput.value = String(bot.heal?.config?.tickMs ?? 100);
+      if (autoHealDelayInput) autoHealDelayInput.value = String(bot.heal?.config?.delayMs ?? 0);
+      if (autoHealMinManaInput) autoHealMinManaInput.value = String(bot.heal?.config?.minimumMana ?? 0);
+      refreshRuneStatus();
+      refreshAutoEatStatus();
+      refreshAutoHealStatus();
+      refreshAutoInvisibleStatus();
+      refreshAutoMagicShieldStatus();
+      refreshAutoAttackStatus();
+      refreshAutoAttackTargetList();
+      refreshEquipRingStatus();
+      refreshPanicStatus();
+      refreshXrayStatus();
+      refreshHomeLabel();
+      refreshTalkStatus();
+      renderTrustedNames();
+      renderGameMasterNames();
+      if (typeof renderHealRules === "function") renderHealRules();
+      refreshCaveStatus();
+      refreshCavePresetControls();
+      refreshCaveClosestStatus();
+      refreshCaveTransitionStatus();
+    };
+
+    const refreshProfileManager = (forceName = false) => {
+      bot.profiles?.refreshCharacter?.();
+      const status = bot.profiles?.getStatus?.();
+      if (!status) return;
+      const profiles = status.profiles || [];
+      const signature = profiles.map((profile) => `${profile.id}:${profile.name}`).join("|");
+      if (signature !== profileListSignature) {
+        const selected = profileSelect.value || status.currentProfileId || "";
+        profileSelect.replaceChildren();
+        if (!profiles.length) {
+          const empty = document.createElement("option");
+          empty.value = "";
+          empty.textContent = "Sin perfiles guardados";
+          profileSelect.appendChild(empty);
+        } else {
+          profiles.forEach((profile) => {
+            const option = document.createElement("option");
+            option.value = profile.id;
+            option.textContent = profile.name;
+            profileSelect.appendChild(option);
+          });
+        }
+        profileListSignature = signature;
+        if (profiles.some((profile) => profile.id === selected)) profileSelect.value = selected;
+      }
+      if (profileCharacterLabel) {
+        profileCharacterLabel.textContent = status.characterName
+          ? `Personaje: ${status.characterName}`
+          : "Detectando personaje…";
+      }
+      if (status.currentProfileId !== renderedProfileId) {
+        renderedProfileId = status.currentProfileId;
+        profileSelect.value = status.currentProfileId || "";
+        if (profileNameInput) {
+          profileNameInput.value = status.currentProfileName || "";
+          profileNameInput.dataset.profileId = status.currentProfileId || "";
+        }
+        refreshProfileInputs();
+      } else if (forceName && profileNameInput) {
+        profileNameInput.value = status.currentProfileName || "";
+      }
+      if (profileMessage) {
+        profileMessage.textContent = status.message || "Los perfiles se guardan en este navegador.";
+      }
+      if (profileUseButton) profileUseButton.disabled = !profileSelect.value;
+    };
+
+    if (panelOpacityInput) {
+      panelOpacityInput.value = String(savedTransparency);
+      if (panelOpacityValue) panelOpacityValue.value = `${savedTransparency}%`;
+      panelOpacityInput.addEventListener("input", () => {
+        const transparency = setPanelTransparency(panelOpacityInput.value);
+        panelOpacityInput.value = String(transparency);
+        if (panelOpacityValue) panelOpacityValue.value = `${transparency}%`;
+        bot.storage.set(panelTransparencyKey, transparency);
+      });
+    }
     const openCaveTransfer = (mode) => {
       caveTransferMode = mode;
       caveTransfer.hidden = false;
@@ -2613,6 +2758,22 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
       refreshHomeLabel();
     });
 
+    profileUseButton?.addEventListener("click", () => {
+      if (!profileSelect?.value || !bot.profiles?.use?.(profileSelect.value)) return;
+      refreshProfileManager(true);
+    });
+    profileSaveButton?.addEventListener("click", () => {
+      bot.profiles?.save?.(profileNameInput?.value || "");
+      refreshProfileManager(true);
+    });
+    profileNameInput?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        profileSaveButton?.click();
+      }
+    });
+
+    refreshProfileManager();
     refreshHomeLabel();
     refreshPanicStatus();
     refreshXrayStatus();
@@ -2647,6 +2808,9 @@ window.__minibiaBotBundle.installPanel = function installPanel(bot) {
     refreshMobileSummary();
     const summaryTimerId = window.setInterval(refreshMobileSummary, 1500);
     bot.addCleanup(() => window.clearInterval(summaryTimerId));
+
+    const profilesTimerId = window.setInterval(refreshProfileManager, 1000);
+    bot.addCleanup(() => window.clearInterval(profilesTimerId));
 
     const refreshSafetyStatus = () => {
       const label = panel.querySelector(".mb-safety-status");
