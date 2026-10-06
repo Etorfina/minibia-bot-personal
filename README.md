@@ -14,43 +14,7 @@ Se verificó que el código fuente inicial reconstruía exactamente el bundle de
 
 ## Cargar nuestra versión
 
-En la consola del navegador, con el juego abierto:
-
-```js
-(async () => {
-  const mainUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/main/minibia-bot.js.gz.b64";
-  const verifiedUrl = "https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/ea2ec7c13a387b956d7495423f675a0a7e7b5dee/minibia-bot.js.gz.b64";
-  const requiredControls = [
-    'data-tab="healing"',
-    'id="minibia-bot-heal-spells"',
-    'id="minibia-bot-heal-items"',
-    'id="minibia-bot-heal-status"',
-    'id="minibia-bot-attack-target-list"',
-    'id="minibia-bot-attack-stance"',
-    'id="minibia-bot-attack-range"'
-  ];
-  const hasTargetingControls = (source) => requiredControls.every((control) => source.includes(control));
-  const decode = async (url) => {
-    const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error(`No pude descargar el bot: HTTP ${response.status}`);
-    const bytes = Uint8Array.from(atob((await response.text()).trim()), c => c.charCodeAt(0));
-    return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
-  };
-  let code = await decode(`${mainUrl}?v=${Date.now()}`);
-  if (!hasTargetingControls(code)) {
-    code = await decode(verifiedUrl);
-  }
-  if (!hasTargetingControls(code)) {
-    throw new Error("La versión descargada no incluye las reglas de curación y controles esperados.");
-  }
-  window.minibiaBotSourceUrl = mainUrl;
-  (0, eval)(code);
-  if (!document.querySelector('[data-tab="healing"]') || !document.getElementById("minibia-bot-heal-spells") || !document.getElementById("minibia-bot-heal-items") || !document.getElementById("minibia-bot-heal-status") || !document.getElementById("minibia-bot-attack-target-list") || !document.getElementById("minibia-bot-attack-stance") || !document.getElementById("minibia-bot-attack-range")) {
-    throw new Error("La versión nueva se descargó, pero no apareció el panel. Recarga el juego y vuelve a ejecutar este código.");
-  }
-  console.info("[minibia-bot] HealBot y Attack Target actualizados cargados");
-})().catch(error => { console.error(error); alert(error.message); });
-```
+Abre Minibia y ejecuta en la consola el contenido de [`minibia-one-code.txt`](https://raw.githubusercontent.com/Etorfina/minibia-bot-personal/develop/minibia-one-code.txt). Ese cargador usa la versión de la rama `develop` y comprueba que el panel, los perfiles por personaje y el control de transparencia estén disponibles. Utiliza el mismo archivo en PC y teléfono.
 
 El botón **Copiar código con mis ajustes** exporta las rutas y opciones del navegador actual. El repositorio conserva el código; los ajustes personales no se sincronizan automáticamente. La clave API y la configuración de Auto Reply se excluyen de la exportación.
 
