@@ -52,6 +52,22 @@ test('legacy routes and presets retain typed data and loop mode after reload', (
   assert.equal(h.cave.getRoute()[2].action, 'goto:HUNT');
   assert.equal(h.store.get('minibiaBot.cave.presets').find(p => p.name === 'Cave').routeMode, 'loop');
 });
+
+test('profile preset replaces the active route and retains its transitions and mode', () => {
+  const h = setup([{ x: 1, y: 1, z: 7 }]);
+  const applied = h.cave.applyProfilePreset({
+    name: 'Knight One',
+    routeMode: 'loop',
+    route: [point(20), point(21, 'walk')],
+    transitions: [{ from: { x: 21, y: 0, z: 7 }, to: { x: 21, y: 0, z: 6 } }],
+  });
+
+  assert.equal(applied.name, 'Knight One');
+  assert.deepEqual(h.cave.getRoute().map(({ x, type }) => [x, type]), [[20, 'node'], [21, 'walk']]);
+  assert.equal(h.cave.status().config.routeMode, 'loop');
+  assert.equal(h.cave.getTransitions().length, 1);
+  assert.equal(h.cave.getPresetNames().includes('Knight One'), true);
+});
 test('stand is exact; node is flexible; floor-change approach remains exact', () => {
   const h = setup([point(1), point(5)]);
   assert.equal(h.cave.isAtWaypoint({ x: 0, y: 0, z: 7 }, point(1)), true);
