@@ -4,7 +4,11 @@
   const response = await fetch(bundleUrl + "?v=" + Date.now(), { cache: "no-store" });
   if (!response.ok) throw new Error("No pude descargar el bot: HTTP " + response.status);
   const bytes = Uint8Array.from(atob((await response.text()).trim()), c => c.charCodeAt(0));
-  const code = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  let code = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  const oldCombatPause = "const shouldPauseForCombat =\n        !!bot.attack?.hasPriorityTarget?.(now);";
+  const fixedCombatPause = "const shouldPauseForCombat = typeof attackStatus?.combatActive === \"boolean\"\n        ? attackStatus.combatActive\n        : !!bot.attack?.hasPriorityTarget?.(now);";
+  if (!code.includes(oldCombatPause)) throw new Error("No se encontró la pausa de combate anterior; no cargué el bot.");
+  code = code.replace(oldCombatPause, fixedCombatPause);
   if (!requiredControls.every(control => code.includes(control))) throw new Error("La versión de perfiles no incluye los controles esperados.");
   if (code.includes("refreshAutoAttackTargetList") || !code.includes("refreshAttackTargetList")) throw new Error("El bundle descargado no contiene la corrección del radar de objetivos. Recarga el script actualizado e inténtalo otra vez.");
   window.minibiaBotSourceUrl = bundleUrl;
